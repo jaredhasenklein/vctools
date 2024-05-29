@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>VMS Parser</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+     #outputTable {
+            width: 100%;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+  <h1>VMS Parser</h1>
+ <div class="table-responsive">
+    <table class="table">
+<tr>
+<td><p><b><u>Instructions:</u></b>
+<ol><li>Log in to VMS and select your event.</li>
+<li>Click <b>All Reports</b>.</li>
+<li>Click <b>Assigned Volunteers</b>.</li>
+<li>Click <b>Export</b>.</li>
+<li>Click the button below to select your export.</li>
+<li>If you are happy with the preview, click <b>Download CSV</b>.</li></ol></p></td>
+<td width="50%"><img src="assets/vmsparse.png" width="100%"></img></td></tr>
+    </table>
+<i>All data processing happens on your computer and is never sent to a server. No worries about PII here! Just remember that the file you download from here contains PII, just like the export from VMS.</i>
+<br><br>
+  </div>
+
+
+
+  <input type="file" id="csvFile" accept=".csv" onchange="loadFile(event)">
+  <div id="buttonContainer"></div>
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered" id="outputTable">
+    </table>
+  </div>
+
+  <script>
+    const columns = [
+      'Minor', 'Legal First Name', 'Preferred First Name', 'Last Name', 'Personal Pronouns', 'Email', 'Phone', 'Languages Spoken', 'FIRST Youth Protection Policy', 'Certified', 'Shirt Size', 'Self-Reported Accommodations', 'Team Affiliation', 'Employer', 'Alumni', 'Emergency Contact', 'Emergency Contact Phone Number', 'Affiliations', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
+    ];
+
+    function loadFile(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function() {
+        const csvData = reader.result;
+        const reformattedData = reformatCSV(csvData);
+        displayData(reformattedData);
+
+               const downloadButton = document.createElement('button');
+        downloadButton.textContent = 'Download CSV';
+        downloadButton.onclick = () => downloadCSV(columns, reformattedData);
+        const buttonContainer = document.getElementById('buttonContainer');
+        buttonContainer.appendChild(downloadButton);
+      };
+
+      reader.readAsText(file);
+    }
+
+    function reformatCSV(csvData) {
+      const rows = csvData.trim().split('\n');
+      const headerRow = rows[11].split(',');
+      const dayIndex = headerRow.indexOf('Day');
+
+      const data = [];
+
+      for (let i = 12; i < rows.length; i++) {
+        const row = replaceCommasInQuotes(rows[i], '|').split(',');
+        const email = row[5];
+        const day = row[dayIndex];
+        const role = row[7];
+
+        const person = data.find(p => p.email === email) || {};
+
+        for (let j = 0; j < headerRow.length; j++) {
+          if (headerRow[j] !== 'Day' && headerRow[j] !== 'Start Time' && headerRow[j] !== 'End Time' && headerRow[j] !== 'Roles') {
+            person[headerRow[j]] = row[j].replace(/\|/g, ',').replace(/^"(.*)"$/, '$1') || '';
+          }
+        }
+
+        if (day) {
+          person[day] = (person[day] || []).concat(role);
+        }
+
+        if (!data.find(p => p.email === email)) {
+          person.email = email;
+          data.push(person);
+        }
+      }
+
+      return data;
+    }
+
+    function replaceCommasInQuotes(str, replacement) {
+      const regex = /"((?:[^"\\]|\\.)*)"?/g;
+      return str.replace(regex, match => match.replace(/,/g, replacement));
+    }
+
+function displayData(reformattedData) {
+  const table = document.getElementById('outputTable');
+  table.innerHTML = '';
+
+  // Filter out columns where all rows have null or undefined values
+  const visibleColumns = columns.filter(header => reformattedData.some(row => row[header] !== null && row[header] !== undefined));
+
+  const headerRow = document.createElement('tr');
+  visibleColumns.forEach(header => {
+    const th = document.createElement('th');
+    th.textContent = header;
+    headerRow.appendChild(th);
+  });
+  table.appendChild(headerRow);
+
+  reformattedData.forEach(row => {
+    const tr = document.createElement('tr');
+    visibleColumns.forEach(header => {
+      const td = document.createElement('td');
+      const value = Array.isArray(row[header]) ? row[header].join(', ') : row[header];
+      td.textContent = value || '';
+      tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  });
+}
+
+
+
+function downloadCSV(headers, data) {
+  // Filter out columns where all rows have null or undefined values
+  const visibleColumns = headers.filter(header => data.some(row => row[header] !== null && row[header] !== undefined));
+
+  const headerRow = visibleColumns.join(',');
+  const csvContent = [headerRow, ...data.map(row => visibleColumns.map(header => {
+    const value = Array.isArray(row[header]) ? row[header].join(', ').replace(/,/g, '""') : (row[header] === undefined ? '' : row[header]);
+    return `"${value}"`;
+  }).join(','))].join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'reformatted.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } else {
+    window.open(URL.createObjectURL(blob));
+  }
+}
+
+
+
+
+
+
+  </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+</body>
+</html>
+
+    
+  </script>
+</body>
+</html>
