@@ -1,0 +1,53 @@
+/* Styles for the form elements */
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+input, select {
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+/* Styles for the label container */
+#labelContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Styles for individual labels */
+.label {
+  width: 4in; /* 4 inches wide */
+  height: 2in; /* 2 inches tall */
+  border: 1px solid black;
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.label div {
+  text-align: center;
+}
+
+.label .firstName {
+  font-size: 16px;
+}
+
+.label .lastName {
+  font-size: 12px;
+}
+
+.label .role {
+  font-size: 12px;
+}
+
+.label .topText,
+.label .bottomRightText {
+  font-size: 10px;
+}
