@@ -53,52 +53,48 @@ document.addEventListener('DOMContentLoaded', function() {
       const labelElement = document.createElement('div');
       labelElement.classList.add('label');
 
-      const table = document.createElement('table');
+      const topTextElement = document.createElement('div');
+      topTextElement.classList.add('topText');
+      topTextElement.textContent = topText;
+      labelElement.appendChild(topTextElement);
 
-      // Row 1: Top text
-      let row = table.insertRow();
-      let cell = row.insertCell();
-      cell.textContent = topText;
-      cell.style.height = '0.23in'; // 12pt
+      const firstNameElement = document.createElement('div');
+      firstNameElement.classList.add('firstName');
+      firstNameElement.textContent = label.firstname || '';
+      labelElement.appendChild(firstNameElement);
 
-      // Row 2: First name
-      row = table.insertRow();
-      cell = row.insertCell();
-      cell.textContent = label.firstname || '';
-      cell.style.height = '0.7in'; // 36pt
-      cell.style.fontWeight = 'bold';
+      const lastNameElement = document.createElement('div');
+      lastNameElement.classList.add('lastName');
+      lastNameElement.textContent = label.lastname || '';
+      labelElement.appendChild(lastNameElement);
 
-      // Row 3: Last name
-      row = table.insertRow();
-      cell = row.insertCell();
-      cell.textContent = label.lastname || '';
-      cell.style.height = '0.35in'; // 18pt
+      const roleElement = document.createElement('div');
+      roleElement.classList.add('role');
+      roleElement.textContent = label.role || '';
+      labelElement.appendChild(roleElement);
 
-      // Row 4: Role
-      row = table.insertRow();
-      cell = row.insertCell();
-      cell.textContent = label.role || '';
-      cell.style.height = '0.35in'; // 18pt
-      cell.style.fontWeight = 'bold';
-      cell.style.color = 'white';
-      cell.style.backgroundColor = 'black';
+      const bottomRowElement = document.createElement('div');
+      bottomRowElement.classList.add('bottomRow');
+      bottomRowElement.style.display = 'flex';
+      bottomRowElement.style.justifyContent = 'space-between';
 
-      // Row 5: Alumni and bottom right text
-      row = table.insertRow();
-      cell = row.insertCell();
+      const bottomLeftTextElement = document.createElement('div');
+      bottomLeftTextElement.classList.add('bottomLeftText');
       if (isAlumni && label.alumni === 'Yes') {
-        cell.textContent = 'FIRST Alumni';
+        bottomLeftTextElement.textContent = 'FIRST Alumni';
       }
-      cell.style.height = '0.23in'; // 12pt
+      bottomRowElement.appendChild(bottomLeftTextElement);
 
-      cell = row.insertCell();
-      cell.textContent = bottomRightText;
-      cell.style.height = '0.23in'; // 12pt
+      const bottomRightTextElement = document.createElement('div');
+      bottomRightTextElement.classList.add('bottomRightText');
+      bottomRightTextElement.textContent = bottomRightText;
+      bottomRowElement.appendChild(bottomRightTextElement);
 
-      labelElement.appendChild(table);
+      labelElement.appendChild(bottomRowElement);
       labelContainer.appendChild(labelElement);
     }
   }
+
 
 
 
@@ -138,14 +134,21 @@ function createPDF(labels, topText, bottomRightText, isAlumni, labelTemplate) {
     // Top text (0.23" height)
     fitText(topText, currentX + labelWidth / 2, currentY + 0.15, labelWidth - 0.4, 12, 'center');
 
-    // First name (0.7" height), autosize
+    // First name (0.7" height)
     fitText((label.firstname || '').toUpperCase(), currentX + labelWidth / 2, currentY + 0.48, labelWidth - 0.4, 18, 'center');
 
-    // Last name (0.35" height), autosize
+    // Last name (0.35" height)
     fitText((label.lastname || '').toUpperCase(), currentX + labelWidth / 2, currentY + 1.08, labelWidth - 0.4, 12, 'center');
 
-    // Role (0.35" height), autosize
-    fitText((label.role || '').toUpperCase(), currentX + labelWidth / 2, currentY + 1.43, labelWidth - 0.4, 12, 'center');
+    // Role with black background (0.35" height)
+    /* if (label.role) {
+      const roleText = (label.role).toUpperCase();
+      const roleFontSize = 12;
+      const roleY = currentY + 1.43;
+      doc.setFillColor(0, 0, 0); // Black background
+      doc.rect(currentX, roleY - 0.15, labelWidth, 0.35, 'F');
+      fitText(roleText, currentX + labelWidth / 2, roleY, labelWidth - 0.4, roleFontSize, 'center', 'white');
+    } */
 
     // Bottom row split into two sections (0.23" height each)
     const bottomRowY = currentY + labelHeight - 0.38; // Starting Y position for bottom row
@@ -182,6 +185,4 @@ function createPDF(labels, topText, bottomRightText, isAlumni, labelTemplate) {
 
 
 
-
-  
 });
