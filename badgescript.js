@@ -8,17 +8,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const csvFile = document.getElementById('csvFile').files[0];
       const labelTemplate = document.getElementById('labelTemplate').value;
-      const isAlumni = document.querySelector('input[name="alumni"]:checked').value === 'yes';
       const topText = document.getElementById('topText').value;
-      const bottomRightText = document.getElementById('bottomRightText').value; // Move this line inside the event handler
+      const bottomLeftText = document.getElementById('bottomLeftText').value;
+      const bottomRightText = document.getElementById('bottomRightText').value;
 
       if (csvFile) {
         const reader = new FileReader();
         reader.onload = () => {
           const csvData = reader.result;
           const labels = parseCSV(csvData);
-          generateLabels(labels, labelTemplate, isAlumni, topText, bottomRightText);
-          createPDF(labels, topText, bottomRightText, isAlumni, labelTemplate);
+          generateLabels(labels, labelTemplate, topText, bottomLeftText, bottomRightText);
+          createPDF(labels, topText, bottomLeftText, bottomRightText, labelTemplate);
         };
         reader.readAsText(csvFile);
       }
@@ -46,59 +46,53 @@ document.addEventListener('DOMContentLoaded', function() {
     return labels;
   }
 
-  function generateLabels(labels, labelTemplate, isAlumni, topText, bottomRightText) {
-    labelContainer.innerHTML = '';
+  function generateLabels(labels, labelTemplate, topText, bottomLeftText, bottomRightText) {
+  labelContainer.innerHTML = '';
 
-    for (const label of labels) {
-      const labelElement = document.createElement('div');
-      labelElement.classList.add('label');
+  for (const label of labels) {
+    const labelElement = document.createElement('div');
+    labelElement.classList.add('label');
 
-      const topTextElement = document.createElement('div');
-      topTextElement.classList.add('topText');
-      topTextElement.textContent = topText;
-      labelElement.appendChild(topTextElement);
+    const topTextElement = document.createElement('div');
+    topTextElement.classList.add('topText');
+    topTextElement.textContent = topText;
+    labelElement.appendChild(topTextElement);
 
-      const firstNameElement = document.createElement('div');
-      firstNameElement.classList.add('firstName');
-      firstNameElement.textContent = label.firstname || '';
-      labelElement.appendChild(firstNameElement);
+    const firstNameElement = document.createElement('div');
+    firstNameElement.classList.add('firstName');
+    firstNameElement.textContent = label.firstname || '';
+    labelElement.appendChild(firstNameElement);
 
-      const lastNameElement = document.createElement('div');
-      lastNameElement.classList.add('lastName');
-      lastNameElement.textContent = label.lastname || '';
-      labelElement.appendChild(lastNameElement);
+    const lastNameElement = document.createElement('div');
+    lastNameElement.classList.add('lastName');
+    lastNameElement.textContent = label.lastname || '';
+    labelElement.appendChild(lastNameElement);
 
-      const roleElement = document.createElement('div');
-      roleElement.classList.add('role');
-      roleElement.textContent = label.role || '';
-      labelElement.appendChild(roleElement);
+    const roleElement = document.createElement('div');
+    roleElement.classList.add('role');
+    roleElement.textContent = label.role || '';
+    labelElement.appendChild(roleElement);
 
-      const bottomRowElement = document.createElement('div');
-      bottomRowElement.classList.add('bottomRow');
-      bottomRowElement.style.display = 'flex';
-      bottomRowElement.style.justifyContent = 'space-between';
+    const bottomRowElement = document.createElement('div');
+    bottomRowElement.classList.add('bottomRow');
+    bottomRowElement.style.display = 'flex';
+    bottomRowElement.style.justifyContent = 'space-between';
 
-      const bottomLeftTextElement = document.createElement('div');
-      bottomLeftTextElement.classList.add('bottomLeftText');
-      if (isAlumni && label.alumni === 'Yes') {
-        bottomLeftTextElement.textContent = 'FIRST Alumni';
-      }
-      bottomRowElement.appendChild(bottomLeftTextElement);
+    const bottomLeftTextElement = document.createElement('div');
+    bottomLeftTextElement.classList.add('bottomLeftText');
+   bottomRowElement.appendChild(bottomLeftTextElement);
 
-      const bottomRightTextElement = document.createElement('div');
-      bottomRightTextElement.classList.add('bottomRightText');
-      bottomRightTextElement.textContent = bottomRightText;
-      bottomRowElement.appendChild(bottomRightTextElement);
+    const bottomRightTextElement = document.createElement('div');
+    bottomRightTextElement.classList.add('bottomRightText');
+    bottomRightTextElement.textContent = bottomRightText;
+    bottomRowElement.appendChild(bottomRightTextElement);
 
-      labelElement.appendChild(bottomRowElement);
-      labelContainer.appendChild(labelElement);
-    }
+    labelElement.appendChild(bottomRowElement);
+    labelContainer.appendChild(labelElement);
   }
+}
 
-
-
-
-function createPDF(labels, topText, bottomRightText, isAlumni, labelTemplate) {
+function createPDF(labels, topText, bottomLeftText, bottomRightText, labelTemplate) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF('p', 'in', [8.5, 11]);
 
@@ -140,25 +134,14 @@ function createPDF(labels, topText, bottomRightText, isAlumni, labelTemplate) {
     // Last name (0.35" height)
     fitText((label.lastname || '').toUpperCase(), currentX + labelWidth / 2, currentY + 1.08, labelWidth - 0.4, 12, 'center');
 
-    // Role with black background (0.35" height)
-    /* if (label.role) {
-      const roleText = (label.role).toUpperCase();
-      const roleFontSize = 12;
-      const roleY = currentY + 1.43;
-      doc.setFillColor(0, 0, 0); // Black background
-      doc.rect(currentX, roleY - 0.15, labelWidth, 0.35, 'F');
-      fitText(roleText, currentX + labelWidth / 2, roleY, labelWidth - 0.4, roleFontSize, 'center', 'white');
-    } */
+    // Role (0.35" height)
+    fitText((label.role || '').toUpperCase(), currentX + labelWidth / 2, currentY + 1.43, labelWidth - 0.4, 12, 'center');
 
-    // Bottom row split into two sections (0.23" height each)
-    const bottomRowY = currentY + labelHeight - 0.38; // Starting Y position for bottom row
-    // Bottom left text ("FIRST Alumni")
-    if (isAlumni && label.alumni === 'Yes') {
-      fitText('FIRST Alumni', currentX + 0.1, bottomRowY, labelWidth / 2 - 0.2, 10, 'left');
-    }
+    // Bottom left text
+    fitText(bottomLeftText, currentX + 0.1, currentY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'left');
 
     // Bottom right text (custom text from the form)
-    fitText(bottomRightText.toUpperCase(), currentX + labelWidth - 0.1, bottomRowY, labelWidth / 2 - 0.2, 10, 'right');
+    fitText(bottomRightText, currentX + labelWidth - 0.1, currentY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'right');
 
     labelCount++;
     currentX += labelWidth + columnGap;
