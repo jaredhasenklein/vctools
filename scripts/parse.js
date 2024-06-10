@@ -1,43 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>VMS Parser</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <style>
-     #outputTable {
-            width: 100%;
-            overflow-x: auto;
-        }
-    </style>
-</head>
-<body>
-  <h1>VMS Parser</h1>
- <div class="table-responsive">
-    <table class="table">
-<tr>
-<td><p><b><u>Instructions:</u></b>
-<ol><li>Log in to VMS and select your event.</li>
-<li>Click <b>All Reports</b>.</li>
-<li>Click <b>Assigned Volunteers</b>.</li>
-<li>Click <b>Export</b>.</li>
-<li>Click the button below to select your export.</li>
-<li>If you are happy with the preview, click <b>Download CSV</b>.</li></ol></p></td>
-<td width="50%"><img src="assets/vmsparse.png" width="100%"></img></td></tr>
-    </table>
-<i>All data processing happens on your computer and is never sent to a server. No worries about PII here! Just remember that the file you download from here contains PII, just like the export from VMS.</i>
-<br><br>
-  </div>
-
-
-
-  <input type="file" id="csvFile" accept=".csv" onchange="loadFile(event)">
-  <div id="buttonContainer"></div>
-  <div class="table-responsive">
-    <table class="table table-striped table-bordered" id="outputTable">
-    </table>
-  </div>
-
-  <script>
     const columns = [
       'Minor', 'Legal First Name', 'Preferred First Name', 'Last Name', 'Personal Pronouns', 'Email', 'Phone', 'Languages Spoken', 'FIRST Youth Protection Policy', 'Certified', 'Shirt Size', 'Self-Reported Accommodations', 'Team Affiliation', 'Employer', 'Alumni', 'Emergency Contact', 'Emergency Contact Phone Number', 'Affiliations', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
     ];
@@ -60,40 +20,76 @@
 
       reader.readAsText(file);
     }
+function reformatCSV(csvData) {
+  const rows = csvData.trim().split('\n');
+  const headerRow = rows[11].split(',');
+  const dayIndex = headerRow.indexOf('Day');
 
-    function reformatCSV(csvData) {
-      const rows = csvData.trim().split('\n');
-      const headerRow = rows[11].split(',');
-      const dayIndex = headerRow.indexOf('Day');
+  // Check if the header row contains quotation marks
+  const hasQuotedHeaders = headerRow.some(header => header.startsWith('"') && header.endsWith('"'));
 
-      const data = [];
+  const data = [];
 
-      for (let i = 12; i < rows.length; i++) {
-        const row = replaceCommasInQuotes(rows[i], '|').split(',');
-        const email = row[5];
-        const day = row[dayIndex];
-        const role = row[7];
+  for (let i = 12; i < rows.length; i++) {
+    const row = hasQuotedHeaders
+      ? parseQuotedRow(rows[i])
+      : rows[i].split(',');
 
-        const person = data.find(p => p.email === email) || {};
+    const email = getValueFromRow(row, 5);
+    const day = getValueFromRow(row, dayIndex);
+    const role = getValueFromRow(row, 7);
 
-        for (let j = 0; j < headerRow.length; j++) {
-          if (headerRow[j] !== 'Day' && headerRow[j] !== 'Start Time' && headerRow[j] !== 'End Time' && headerRow[j] !== 'Roles') {
-            person[headerRow[j]] = row[j].replace(/\|/g, ',').replace(/^"(.*)"$/, '$1') || '';
-          }
+    const person = data.find(p => p.email === email) || {};
+
+    for (let j = 0; j < headerRow.length; j++) {
+      const header = headerRow[j].replace(/"/g, '');
+      const value = getValueFromRow(row, j);
+
+      if (header === 'Day') {
+        if (value) {
+          person[day] = role;
         }
-
-        if (day) {
-          person[day] = (person[day] || []).concat(role);
-        }
-
-        if (!data.find(p => p.email === email)) {
-          person.email = email;
-          data.push(person);
-        }
+      } else {
+        person[header] = value;
       }
-
-      return data;
     }
+
+    if (!data.find(p => p.email === email)) {
+      data.push(person);
+    }
+  }
+
+  return data;
+}
+
+function parseQuotedRow(row) {
+  const values = [];
+  let currentValue = '';
+  let isQuoted = false;
+
+  for (let i = 0; i < row.length; i++) {
+    const char = row[i];
+
+    if (char === '"') {
+      isQuoted = !isQuoted;
+    } else if (char === ',' && !isQuoted) {
+      values.push(currentValue.trim());
+      currentValue = '';
+    } else {
+      currentValue += char;
+    }
+  }
+
+  values.push(currentValue.trim());
+  return values;
+}
+
+function getValueFromRow(row, index) {
+  const value = row[index] || '';
+  return value.replace(/"/g, '');
+}
+
+
 
     function replaceCommasInQuotes(str, replacement) {
       const regex = /"((?:[^"\\]|\\.)*)"?/g;
@@ -153,20 +149,3 @@ function downloadCSV(headers, data) {
     window.open(URL.createObjectURL(blob));
   }
 }
-
-
-
-
-
-
-  </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-
-</body>
-</html>
-
-    
-  </script>
-</body>
-</html>
