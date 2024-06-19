@@ -9,8 +9,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="scripts/badge.js" defer></script>
+<style>
+        .footer {
+            margin-top: 40px;
+            padding: 20px 0;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-top: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
+<br>
+<a href="index.html" class="btn btn-primary">🏠 See more resources</a>
   <h1>Name Badge Generator</h1>
  <div class="table-responsive">
     <table class="table">
@@ -83,5 +94,8 @@
     <button type="submit">Generate Labels</button>
   </form>
   <div id="labelContainer"></div>
+        <div class="footer">
+            <p>Made by <a href="mailto:tools@jaredhk.com">Jared Hasen-Klein</a> with help from <a href="https://sourcegraph.com/cody/chat">Cody</a> and <a href="https://platform.openai.com/docs/models/gpt-3-5-turbo">GPT-3.5</a>.</p>
+        </div>
 </body>
 </html>

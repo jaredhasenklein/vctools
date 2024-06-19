@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Schedule Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tournament Schedule Generator</h1>
+    <form id="schedule-form">
+        <label for="team-list">Team List (comma or line-separated):</label>
+        <input type="text" id="team-list" value="1,2,3,4,5,6,7,8">
+
+        <label for="first-judging-time">First Judging Session Time (hh:mm AM/PM):</label>
+        <input type="text" id="first-judging-time" value="9:00 AM">
+
+        <label for="judging-duration">Judging Session Duration (minutes):</label>
+        <input type="number" id="judging-duration" value="30" min="1">
+
+        <label for="deliberation-minutes">Deliberation Minutes:</label>
+        <input type="number" id="deliberation-minutes" value="10" min="3" max="20">
+
+        <label for="am-round-time">AM Number of minutes for robot matches:</label>
+        <input type="number" id="am-round-time" value="7" min="4" max="8">
+
+        <label for="robot-rounds">Robot Rounds:</label>
+        <input type="number" id="robot-rounds" value="4" min="4" max="6">
+
+        <label for="lunch-minutes">Lunch Minutes:</label>
+        <input type="number" id="lunch-minutes" value="30" min="0" max="120">
+
+        <label for="pm-round-time">PM Number of minutes for robot matches:</label>
+        <input type="number" id="pm-round-time" value="6" min="4" max="8">
+
+        <label for="stagger-am-rounds">Stagger AM Rounds:</label>
+        <input type="checkbox" id="stagger-am-rounds">
+
+        <label for="include-calibration">Include Calibration Round:</label>
+        <input type="checkbox" id="include-calibration">
+
+        <button type="button" id="generate-schedule">Generate Schedule</button>
+    </form>
+
+    <div id="error-message"></div>
+    <a id="download-link" download="schedule.csv" style="display: none;">Download Schedule</a>
+
+    <script>
+        const form = document.getElementById('schedule-form');
+        const errorMessage = document.getElementById('error-message');
+        const downloadLink = document.getElementById('download-link');
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            generateSchedule();
+        });
+
+        document.getElementById('generate-schedule').addEventListener('click', generateSchedule);
+
+        function generateSchedule() {
+            errorMessage.textContent = '';
+            downloadLink.style.display = 'none';
+
+            const teamList = document.getElementById('team-list').value.split(/[,\n]/).map(Number);
+            const firstJudgingTime = parseTime(document.getElementById('first-judging-time

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tournament Scheduler</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="mb-4">Tournament Scheduler</h1>
+    <form id="schedulerForm">
+      <div class="form-group">
+        <label for="teamList">List of Teams (comma-separated)</label>
+        <input type="text" class="form-control" id="teamList" placeholder="123, 456, 789, 101112, 131415...">
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="numJudgingSessions">Number of Judging Sessions per Team</label>
+          <input type="number" class="form-control" id="numJudgingSessions" min="1" value="1" disabled>
+        </div>
+        <div class="form-group col-md-6">
+          <label for="numRobotRounds">Number of Robot Rounds per Team (minimum for official events = 4 (1 practice + 3 official)</label>
+          <input type="number" class="form-control" id="numRobotRounds" min="1" value="4" disabled>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="numJudgingRooms">Number of Judging Rooms</label>
+          <input type="number" class="form-control" id="numJudgingRooms" min="1" max="25" value="4">
+        </div>
+        <div class="form-group col-md-6">
+          <label for="numRobotTables">Number of Robot Game Tables (multiples of two)</label>
+          <input type="number" class="form-control" id="numRobotTables" min="2" max="24" step="2" value="4">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="startTime">Judging/Robot Round Start Time (remember, this is later than your overall event start time)</label>
+          <input type="time" class="form-control" id="startTime" value="08:30">
+        </div>
+        <div class="form-group col-md-6">
+          <label for="judgingSessionDuration">Judging Session Duration (minutes)</label>
+          <input type="number" class="form-control" id="judgingSessionDuration" min="1" value="30" disabled>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="robotGameDuration">Robot Game Duration (minutes)</label>
+          <input type="number" step="0.5" class="form-control" id="robotGameDuration" min="1" value="2.5" disabled>
+        </div>
+        <div class="form-group col-md-6">
+          <label for="timeBetweenJudgingSessions">Time Between Judging Sessions (minutes)</label>
+          <input type="number" class="form-control" id="timeBetweenJudgingSessions" min="5" max="30" value="10">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="minTimeBetweenRobotRounds">Minimum Time Between Robot Rounds (minutes)</label>
+          <input type="number" class="form-control" id="minTimeBetweenRobotRounds" min="4" max="30" value="6">
+        </div>
+        <div class="form-group col-md-6">
+          <label for="lunchBreakStartTime">Lunch Break Start Time</label>
+          <input type="time" class="form-control" id="lunchBreakStartTime" value="12:00">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="lunchBreakEndTime">Lunch Break End Time</label>
+          <input type="time" class="form-control" id="lunchBreakEndTime" value="12:30">
+        </div>
+        <div class="form-group col-md-6">
+          <label for="teamTimeBetweenActivities">Team Time Between Activities (minutes)</label>
+          <input type="number" class="form-control" id="teamTimeBetweenActivities" min="5" max="120" value="15">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Generate Schedule</button>
+
+
+    </form>
+  </div>
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">Schedule Confirmation</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Judging sessions will end at <strong><span id="judgingEndTime"></span></strong>.</p>
+        <p>Robot game sessions will end at <strong><span id="robotEndTime"></span></strong>.</p>
+        <p>Do you want to proceed and export the generated schedule?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Modify Parameters</button>
+        <button type="button" class="btn btn-primary" id="exportButton">Export Schedule</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script src="scripts/fllschedule.js"></script>
+</body>
+</html>

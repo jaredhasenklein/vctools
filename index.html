@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VC Tools</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .tile {
+            margin-top: 20px;
+            padding: 30px;
+            text-align: center;
+            border: 3px solid #ddd;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .tile:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.05);
+        }
+        .footer {
+            margin-top: 40px;
+            padding: 20px 0;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="container">
+        <div class="text-center my-5">
+            <h1>VC Tools</h1>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <a href="badge.html" class="text-decoration-none text-dark">
+                    <div class="tile">
+                        <h2>Name Badge Generator</h2>
+                        <p>Generate name badges from a VMS export in a few quick clicks.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="parse.html" class="text-decoration-none text-dark">
+                    <div class="tile">
+                        <h2>Volunteer List Parser</h2>
+                        <p>Convert the Assigned Volunteers Report from VMS into something helpful and easy to read.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Made by <a href="mailto:tools@jaredhk.com">Jared Hasen-Klein</a> with help from <a href="https://sourcegraph.com/cody/chat">Cody</a> and <a href="https://platform.openai.com/docs/models/gpt-3-5-turbo">GPT-3.5</a>.</p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
