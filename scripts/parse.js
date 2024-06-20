@@ -1,60 +1,61 @@
-    const columns = [
-      'Minor', 'Legal First Name', 'Preferred First Name', 'Last Name', 'Personal Pronouns', 'Email', 'Phone', 'Languages Spoken', 'FIRST Youth Protection Policy', 'Certified', 'Shirt Size', 'Self-Reported Accommodations', 'Team Affiliation', 'Employer', 'Alumni', 'Emergency Contact', 'Emergency Contact Phone Number', 'Affiliations', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
-    ];
+const columns = [
+  'Minor', 'Legal First Name', 'Preferred First Name', 'Last Name', 'Personal Pronouns', 'Email', 'Phone', 'Languages Spoken', 'FIRST Youth Protection Policy', 'Certified', 'Shirt Size', 'Self-Reported Accommodations', 'Team Affiliation', 'Employer', 'Alumni', 'Emergency Contact', 'Emergency Contact Phone Number', 'Affiliations', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
+];
 
-    function loadFile(event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
+function loadFile(event) {
+  const file = event.target.files[0];
+  const reader = new FileReader();
 
-      reader.onload = function() {
-        const csvData = reader.result;
-        const reformattedData = reformatCSV(csvData);
-        displayData(reformattedData);
+  reader.onload = function() {
+    const csvData = reader.result;
+    const preprocessedData = preprocessCSV(csvData);
+    const reformattedData = reformatCSV(preprocessedData);
+    displayData(reformattedData);
 
-               const downloadButton = document.createElement('button');
-        downloadButton.textContent = 'Download CSV';
-        downloadButton.onclick = () => downloadCSV(columns, reformattedData);
-        const buttonContainer = document.getElementById('buttonContainer');
-        buttonContainer.appendChild(downloadButton);
-      };
+    const downloadButton = document.createElement('button');
+    downloadButton.textContent = 'Download CSV';
+    downloadButton.onclick = () => downloadCSV(columns, reformattedData);
+    const buttonContainer = document.getElementById('buttonContainer');
+    buttonContainer.appendChild(downloadButton);
+  };
 
-      reader.readAsText(file);
-    }
+  reader.readAsText(file);
+}
+
+function preprocessCSV(csvData) {
+  return csvData.replace(/(".*?")/g, (match) => {
+    // If the quoted string contains a comma, keep the quotes, otherwise remove them
+    return match.includes(',') ? match : match.replace(/"/g, '');
+  });
+}
+
 function reformatCSV(csvData) {
   const rows = csvData.trim().split('\n');
   const headerRow = rows[11].split(',');
   const dayIndex = headerRow.indexOf('Day');
 
-  // Check if the header row contains quotation marks
-  const hasQuotedHeaders = headerRow.some(header => header.startsWith('"') && header.endsWith('"'));
-
   const data = [];
 
   for (let i = 12; i < rows.length; i++) {
-    const row = hasQuotedHeaders
-      ? parseQuotedRow(rows[i])
-      : rows[i].split(',');
-
-    const email = getValueFromRow(row, 5);
-    const day = getValueFromRow(row, dayIndex);
-    const role = getValueFromRow(row, 7);
+    const row = replaceCommasInQuotes(rows[i], '|').split(',');
+    const email = row[5];
+    const day = row[dayIndex];
+    const role = row[7];
 
     const person = data.find(p => p.email === email) || {};
 
     for (let j = 0; j < headerRow.length; j++) {
-      const header = headerRow[j].replace(/"/g, '');
-      const value = getValueFromRow(row, j);
-
-      if (header === 'Day') {
-        if (value) {
-          person[day] = role;
-        }
-      } else {
-        person[header] = value;
+      if (headerRow[j] !== 'Day' && headerRow[j] !== 'Start Time' && headerRow[j] !== 'End Time' && headerRow[j] !== 'Roles') {
+        person[headerRow[j]] = row[j].replace(/\|/g, ',').replace(/^"(.*)"$/, '$1') || '';
       }
     }
 
+    if (day) {
+      person[day] = (person[day] || []).concat(role);
+    }
+
     if (!data.find(p => p.email === email)) {
+      person.email = email;
       data.push(person);
     }
   }
@@ -62,39 +63,10 @@ function reformatCSV(csvData) {
   return data;
 }
 
-function parseQuotedRow(row) {
-  const values = [];
-  let currentValue = '';
-  let isQuoted = false;
-
-  for (let i = 0; i < row.length; i++) {
-    const char = row[i];
-
-    if (char === '"') {
-      isQuoted = !isQuoted;
-    } else if (char === ',' && !isQuoted) {
-      values.push(currentValue.trim());
-      currentValue = '';
-    } else {
-      currentValue += char;
-    }
-  }
-
-  values.push(currentValue.trim());
-  return values;
+function replaceCommasInQuotes(str, replacement) {
+  const regex = /"((?:[^"\\]|\\.)*)"/g;
+  return str.replace(regex, match => match.replace(/,/g, replacement));
 }
-
-function getValueFromRow(row, index) {
-  const value = row[index] || '';
-  return value.replace(/"/g, '');
-}
-
-
-
-    function replaceCommasInQuotes(str, replacement) {
-      const regex = /"((?:[^"\\]|\\.)*)"?/g;
-      return str.replace(regex, match => match.replace(/,/g, replacement));
-    }
 
 function displayData(reformattedData) {
   const table = document.getElementById('outputTable');
@@ -123,8 +95,6 @@ function displayData(reformattedData) {
   });
 }
 
-
-
 function downloadCSV(headers, data) {
   // Filter out columns where all rows have null or undefined values
   const visibleColumns = headers.filter(header => data.some(row => row[header] !== null && row[header] !== undefined));
@@ -140,7 +110,7 @@ function downloadCSV(headers, data) {
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'reformatted.csv');
+    link.setAttribute('download', 'Assigned Volunteers Reformatted.csv');
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
