@@ -117,94 +117,98 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function createPDF(labels, topText, bottomLeftText, bottomRightText, labelTemplate) {
-    const { jsPDF } = window.jspdf;
-    let doc;
+  const { jsPDF } = window.jspdf;
+  let doc;
 
-    if (labelTemplate === 'avery5163') {
-      doc = new jsPDF('p', 'in', [8.5, 11]);
-    } else if (labelTemplate === 'dymo2x4') {
-      doc = new jsPDF('l', 'in', [4, 2]);
+  if (labelTemplate === 'avery5163') {
+    doc = new jsPDF('p', 'in', [8.5, 11]);
+  } else if (labelTemplate === 'dymo2x4') {
+    doc = new jsPDF('l', 'in', [4, 2]);
+  }
+
+  if (labelTemplate === 'avery5163') {
+    const labelWidth = 4;
+    const labelHeight = 2;
+    const startX = 0.16;
+    const startY = 0.5;
+    const columnGap = 0.19;
+    const rowGap = 0.0;
+    const labelsPerRow = 2;
+    const labelsPerPage = 10;
+
+    let currentX = startX;
+    let currentY = startY;
+    let labelCount = 0;
+
+    function fitText(text, x, y, maxWidth, fontSize, alignment) {
+      doc.setFontSize(fontSize);
+      while (doc.getTextWidth(text) > maxWidth && fontSize > 6) {
+        fontSize -= 0.5;
+        doc.setFontSize(fontSize);
+      }
+      doc.text(text, x, y, { align: alignment });
     }
 
     for (const label of labels) {
-      if (labelTemplate === 'avery5163') {
-        const labelWidth = 4;
-        const labelHeight = 2;
-        const startX = 0.16;
-        const startY = 0.5;
-        const columnGap = 0.19;
-        const rowGap = 0.0;
-        const labelsPerRow = 2;
-        const labelsPerPage = 10;
-
-        let currentX = startX;
-        let currentY = startY;
-        let labelCount = 0;
-
-        function fitText(text, x, y, maxWidth, fontSize, alignment) {
-          doc.setFontSize(fontSize);
-          while (doc.getTextWidth(text) > maxWidth && fontSize > 6) {
-            fontSize -= 0.5;
-            doc.setFontSize(fontSize);
-          }
-          doc.text(text, x, y, { align: alignment });
-        }
-
-        for (const label of labels) {
-          if (labelCount > 0 && labelCount % labelsPerPage === 0) {
-            doc.addPage();
-            currentX = startX;
-            currentY = startY;
-          }
-
-          fitText(topText, currentX + labelWidth / 2, currentY + 0.15, labelWidth - 0.4, 12, 'center');
-          fitText((label.firstname || '').toUpperCase(), currentX + labelWidth / 2, currentY + 0.48, labelWidth - 0.4, 18, 'center');
-          fitText((label.lastname || '').toUpperCase(), currentX + labelWidth / 2, currentY + 0.83, labelWidth - 0.4, 12, 'center');
-          doc.setFillColor(0, 0, 0);
-          doc.rect(currentX, currentY + 1.05, labelWidth, 0.2, 'F');
-          doc.setTextColor(255, 255, 255);
-          fitText((label.roles || '').toUpperCase(), currentX + labelWidth / 2, currentY + 1.2, labelWidth - 0.4, 10, 'center');
-          doc.setTextColor(0, 0, 0);
-          fitText(bottomLeftText, currentX + 0.1, currentY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'left');
-          fitText(bottomRightText, currentX + labelWidth - 0.1, currentY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'right');
-
-          labelCount++;
-          currentX += labelWidth + columnGap;
-
-          if (labelCount % labelsPerRow === 0) {
-            currentX = startX;
-            currentY += labelHeight + rowGap;
-          }
-        }
-      } else if (labelTemplate === 'dymo2x4') {
-        const labelWidth = 4;
-        const labelHeight = 2;
-        const startX = 0.00;
-        const startY = 0.05;
-
-        function fitText(text, x, y, maxWidth, fontSize, alignment) {
-          doc.setFontSize(fontSize);
-          while (doc.getTextWidth(text) > maxWidth && fontSize > 6) {
-            fontSize -= 0.5;
-            doc.setFontSize(fontSize);
-          }
-          doc.text(text, x, y, { align: alignment });
-        }
-
-        fitText(topText, startX + labelWidth / 2, startY + 0.23, labelWidth - 0.1, 12, 'center');
-        fitText((label.firstname || '').toUpperCase(), startX + labelWidth / 2, startY + 0.63, labelWidth - 0.1, 18, 'center');
-        fitText((label.lastname || '').toUpperCase(), startX + labelWidth / 2, startY + 1.03, labelWidth - 0.1, 12, 'center');
-        doc.setFillColor(0, 0, 0);
-        doc.rect(startX, startY + 1.2, labelWidth, 0.2, 'F');
-        doc.setTextColor(255, 255, 255);
-        fitText((label.roles || '').toUpperCase(), startX + labelWidth / 2, startY + 1.35, labelWidth - 0.1, 10, 'center');
-        doc.setTextColor(0, 0, 0);
-        fitText(bottomLeftText, startX + 0.1, startY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'left');
-        fitText(bottomRightText, startX + labelWidth - 0.1, startY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'right');
+      if (labelCount > 0 && labelCount % labelsPerPage === 0) {
         doc.addPage();
+        currentX = startX;
+        currentY = startY;
+      }
+
+      fitText(topText, currentX + labelWidth / 2, currentY + 0.15, labelWidth - 0.4, 12, 'center');
+      fitText((label.firstname || '').toUpperCase(), currentX + labelWidth / 2, currentY + 0.48, labelWidth - 0.4, 18, 'center');
+      fitText((label.lastname || '').toUpperCase(), currentX + labelWidth / 2, currentY + 0.83, labelWidth - 0.4, 12, 'center');
+      doc.setFillColor(0, 0, 0);
+      doc.rect(currentX, currentY + 1.05, labelWidth, 0.2, 'F');
+      doc.setTextColor(255, 255, 255);
+      fitText((label.roles || '').toUpperCase(), currentX + labelWidth / 2, currentY + 1.2, labelWidth - 0.4, 10, 'center');
+      doc.setTextColor(0, 0, 0);
+      fitText(bottomLeftText, currentX + 0.1, currentY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'left');
+      fitText(bottomRightText, currentX + labelWidth - 0.1, currentY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'right');
+
+      labelCount++;
+      currentX += labelWidth + columnGap;
+
+      if (labelCount % labelsPerRow === 0) {
+        currentX = startX;
+        currentY += labelHeight + rowGap;
       }
     }
+  } else if (labelTemplate === 'dymo2x4') {
+    const labelWidth = 4;
+    const labelHeight = 2;
 
-    doc.save('labels.pdf');
+    function fitText(text, x, y, maxWidth, fontSize, alignment) {
+      doc.setFontSize(fontSize);
+      while (doc.getTextWidth(text) > maxWidth && fontSize > 6) {
+        fontSize -= 0.5;
+        doc.setFontSize(fontSize);
+      }
+      doc.text(text, x, y, { align: alignment });
+    }
+
+    for (const label of labels) {
+      const startX = 0.00;
+      const startY = 0.05;
+
+      fitText(topText, startX + labelWidth / 2, startY + 0.23, labelWidth - 0.1, 12, 'center');
+      fitText((label.firstname || '').toUpperCase(), startX + labelWidth / 2, startY + 0.63, labelWidth - 0.1, 18, 'center');
+      fitText((label.lastname || '').toUpperCase(), startX + labelWidth / 2, startY + 1.03, labelWidth - 0.1, 12, 'center');
+      doc.setFillColor(0, 0, 0);
+      doc.rect(startX, startY + 1.2, labelWidth, 0.2, 'F');
+      doc.setTextColor(255, 255, 255);
+      fitText((label.roles || '').toUpperCase(), startX + labelWidth / 2, startY + 1.35, labelWidth - 0.1, 10, 'center');
+      doc.setTextColor(0, 0, 0);
+      fitText(bottomLeftText, startX + 0.1, startY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'left');
+      fitText(bottomRightText, startX + labelWidth - 0.1, startY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'right');
+      doc.addPage();
+    }
   }
+
+  // Remove the last blank page
+  doc.deletePage(doc.getNumberOfPages());
+
+  doc.save('labels.pdf');
+}
 });
