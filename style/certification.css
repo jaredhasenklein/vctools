@@ -1,0 +1,85 @@
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 10px;
+        position: relative;
+    }
+    #dropzone {
+        border: 2px dashed #ccc;
+        border-radius: 20px;
+        width: 100%;
+        font-family: sans-serif;
+        margin: 10px auto;
+        padding: 10px;
+        text-align: center;
+    }
+    #dropzone.dragover {
+        border-color: #000;
+        background-color: #f0f0f0;
+    }
+    table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
+    table td {
+        width: 33.33%;
+        vertical-align: top;
+    }
+    th {
+        background-color: #f2f2f2;
+        text-align: left;
+        padding: 8px;
+    }
+    td {
+        padding: 8px;
+        vertical-align: top;
+    }
+    .role-section {
+        margin-bottom: 20px;
+    }
+    .role-section h4 {
+        border-bottom: 2px solid #000;
+        padding-bottom: 5px;
+    }
+    .role-section h5 {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    #error {
+        color: red;
+        margin-top: 20px;
+    }
+    .email-button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 3px 8px;
+        cursor: pointer;
+        border-radius: 3px;
+        margin-left: 10px;
+        text-decoration: none;
+        font-size: 0.8em;
+    }
+    #warning-box {
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        color: #856404;
+        padding: 10px;
+    }
+    #version-tag {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        align-items: center;
+    }
+    #version-tag .version-box {
+        background-color: #007bff;
+        color: white;
+        padding: 5px 10px;
+        margin-left: 10px;
+        border-radius: 3px;
+    }
