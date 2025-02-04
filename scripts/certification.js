@@ -99,7 +99,7 @@
                processCSV(results.data);
            },
            error: function(error) {
-               showError('Error parsing CSV: ' + error);
+               showError('Error parsing file. Please make sure this is a Training and Certifications report from VMS. Details: ' + error);
            },
            skipEmptyLines: true,
            header: false
