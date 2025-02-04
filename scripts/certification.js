@@ -211,8 +211,8 @@
                if (!hasRequiredRole) return;
 
                // Check course status
-               const courseStatus = config.requiredCourses.map(course =>
-                   personInfo.courses[course] ? determineCourseStatus(personInfo.courses[course]) : null
+              const courseStatus = config.requiredCourses.map(course =>
+                   personInfo.courses[course] ? determineCourseStatus(personInfo.courses[course]) : '❌'
                );
 
                // Check if all required courses have a valid status
