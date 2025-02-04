@@ -245,7 +245,7 @@
        // Clear previous results
        resultsContainer.innerHTML = '';
 
-       // Create a table with 3 columns
+       // Create a table with 4 columns
        let tableContent = '<table><tr>';
        const roles = Object.keys(ROLE_CONFIGS);
 
@@ -271,8 +271,8 @@
            // Add to table cell
            tableContent += `<td>${roleHtml}</td>`;
 
-           // Start new row every 3 columns
-           if ((i + 1) % 3 === 0 && i < roles.length - 1) {
+           // Start new row every 4 columns
+           if ((i + 1) % 4 === 0 && i < roles.length - 1) {
                tableContent += '</tr><tr>';
            }
        }
