@@ -1,24 +1,28 @@
    // Role configurations with required roles and courses
    const ROLE_CONFIGS = {
-       'Head Referee': {
-           requiredRoles: ['Head Referee'],
-           requiredCourses: ['2025 FRC Referee Training', '2025 FRC Head Referee Training']
-       },
-       'Referee': {
-           requiredRoles: ['Referee'],
-           requiredCourses: ['2025 FRC Referee Training']
-       },
        'Judge': {
            requiredRoles: ['Judge'],
            requiredCourses: ['2025 FRC General Judge Training']
        },
        'Judge - Dean\'s List Award': {
            requiredRoles: ['Judge - Dean\'s List Award'],
-           requiredCourses: ['2025 FRC Dean\'s List Judge Training']
+           requiredCourses: ['2025 FRC Dean\'s List Judge Training', 'FIRST Data Privacy and Protection Training 2024-2025']
        },
        'Judge - FIRST Impact Award': {
            requiredRoles: ['Judge - FIRST Impact Award'],
-           requiredCourses: ['2025 FRC FIRST Impact Award Judge Training']
+           requiredCourses: ['2025 FRC FIRST Impact Award Judge Training', 'FIRST Data Privacy and Protection Training 2024-2025']
+       },
+       'Judge Advisor': {
+           requiredRoles: ['Judge Advisor'],
+           requiredCourses: ['2025 FRC Judge Advisor Training', 'FIRST Data Privacy and Protection Training 2024-2025']
+       },
+      'Head Referee': {
+           requiredRoles: ['Head Referee'],
+           requiredCourses: ['2025 FRC Referee Training', '2025 FRC Head Referee Training']
+       },
+       'Referee': {
+           requiredRoles: ['Referee'],
+           requiredCourses: ['2025 FRC Referee Training']
        },
        'Lead Robot Inspector': {
            requiredRoles: ['Lead Robot Inspector'],
@@ -35,6 +39,10 @@
        'Safety Manager': {
            requiredRoles: ['Safety Manager'],
            requiredCourses: ['2025 FRC Safety Manager Training']
+       },
+       'Pit Admin (all roles)': {
+           requiredRoles: ['Pit Administrator', 'Pit Administration Supervisor'],
+           requiredCourses: ['FIRST Data Privacy and Protection Training 2024-2025']
        }
    };
 
