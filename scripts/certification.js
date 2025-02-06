@@ -26,7 +26,7 @@
        },
        'Lead Robot Inspector': {
            requiredRoles: ['Lead Robot Inspector'],
-           requiredCourses: ['FRC Robot Inspector Test', '2025 FRC Lead Robot Inspector Training']
+           requiredCourses: ['FRC Robot Inspector Test']
        },
        'Robot Inspector': {
            requiredRoles: ['Robot Inspector'],
