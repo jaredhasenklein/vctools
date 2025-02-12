@@ -1,6 +1,22 @@
    // Role configurations with required roles and courses
    const ROLE_CONFIGS = {
-       'Head Referee': {
+       'Judge': {
+           requiredRoles: ['Judge'],
+           requiredCourses: ['2025 FRC General Judge Training']
+       },
+       'Judge - Dean\'s List Award': {
+           requiredRoles: ['Judge - Dean\'s List Award'],
+           requiredCourses: ['2025 FRC Dean\'s List Judge Training', 'FIRST Data Privacy and Protection Training 2024-2025']
+       },
+       'Judge - FIRST Impact Award': {
+           requiredRoles: ['Judge - FIRST Impact Award'],
+           requiredCourses: ['2025 FRC FIRST Impact Award Judge Training', 'FIRST Data Privacy and Protection Training 2024-2025']
+       },
+       'Judge Advisor': {
+           requiredRoles: ['Judge Advisor'],
+           requiredCourses: ['2025 FRC Judge Advisor Training', 'FIRST Data Privacy and Protection Training 2024-2025']
+       },
+      'Head Referee': {
            requiredRoles: ['Head Referee'],
            requiredCourses: ['2025 FRC Referee Training', '2025 FRC Head Referee Training']
        },
@@ -8,25 +24,13 @@
            requiredRoles: ['Referee'],
            requiredCourses: ['2025 FRC Referee Training']
        },
-       'Judge': {
-           requiredRoles: ['Judge'],
-           requiredCourses: ['2025 FRC General Judge Training']
-       },
-       'Judge - Dean\'s List Award': {
-           requiredRoles: ['Judge - Dean\'s List Award'],
-           requiredCourses: ['2025 FRC Dean\'s List Judge Training']
-       },
-       'Judge - FIRST Impact Award': {
-           requiredRoles: ['Judge - FIRST Impact Award'],
-           requiredCourses: ['2025 FRC FIRST Impact Award Judge Training']
-       },
        'Lead Robot Inspector': {
            requiredRoles: ['Lead Robot Inspector'],
-           requiredCourses: ['2025 FRC Robot Inspector Training', '2025 FRC Lead Robot Inspector Training']
+           requiredCourses: ['FRC Robot Inspector Test']
        },
        'Robot Inspector': {
            requiredRoles: ['Robot Inspector'],
-           requiredCourses: ['2025 FRC Robot Inspector Training']
+           requiredCourses: ['2025 FRC Robot Inspector Test']
        },
        'Lead Queuer': {
            requiredRoles: ['Lead Queuer'],
@@ -35,6 +39,10 @@
        'Safety Manager': {
            requiredRoles: ['Safety Manager'],
            requiredCourses: ['2025 FRC Safety Manager Training']
+       },
+       'Pit Admin (all roles)': {
+           requiredRoles: ['Pit Administrator', 'Pit Administration Supervisor'],
+           requiredCourses: ['FIRST Data Privacy and Protection Training 2024-2025']
        }
    };
 
@@ -203,8 +211,8 @@
                if (!hasRequiredRole) return;
 
                // Check course status
-               const courseStatus = config.requiredCourses.map(course =>
-                   personInfo.courses[course] ? determineCourseStatus(personInfo.courses[course]) : null
+              const courseStatus = config.requiredCourses.map(course =>
+                   personInfo.courses[course] ? determineCourseStatus(personInfo.courses[course]) : '❌'
                );
 
                // Check if all required courses have a valid status
@@ -237,7 +245,7 @@
        // Clear previous results
        resultsContainer.innerHTML = '';
 
-       // Create a table with 3 columns
+       // Create a table with 4 columns
        let tableContent = '<table><tr>';
        const roles = Object.keys(ROLE_CONFIGS);
 
@@ -263,8 +271,8 @@
            // Add to table cell
            tableContent += `<td>${roleHtml}</td>`;
 
-           // Start new row every 3 columns
-           if ((i + 1) % 3 === 0 && i < roles.length - 1) {
+           // Start new row every 4 columns
+           if ((i + 1) % 4 === 0 && i < roles.length - 1) {
                tableContent += '</tr><tr>';
            }
        }
