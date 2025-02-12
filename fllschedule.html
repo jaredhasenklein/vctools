@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LNHZ3NT97K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LNHZ3NT97K');
+</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FLL Schedule Generator</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style/fllschedule.css">
+
+</head>
+<body>
+
+<body>
+<br>
+<a href="index.html" class="btn btn-primary">🏠 See more resources</a>
+  <h1>FLL Schedule Generator</h1>
+ <div class="table-responsive">
+    <table class="table">
+<tr>
+<td><p><b><u>Instructions:</u></b>
+<ol><li>Forthcoming.</li></ol></p></td>
+</tr>
+    </table>
+<br><br>
+  </div>
+
+    
+    <form id="schedulerForm">
+
+  <div class="form-group" style="display: flex; gap: 10px; align-items: flex-start;">
+            <div style="flex-grow: 1;">
+                <label for="teams">Team Numbers (comma-separated):</label>
+                <input type="text" id="teams" required placeholder="1,2,3,4,5">
+            </div>
+            <button type="button" id="pitNumbers" style="margin-top: 24px; white-space: nowrap;">
+                Use pit numbers instead
+            </button>
+        </div>
+
+        <div id="pitNumberModal" class="modal">
+            <div class="modal-content" style="max-width: 300px;">
+                <h2>Enter Number of Teams</h2>
+                <div class="form-group">
+                    <input type="number" id="numTeams" min="1" step="1" placeholder="Enter number of teams">
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" id="cancelPitNumbers">Cancel</button>
+                    <button type="button" id="confirmPitNumbers">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="gameTime">Robot Game Duration (minutes):</label>
+            <input type="number" id="gameTime" value="2.5" step="0.5" required>
+        </div>
+
+        <div class="form-group">
+            <label for="resetTime">Robot Game Reset Duration (minutes):</label>
+            <input type="number" id="resetTime" value="7.5" step="0.5" required>
+        </div>
+
+        <div class="form-group">
+            <label for="judgingTime">Judging Session Duration (minutes):</label>
+            <input type="number" id="judgingTime" value="30" required>
+        </div>
+
+        <div class="form-group">
+            <label for="deliberationTime">Judging Session Deliberation (minutes):</label>
+            <input type="number" id="deliberationTime" value="10" required>
+        </div>
+
+        <div class="form-group">
+            <label for="judgingRooms">Number of Judging Rooms:</label>
+            <input type="number" id="judgingRooms" value="4" required>
+        </div>
+
+        <div class="form-group">
+            <label for="gameTables">Number of Robot Game Tables:</label>
+            <input type="number" id="gameTables" value="4" required>
+        </div>
+
+        <div class="form-group">
+            <label for="startTime">Activity Start Time:</label>
+            <input type="time" id="startTime" value="08:30" required>
+        </div>
+
+        <div class="form-group">
+            <label for="robotRounds">Number of Robot Rounds per Team:</label>
+            <input type="number" id="robotRounds" value="4" required>
+        </div>
+
+        <div class="form-group">
+            <label for="judgingSessions">Number of Judging Sessions:</label>
+            <input type="number" id="judgingSessions" value="1" readonly>
+        </div>
+
+        <div class="form-group">
+            <label for="minTime">Minimum Time Between Activities (minutes):</label>
+            <input type="number" id="minTime" value="15" required>
+        </div>
+
+        <div class="form-group">
+            <label for="lunchStart">Lunch Break Start:</label>
+            <input type="time" id="lunchStart" value="12:00" required>
+        </div>
+
+        <div class="form-group">
+            <label for="lunchEnd">Lunch Break End:</label>
+            <input type="time" id="lunchEnd" value="13:00" required>
+        </div>
+
+        <button type="submit">Generate Schedule</button>
+    </form>
+
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h2>Schedule Summary</h2>
+            <p id="judgingEndTime"></p>
+            <p id="robotEndTime"></p>
+            <div class="modal-buttons">
+                <button id="editButton">Make Edits</button>
+                <button id="proceedButton">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="scripts/fllschedule.js"></script>
+  <div id="labelContainer"></div>
+        <div class="footer">
+            <p>Made by <a href="mailto:tools@jaredhk.com">Jared Hasen-Klein</a> with help from <a href="https://sourcegraph.com/cody/chat">Cody</a>, <a href="https://platform.openai.com/docs/models/gpt-3-5-turbo">ChatGPT</a>, <a href="https://www.anthropic.com/news/introducing-claude">Claude</a>, and <a href="https://github.com/jaredhasenklein/vctools">you, hopefully</a>.</p>
+        </div>
+</body>
+</html>
