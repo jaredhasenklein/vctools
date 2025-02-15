@@ -51,11 +51,12 @@
   </div>
   <form id="nameTagForm">
     <input type="file" id="csvFile" accept=".csv" required>
-    <select id="labelTemplate">
-      <option value="avery5163">Avery 5163</option>
-      <option value="dymo2x4">Dymo 2x4</option>
-    </select>
+    <select id="labelType" name="labelType"></select>
+    <select id="labelStyle" name="labelStyle"></select>
+
     <div>
+
+
 
     <table style="border: 1px solid black;">
         <tbody>
@@ -84,14 +85,31 @@
                 </td>
             </tr>
             <tr>
+              <div style="padding: 10px;">
+                  <div style="margin-bottom: 10px;">
                 <td colspan="2" width="50%">
-                    <p style="font-size:10px;text-align:center;">      <label>
-<input type="text" id="bottomLeftText" placeholder="Custom Text">
-      </label></p>
-                </td>
-                <td colspan="2" width="50%">
-                    <p style="font-size:10px;text-align:center;">    <input type="text" id="bottomRightText" placeholder="Custom Text">
-</p>
+                            <label>
+                                <select id="bottomLeftType" class="form-select" style="font-size:10px;">
+                                    <option value="">--Select text/field--</option>
+                                    <option value="custom">Custom Text</option>
+                                    <option value="pronouns">Personal Pronouns</option>
+                                    <option value="languages">Languages Spoken</option>
+                                </select>
+                                <input type="text" id="bottomLeftText" class="form-control" placeholder="Custom Text" style="font-size:10px; margin-top: 5px;">
+                            </label>
+                            </td>
+                            <td colspan="2" width="50%">
+                            <label>
+                                <select id="bottomRightType" class="form-select" style="font-size:10px;">
+                                    <option value="">--Select text/field--</option>
+                                    <option value="custom">Custom Text</option>
+                                    <option value="pronouns">Personal Pronouns</option>
+                                    <option value="languages">Languages Spoken</option>
+                                </select>
+                                <input type="text" id="bottomRightText" class="form-control" placeholder="Custom Text" style="font-size:10px; margin-top: 5px;">
+                            </label>
+                        </div>
+                    </div>
                 </td>
             </tr>
         </tbody>

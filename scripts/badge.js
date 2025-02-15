@@ -1,214 +1,401 @@
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('nameTagForm');
   const labelContainer = document.getElementById('labelContainer');
 
+  // Update the select elements
+  const labelTypeSelect = document.getElementById('labelType');
+  const labelStyleSelect = document.getElementById('labelStyle');
+
+  // Define label types and their properties
+  const labelTypes = {
+    'avery5163': {
+      name: 'Avery 5163',
+      pageOrientation: 'p',
+      pageWidth: 8.5,
+      pageHeight: 11,
+      labelWidth: 4,
+      labelHeight: 2,
+      startX: 0.16,
+      startY: 0.5,
+      columnGap: 0.19,
+      rowGap: 0,
+      labelsPerRow: 2,
+      labelsPerPage: 10
+    },
+    'dymo2x4': {
+      name: 'Dymo 2x4',
+      pageOrientation: 'l',
+      pageWidth: 4,
+      pageHeight: 2,
+      labelWidth: 4,
+      labelHeight: 2,
+      startX: 0,
+      startY: 0.05,
+      labelsPerRow: 1,
+      labelsPerPage: 1
+    }
+  };
+
+  // Define label styles
+  const labelStyles = {
+    'styleA': {
+      name: 'Style A - Full Name',
+      render: (label, doc, x, y, width, height, config) => {
+        const margin = 0.1; // 0.1 inch margin on each side
+        const availableWidth = width - (2 * margin);
+
+        // Function to fit text within available width
+        function fitText(text, fontSize, isBold = false) {
+          doc.setFont(undefined, isBold ? 'bold' : 'normal');
+          doc.setFontSize(fontSize);
+          while (doc.getTextWidth(text) > availableWidth && fontSize > 10) {
+            fontSize -= 0.5;
+            doc.setFontSize(fontSize);
+          }
+          return fontSize;
+        }
+
+        function formatRole(role) {
+          return (role || '').replace(/,\s*/g, '/');
+        }
+
+        function applyFirstItalics(text, doc, x, y, alignment) {
+          // Split text where "FIRST" appears
+          const parts = text.split(/(FIRST)/g);
+          let currentX = x;
+
+          // For center alignment, we need to calculate total width first
+          if (alignment === 'center') {
+            const totalWidth = doc.getTextWidth(text);
+            currentX = x - (totalWidth / 2);
+          } else if (alignment === 'right') {
+            const totalWidth = doc.getTextWidth(text);
+            currentX = x - totalWidth;
+          }
+
+          // Track position as we draw
+          let xOffset = 0;
+
+          // Draw each part, making "FIRST" italic
+          parts.forEach(part => {
+            if (part === 'FIRST') {
+              const currentFont = doc.getFont();
+              const currentFontSize = doc.getFontSize();
+              doc.setFont(undefined, 'italic');
+              doc.text(part, currentX + xOffset, y);
+              xOffset += doc.getTextWidth(part);
+              doc.setFont(undefined, currentFont.style);
+            } else if (part) {
+              doc.text(part, currentX + xOffset, y);
+              xOffset += doc.getTextWidth(part);
+            }
+          });
+        }
+
+
+        // Top text
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        doc.text(config.topText, x + width / 2, y + 0.15, { align: 'center' });
+
+        // First name
+        doc.setFontSize(18);
+        doc.text((label.firstname || '').toUpperCase(), x + width / 2, y + 0.48, { align: 'center' });
+
+        // Last name
+        doc.setFontSize(12);
+        doc.text((label.lastname || '').toUpperCase(), x + width / 2, y + 0.83, { align: 'center' });
+
+        // Role (with adaptive font sizing)
+        const role = (label.roles || '').toUpperCase();
+        doc.setFillColor(0, 0, 0);
+        doc.rect(x, y + 1.05, width, 0.2, 'F');
+        doc.setTextColor(255, 255, 255);
+
+        // Find appropriate font size for role
+        const roleFontSize = fitText(role, 12);
+        doc.setFontSize(roleFontSize);
+        doc.text(role, x + width / 2, y + 1.2, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+
+        // Bottom text
+        doc.setFontSize(12);
+        doc.text(config.bottomLeftText, x + 0.1, y + height - 0.38, { align: 'left' });
+        doc.text(config.bottomRightText, x + width - 0.1, y + height - 0.38, { align: 'right' });
+      }
+    },
+    'styleB': {
+      name: 'Style B - First Name with Initial',
+      render: (label, doc, x, y, width, height, config) => {
+        const margin = 0.1; // 0.1 inch margin on each side
+        const availableWidth = width - (2 * margin);
+
+        // Function to fit text within available width
+        function fitText(text, fontSize, isBold = false) {
+          doc.setFont(undefined, isBold ? 'bold' : 'normal');
+          doc.setFontSize(fontSize);
+          while (doc.getTextWidth(text) > availableWidth && fontSize > 10) {
+            fontSize -= 0.5;
+            doc.setFontSize(fontSize);
+          }
+          return fontSize;
+        }
+
+        // Calculate vertical spacing
+        const topMargin = 0.15; // Space for top text
+        const bottomMargin = 0.15; // Space for bottom text
+        const availableHeight = height - topMargin - bottomMargin;
+
+        // Top text
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        doc.text(config.topText, x + width / 2, y + topMargin, { align: 'center' });
+
+        // Name
+        const displayName = formatNameWithInitial(
+          (label.firstname || '').toUpperCase(),
+          (label.lastname || '').toUpperCase()
+        );
+
+        // Fit and measure name
+        const nameFontSize = fitText(displayName, 36, true);
+        doc.setFontSize(nameFontSize);
+        const nameHeight = nameFontSize / 72; // Convert pt to inches
+
+        // Fit and measure role
+        const role = (label.roles || '').toUpperCase();
+        const roleFontSize = fitText(role, 24);
+        doc.setFontSize(roleFontSize);
+        const roleHeight = roleFontSize / 72; // Convert pt to inches
+
+        // Calculate vertical positions to center content
+        const contentHeight = nameHeight + roleHeight + 0.2; // 0.2 is spacing between name and role
+        const startContentY = y + topMargin + (availableHeight - contentHeight) / 2;
+
+        // Render name
+        doc.setFontSize(nameFontSize);
+        doc.setFont(undefined, 'bold');
+        doc.text(displayName, x + width / 2, startContentY + nameHeight, { align: 'center' });
+
+        // Render role
+        doc.setFontSize(roleFontSize);
+        doc.setFont(undefined, 'normal');
+        doc.text(role, x + width / 2, startContentY + nameHeight + 0.2 + roleHeight, { align: 'center' });
+
+        // Bottom text
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text(config.bottomLeftText, x + 0.1, y + height - 0.15, { align: 'left' });
+        doc.text(config.bottomRightText, x + width - 0.1, y + height - 0.15, { align: 'right' });
+      }
+    }
+  };
+
+  // Event listeners to show/hide custom text inputs
+  ['Left', 'Right'].forEach(side => {
+      const select = document.getElementById(`bottom${side}Type`);
+      const input = document.getElementById(`bottom${side}Text`);
+
+      if (select && input) {
+          // Hide input by default
+          input.style.display = 'none';
+
+          select.addEventListener('change', () => {
+              input.style.display = select.value === 'custom' ? 'block' : 'none';
+          });
+      }
+  });
+
+
+  // Populate select elements
+  labelTypeSelect.innerHTML = Object.entries(labelTypes)
+    .map(([value, type]) => `<option value="${value}">${type.name}</option>`)
+    .join('');
+
+  labelStyleSelect.innerHTML = Object.entries(labelStyles)
+    .map(([value, style]) => `<option value="${value}">${style.name}</option>`)
+    .join('');
+
+  function formatNameWithInitial(firstName, lastName) {
+    const firstNameStr = (firstName || '').trim();
+    const lastNameStr = (lastName || '').trim();
+    const lastInitial = lastNameStr ? lastNameStr[0] + '.' : '';
+    return `${firstNameStr}${lastInitial ? ' ' + lastInitial : ''}`;
+  }
+
   if (form) {
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
 
-      const csvFile = document.getElementById('csvFile').files[0];
-      const labelTemplate = document.getElementById('labelTemplate').value;
-      const topText = document.getElementById('topText').value;
-      const bottomLeftText = document.getElementById('bottomLeftText').value;
-      const bottomRightText = document.getElementById('bottomRightText').value;
+        const csvFile = document.getElementById('csvFile').files[0];
+        const labelType = document.getElementById('labelType').value;
+        const labelStyle = document.getElementById('labelStyle').value;
+        const topText = document.getElementById('topText').value;
 
-      if (csvFile) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const csvData = reader.result;
-          const labels = parseCSV(csvData);
-          generateLabels(labels, labelTemplate, topText, bottomLeftText, bottomRightText);
-          createPDF(labels, topText, bottomLeftText, bottomRightText, labelTemplate);
+        const bottomLeftType = document.getElementById('bottomLeftType').value;
+        const bottomLeftCustom = document.getElementById('bottomLeftText').value;
+        const bottomRightType = document.getElementById('bottomRightType').value;
+        const bottomRightCustom = document.getElementById('bottomRightText').value;
+
+        if (csvFile) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const csvData = reader.result;
+            const labels = parseCSV(csvData);
+            createPDF(
+              labels,
+              labelType,
+              labelStyle,
+              topText,
+              bottomLeftType,
+              bottomLeftCustom,
+              bottomRightType,
+              bottomRightCustom
+            );
+          };
+          reader.readAsText(csvFile);
+        }
+      });
+    }
+
+    function parseCSV(csvData) {
+        const labels = [];
+        const rows = csvData.trim().split('\n');
+        const headerMap = {
+          'Minor': 'minor',
+          'First Name': 'firstname',
+          'Last Name': 'lastname',
+          'Personal Pronouns': 'personalpronouns',
+          'Roles': 'roles',
+          'Languages Spoken': 'languagesspoken'
         };
-        reader.readAsText(csvFile);
-      }
-    });
-  } else {
-    console.error('Form element not found');
-  }
 
-  function parseCSV(csvData) {
-    const labels = [];
-    const rows = csvData.trim().split('\n');
-    const headerMap = {
-      'Minor': 'minor',
-      'First Name': 'firstname',
-      'Last Name': 'lastname',
-      'Personal Pronouns': 'personalpronouns',
-      'Roles': 'roles',
-      'Languages Spoken': 'languagesspoken'
-    };
+        let headers = [];
 
-    let headers = [];
+        // Get the header row (row 12)
+        // Use a regex to properly split CSV while respecting quotes
+        const headerRow = rows[11].split(',').map(header => header.trim().replace(/^"(.*)"$/, '$1'));
+        headers = headerRow.filter(header => header !== '');
 
-    // Get the header row (row 12)
-    const headerRow = rows[11].split(',').map(header => header.trim().replace(/^"(.*)"$/, '$1'));
-    headers = headerRow.filter(header => header !== '');
+        // Parse the data rows after the header row
+        for (let i = 12; i < rows.length; i++) {
+            const row = parseCSVRow(rows[i]);
+            const label = {};
 
-    // Parse the data rows after the header row
-    for (let i = 12; i < rows.length; i++) {
-      const row = rows[i].split(',');
-      const label = {};
+            for (let j = 0; j < headers.length; j++) {
+                const headerKey = Object.keys(headerMap).find(key => key.toLowerCase() === headers[j].toLowerCase())
+                    ? headerMap[Object.keys(headerMap).find(key => key.toLowerCase() === headers[j].toLowerCase())]
+                    : headers[j].toLowerCase().replace(/\s+/g, '');
 
-      for (let j = 0; j < headers.length; j++) {
-        const headerKey = Object.keys(headerMap).find(key => key.toLowerCase() === headers[j].toLowerCase())
-          ? headerMap[Object.keys(headerMap).find(key => key.toLowerCase() === headers[j].toLowerCase())]
-          : headers[j].toLowerCase().replace(/\s+/g, '');
+                const columnIndex = headers.findIndex(header => header.toLowerCase() === headers[j].toLowerCase());
+                const cellValue = row[columnIndex] ? row[columnIndex].trim().replace(/^"?(.*?)"?$/, '$1') : '';
+                label[headerKey] = cellValue;
+            }
 
-        const columnIndex = headers.findIndex(header => header.toLowerCase() === headers[j].toLowerCase());
-        const cellValue = row[columnIndex] ? row[columnIndex].trim().replace(/^"?(.*?)"?$/, '$1') : '';
-        label[headerKey] = cellValue;
-      }
+            labels.push(label);
+        }
 
-      labels.push(label);
+        return labels;
     }
 
-    return labels;
-  }
+    // Helper function to properly parse CSV rows with quoted fields
+    function parseCSVRow(rowStr) {
+        const row = [];
+        let inQuotes = false;
+        let currentValue = '';
 
-  function generateLabels(labels, labelTemplate, topText, bottomLeftText, bottomRightText) {
-    labelContainer.innerHTML = '';
+        for (let i = 0; i < rowStr.length; i++) {
+            const char = rowStr[i];
 
-    for (const label of labels) {
-      const labelElement = document.createElement('div');
-      labelElement.classList.add('label');
+            if (char === '"') {
+                inQuotes = !inQuotes;
+                continue;
+            }
 
-      const topTextElement = document.createElement('div');
-      topTextElement.classList.add('topText');
-      topTextElement.textContent = topText;
-      labelElement.appendChild(topTextElement);
+            if (char === ',' && !inQuotes) {
+                row.push(currentValue.trim());
+                currentValue = '';
+                continue;
+            }
 
-      const firstNameElement = document.createElement('div');
-      firstNameElement.classList.add('firstName');
-      firstNameElement.textContent = label.firstname || '';
-      labelElement.appendChild(firstNameElement);
+            currentValue += char;
+        }
 
-      const lastNameElement = document.createElement('div');
-      lastNameElement.classList.add('lastName');
-      lastNameElement.textContent = label.lastname || '';
-      labelElement.appendChild(lastNameElement);
+        // Push the last value
+        row.push(currentValue.trim());
 
-      const rolesElement = document.createElement('div');
-      rolesElement.classList.add('roles');
-      rolesElement.style.backgroundColor = 'black';
-      rolesElement.style.color = 'white';
-      rolesElement.style.padding = '5px';
-      rolesElement.textContent = label.roles || '';
-      labelElement.appendChild(rolesElement);
-
-      const bottomRowElement = document.createElement('div');
-      bottomRowElement.classList.add('bottomRow');
-      bottomRowElement.style.display = 'flex';
-      bottomRowElement.style.justifyContent = 'space-between';
-
-      const bottomLeftTextElement = document.createElement('div');
-      bottomLeftTextElement.classList.add('bottomLeftText');
-      bottomLeftTextElement.textContent = bottomLeftText;
-      bottomRowElement.appendChild(bottomLeftTextElement);
-
-      const bottomRightTextElement = document.createElement('div');
-      bottomRightTextElement.classList.add('bottomRightText');
-      bottomRightTextElement.textContent = bottomRightText;
-      bottomRowElement.appendChild(bottomRightTextElement);
-
-      labelElement.appendChild(bottomRowElement);
-      labelContainer.appendChild(labelElement);
-    }
-  }
-
-  function createPDF(labels, topText, bottomLeftText, bottomRightText, labelTemplate) {
-  const { jsPDF } = window.jspdf;
-  let doc;
-
-  if (labelTemplate === 'avery5163') {
-    doc = new jsPDF('p', 'in', [8.5, 11]);
-  } else if (labelTemplate === 'dymo2x4') {
-    doc = new jsPDF('l', 'in', [4, 2]);
-  }
-
-  if (labelTemplate === 'avery5163') {
-    const labelWidth = 4;
-    const labelHeight = 2;
-    const startX = 0.16;
-    const startY = 0.5;
-    const columnGap = 0.19;
-    const rowGap = 0.0;
-    const labelsPerRow = 2;
-    const labelsPerPage = 10;
-
-    let currentX = startX;
-    let currentY = startY;
-    let labelCount = 0;
-
-    function fitText(text, x, y, maxWidth, fontSize, alignment) {
-      doc.setFontSize(fontSize);
-      while (doc.getTextWidth(text) > maxWidth && fontSize > 6) {
-        fontSize -= 0.5;
-        doc.setFontSize(fontSize);
-      }
-      doc.text(text, x, y, { align: alignment });
+        return row;
     }
 
-    for (const label of labels) {
-      if (labelCount > 0 && labelCount % labelsPerPage === 0) {
-        doc.addPage();
-        currentX = startX;
-        currentY = startY;
+  function createPDF(labels, labelType, labelStyle, topText, bottomLeftType, bottomLeftCustom, bottomRightType, bottomRightCustom) {
+      const { jsPDF } = window.jspdf;
+      const typeConfig = labelTypes[labelType];
+      const styleConfig = labelStyles[labelStyle];
+
+      const doc = new jsPDF(
+        typeConfig.pageOrientation,
+        'in',
+        [typeConfig.pageWidth, typeConfig.pageHeight]
+      );
+
+      function getBottomText(type, customText, label) {
+        if (type === 'custom') {
+          return customText;
+        } else if (type === 'pronouns') {
+          return label.personalpronouns === 'Not Specified' ? '' : label.personalpronouns;
+        } else if (type === 'languages') {
+          return label.languagesspoken === 'Not Specified' ? '' : label.languagesspoken;
+        }
+        return '';
       }
 
-      fitText(topText, currentX + labelWidth / 2, currentY + 0.15, labelWidth - 0.4, 12, 'center');
-      fitText((label.firstname || '').toUpperCase(), currentX + labelWidth / 2, currentY + 0.48, labelWidth - 0.4, 18, 'center');
-      fitText((label.lastname || '').toUpperCase(), currentX + labelWidth / 2, currentY + 0.83, labelWidth - 0.4, 12, 'center');
-      doc.setFillColor(0, 0, 0);
-      doc.rect(currentX, currentY + 1.05, labelWidth, 0.2, 'F');
-      doc.setTextColor(255, 255, 255);
-      fitText((label.roles || '').toUpperCase(), currentX + labelWidth / 2, currentY + 1.2, labelWidth - 0.4, 10, 'center');
-      doc.setTextColor(0, 0, 0);
-      fitText(bottomLeftText, currentX + 0.1, currentY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'left');
-      fitText(bottomRightText, currentX + labelWidth - 0.1, currentY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'right');
-
-      labelCount++;
-      currentX += labelWidth + columnGap;
-
-      if (labelCount % labelsPerRow === 0) {
-        currentX = startX;
-        currentY += labelHeight + rowGap;
+      // Modified config object to include dynamic bottom text
+      function getConfigForLabel(label) {
+        return {
+          topText,
+          bottomLeftText: getBottomText(bottomLeftType, bottomLeftCustom, label),
+          bottomRightText: getBottomText(bottomRightType, bottomRightCustom, label)
+        };
       }
-    }
-  } else if (labelTemplate === 'dymo2x4') {
-    const labelWidth = 4;
-    const labelHeight = 2;
 
-    function fitText(text, x, y, maxWidth, fontSize, alignment) {
-      doc.setFontSize(fontSize);
-      while (doc.getTextWidth(text) > maxWidth && fontSize > 6) {
-        fontSize -= 0.5;
-        doc.setFontSize(fontSize);
+      let currentX = typeConfig.startX;
+      let currentY = typeConfig.startY;
+      let labelCount = 0;
+
+      for (const label of labels) {
+        if (labelCount > 0 && labelCount % typeConfig.labelsPerPage === 0) {
+          doc.addPage();
+          currentX = typeConfig.startX;
+          currentY = typeConfig.startY;
+        }
+
+        styleConfig.render(
+          label,
+          doc,
+          currentX,
+          currentY,
+          typeConfig.labelWidth,
+          typeConfig.labelHeight,
+          getConfigForLabel(label)
+        );
+
+        labelCount++;
+        if (typeConfig.labelsPerRow > 1) {
+          currentX += typeConfig.labelWidth + (typeConfig.columnGap || 0);
+          if (labelCount % typeConfig.labelsPerRow === 0) {
+            currentX = typeConfig.startX;
+            currentY += typeConfig.labelHeight + (typeConfig.rowGap || 0);
+          }
+        }
       }
-      doc.text(text, x, y, { align: alignment });
+
+      if (doc.getNumberOfPages() > 1 && labelCount % typeConfig.labelsPerPage === 0) {
+        doc.deletePage(doc.getNumberOfPages());
+      }
+
+      doc.save('labels.pdf');
     }
-
-    for (const label of labels) {
-      const startX = 0.00;
-      const startY = 0.05;
-
-      fitText(topText, startX + labelWidth / 2, startY + 0.23, labelWidth - 0.1, 12, 'center');
-      fitText((label.firstname || '').toUpperCase(), startX + labelWidth / 2, startY + 0.63, labelWidth - 0.1, 18, 'center');
-      fitText((label.lastname || '').toUpperCase(), startX + labelWidth / 2, startY + 1.03, labelWidth - 0.1, 12, 'center');
-      doc.setFillColor(0, 0, 0);
-      doc.rect(startX, startY + 1.2, labelWidth, 0.2, 'F');
-      doc.setTextColor(255, 255, 255);
-      fitText((label.roles || '').toUpperCase(), startX + labelWidth / 2, startY + 1.35, labelWidth - 0.1, 10, 'center');
-      doc.setTextColor(0, 0, 0);
-      fitText(bottomLeftText, startX + 0.1, startY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'left');
-      fitText(bottomRightText, startX + labelWidth - 0.1, startY + labelHeight - 0.38, labelWidth / 2 - 0.2, 10, 'right');
-      doc.addPage();
-    }
-  }
-
-  // Remove the last blank page
-  doc.deletePage(doc.getNumberOfPages());
-
-  doc.save('labels.pdf');
-}
 });
