@@ -10,7 +10,7 @@
        },
        'Judge - FIRST Impact Award': {
            requiredRoles: ['Judge - FIRST Impact Award'],
-           requiredCourses: ['2025 FRC FIRST Impact Award Judge Training', 'FIRST Data Privacy and Protection Training 2024-2025']
+           requiredCourses: ['2025 FRC FIRST Impact Award Judge Training', '2025 FRC General Judge Training']
        },
        'Judge Advisor': {
            requiredRoles: ['Judge Advisor'],
