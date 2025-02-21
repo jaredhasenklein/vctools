@@ -46,7 +46,7 @@
        },
        'Accommodation Coordinator (optional role)': {
            requiredRoles: ['Accommodation Coordinator'],
-           requiredCourses: ['24-25 Accommodation Coordinator Training']
+           requiredCourses: ['24-25 Accommodation Coordinator Training', 'FIRST Data Privacy and Protection Training 2024-2025']
        }
    };
 
