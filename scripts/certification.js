@@ -40,9 +40,13 @@
            requiredRoles: ['Safety Manager'],
            requiredCourses: ['2025 FRC Safety Manager Training']
        },
-       'Pit Admin (all roles)': {
-           requiredRoles: ['Pit Administrator', 'Pit Administration Supervisor'],
+       'Pit Admin Supervisor': {
+           requiredRoles: ['Pit Administration Supervisor'],
            requiredCourses: ['FIRST Data Privacy and Protection Training 2024-2025']
+       },
+       'Accommodation Coordinator (optional role)': {
+           requiredRoles: ['Accommodation Coordinator'],
+           requiredCourses: ['24-25 Accommodation Coordinator Training']
        }
    };
 
