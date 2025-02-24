@@ -124,7 +124,7 @@
    }
 
    function findHeaderRow(rows) {
-       const expectedHeaders = ['Minor', 'First Name', 'Last Name', 'Email', 'Phone', 'Role', 'Course Name', 'Enrollment Date', 'Completion Date', 'Type'];
+       const expectedHeaders = ['Minor', 'Preferred First Name', 'Last Name', 'Email', 'Phone', 'Role', 'Course Name', 'Enrollment Date', 'Completion Date', 'Required?'];
 
        for (let i = 0; i < rows.length; i++) {
            const row = rows[i];
