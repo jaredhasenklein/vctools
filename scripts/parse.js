@@ -2,8 +2,64 @@ const columns = [
   'Minor', 'Legal First Name', 'Preferred First Name', 'Last Name', 'Personal Pronouns', 'Email', 'Phone', 'Languages Spoken', 'FIRST Youth Protection Policy', 'Certified', 'Shirt Size', 'Self-Reported Accommodations', 'Team Affiliation', 'Employer', 'Alumni', 'Emergency Contact', 'Emergency Contact Phone Number', 'Affiliations', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
 ];
 
+// Added elements and event listeners for drag and drop
+document.addEventListener('DOMContentLoaded', function() {
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('csvFile');
+  const errorDiv = document.getElementById('error');
+
+  // Drag and drop event handlers
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+  }
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, highlight, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, unhighlight, false);
+  });
+
+  function highlight() {
+      dropzone.classList.add('dragover');
+  }
+
+  function unhighlight() {
+      dropzone.classList.remove('dragover');
+  }
+
+  dropzone.addEventListener('click', () => fileInput.click(), false);
+  dropzone.addEventListener('drop', handleDrop, false);
+});
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files.length) {
+        document.getElementById('csvFile').files = files;
+        loadFile({target: {files: files}});
+    }
+}
+
 function loadFile(event) {
   const file = event.target.files[0];
+  if (!file) return;
+
+  document.getElementById('buttonContainer').innerHTML = '';
+  document.getElementById('outputTable').innerHTML = '';
+  document.getElementById('error').textContent = '';
+
+  if (!file.name.endsWith('.csv')) {
+    document.getElementById('error').textContent = 'Please upload a CSV file.';
+    return;
+  }
+
   const reader = new FileReader();
 
   reader.onload = function() {
@@ -75,13 +131,20 @@ function displayData(reformattedData) {
   // Filter out columns where all rows have null or undefined values
   const visibleColumns = columns.filter(header => reformattedData.some(row => row[header] !== null && row[header] !== undefined));
 
+  // Create table header with scope attribute for better accessibility
+  const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
   visibleColumns.forEach(header => {
     const th = document.createElement('th');
+    th.setAttribute('scope', 'col');
     th.textContent = header;
     headerRow.appendChild(th);
   });
-  table.appendChild(headerRow);
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Create table body
+  const tbody = document.createElement('tbody');
 
   reformattedData.forEach(row => {
     const tr = document.createElement('tr');
@@ -91,8 +154,10 @@ function displayData(reformattedData) {
       td.textContent = value || '';
       tr.appendChild(td);
     });
-    table.appendChild(tr);
+    tbody.appendChild(tr);
   });
+
+  table.appendChild(tbody);
 }
 
 function downloadCSV(headers, data) {

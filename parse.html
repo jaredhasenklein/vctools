@@ -12,24 +12,10 @@
 </script>
   <title>VMS Parser</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <style>
-     #outputTable {
-            width: 100%;
-            overflow-x: auto;
-        }
-th, td {
-  padding: 15px;
-}
-        .footer {
-            margin-top: 40px;
-            padding: 20px 0;
-            text-align: center;
-            background-color: #f8f9fa;
-            border-top: 1px solid #ddd;
-        }
-    </style>
+<link rel="stylesheet" href="style/parse.css">
+
 </head>
-<body>
+<body class="container-fluid">
 <br>
 <a href="index.html" class="btn btn-primary">🏠 See more resources</a>
   <h1>VMS Parser</h1>
@@ -50,28 +36,24 @@ th, td {
 <br><br>
   </div>
 
-
-
-  <input type="file" id="csvFile" accept=".csv" onchange="loadFile(event)">
+  <input type="file" id="csvFile" accept=".csv" style="display:none;">
+  <div id="dropzone">
+    Click or Drag and Drop CSV File
+  </div>
+  <div id="error"></div>
   <div id="buttonContainer"></div>
   <div class="table-responsive">
-    <table class="table table-striped table-bordered" id="outputTable">
-    </table>
+
+        <table class="table table-striped table-bordered" id="outputTable">
+        </table>
   </div>
 
-        <div class="footer">
-            <p>Made by <a href="mailto:tools@jaredhk.com">Jared Hasen-Klein</a> with help from <a href="https://sourcegraph.com/cody/chat">Cody</a> and <a href="https://platform.openai.com/docs/models/gpt-3-5-turbo">ChatGPT</a>, <a href="https://www.anthropic.com/news/introducing-claude">Claude</a>, and <a href="https://github.com/jaredhasenklein/vctools">you, hopefully</a>.</p>
-        </div>
-    </div>
+  <div class="footer">
+    <p>Made by <a href="mailto:tools@jaredhk.com">Jared Hasen-Klein</a> with help from <a href="https://sourcegraph.com/cody/chat">Cody</a> and <a href="https://platform.openai.com/docs/models/gpt-3-5-turbo">ChatGPT</a>, <a href="https://www.anthropic.com/news/introducing-claude">Claude</a>, and <a href="https://github.com/jaredhasenklein/vctools">you, hopefully</a>.</p>
+  </div>
 
 <script src="scripts/parse.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-
-</body>
-</html>
-
-
-  </script>
 </body>
 </html>
