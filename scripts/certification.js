@@ -10,7 +10,7 @@
        },
        'Judge - FIRST Impact Award': {
            requiredRoles: ['Judge - FIRST Impact Award'],
-           requiredCourses: ['2025 FRC FIRST Impact Award Judge Training', 'FIRST Data Privacy and Protection Training 2024-2025']
+           requiredCourses: ['2025 FRC FIRST Impact Award Judge Training', '2025 FRC General Judge Training']
        },
        'Judge Advisor': {
            requiredRoles: ['Judge Advisor'],
@@ -40,9 +40,13 @@
            requiredRoles: ['Safety Manager'],
            requiredCourses: ['2025 FRC Safety Manager Training']
        },
-       'Pit Admin (all roles)': {
-           requiredRoles: ['Pit Administrator', 'Pit Administration Supervisor'],
+       'Pit Admin Supervisor': {
+           requiredRoles: ['Pit Administration Supervisor'],
            requiredCourses: ['FIRST Data Privacy and Protection Training 2024-2025']
+       },
+       'Accommodation Coordinator (optional role)': {
+           requiredRoles: ['Accommodation Coordinator'],
+           requiredCourses: ['24-25 Accommodation Coordinator Training', 'FIRST Data Privacy and Protection Training 2024-2025']
        }
    };
 
@@ -120,7 +124,7 @@
    }
 
    function findHeaderRow(rows) {
-       const expectedHeaders = ['Minor', 'First Name', 'Last Name', 'Email', 'Phone', 'Role', 'Course Name', 'Enrollment Date', 'Completion Date', 'Type'];
+       const expectedHeaders = ['Minor', 'Preferred First Name', 'Last Name', 'Email', 'Phone', 'Role', 'Course Name', 'Enrollment Date', 'Completion Date', 'Required?'];
 
        for (let i = 0; i < rows.length; i++) {
            const row = rows[i];

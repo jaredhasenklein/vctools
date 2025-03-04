@@ -286,10 +286,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const rows = csvData.trim().split('\n');
     const headerMap = {
       'Minor': 'minor',
-      'First Name': 'firstname',
+      'Preferred First Name': 'firstname',
       'Last Name': 'lastname',
       'Personal Pronouns': 'personalpronouns',
-      'Roles': 'roles',
+      'Roles Assigned': 'roles',
       'Languages Spoken': 'languagesspoken'
     };
 
