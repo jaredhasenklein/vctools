@@ -1,0 +1,140 @@
+.meal-report th.rotated-header {
+    height: 100px;
+    white-space: nowrap;
+    position: relative;
+    padding: 0;
+    text-align: center;
+    width: 40px;
+}
+
+.meal-report th.rotated-header > div {
+    transform: rotate(-90deg);
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 30px;
+    margin: 0 auto;
+}
+
+.meal-report td:first-child {
+    width: 15%;
+    word-wrap: break-word;
+    white-space: normal;
+    text-align: left;
+}
+
+.meal-report th:first-child {
+    width: 15%;
+    text-align: left;
+}
+}#mealTimesGrid {
+    margin-top: 15px;
+}
+
+.report-section {
+    margin-bottom: 30px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    background-color: #fff;
+}
+
+.report-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #0d6efd;
+}
+
+.time-checkbox-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.time-input-container {
+    flex-grow: 1;
+    margin-right: 5px;
+}
+
+input[type="time"] {
+    width: 100%;
+}
+
+.nomeal-container {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+}
+
+.nomeal-label {
+    margin-left: 3px;
+    font-size: 0.8rem;
+}
+
+/* Styling for the meal attendance tables */
+#mealTimesGrid th,
+.meal-report th {
+    background-color: #f2f2f2;
+    text-align: center;
+}
+
+#mealTimesGrid td,
+.meal-report td {
+    text-align: center;
+}
+
+.total-row {
+    font-weight: bold;
+    background-color: #e2e3e5;
+}
+
+.meal-report {
+    margin-bottom: 30px;
+}
+
+#yearsOfServiceReport td,
+#shirtSizeReport td,
+#consentReport td {
+    text-align: left;
+}
+
+/* Button styling */
+#updateMealTimes, .export-btn {
+    background-color: #0dcaf0;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
+.export-btn {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+}
+
+#exportAllData {
+    margin-bottom: 15px;
+}
+
+/* Responsive tables */
+@media screen and (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    input[type="time"] {
+        max-width: 100px;
+    }
+}
+
+/* Highlight data rows on hover */
+tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Alternating row colors for better readability */
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}

@@ -52,3 +52,30 @@ table {
             background-color: #f8f9fa;
             transform: scale(1.05);
         }
+    .tile {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      height: 100%;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .tile:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .footer {
+      margin-top: 40px;
+      padding: 20px 0;
+      text-align: center;
+      border-top: 1px solid #eee;
+    }
+    
+    @media (max-width: 767px) {
+      .tool-card {
+        width: 100%;
+      }
+    }
