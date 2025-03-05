@@ -1,317 +1,297 @@
-   // Role configurations with required roles and courses
-   const ROLE_CONFIGS = {
-       'Judge': {
-           requiredRoles: ['Judge'],
-           requiredCourses: ['2025 FRC General Judge Training']
-       },
-       'Judge - Dean\'s List Award': {
-           requiredRoles: ['Judge - Dean\'s List Award'],
-           requiredCourses: ['2025 FRC Dean\'s List Judge Training', 'FIRST Data Privacy and Protection Training 2024-2025']
-       },
-       'Judge - FIRST Impact Award': {
-           requiredRoles: ['Judge - FIRST Impact Award'],
-           requiredCourses: ['2025 FRC FIRST Impact Award Judge Training', '2025 FRC General Judge Training']
-       },
-       'Judge Advisor': {
-           requiredRoles: ['Judge Advisor'],
-           requiredCourses: ['2025 FRC Judge Advisor Training', 'FIRST Data Privacy and Protection Training 2024-2025']
-       },
-      'Head Referee': {
-           requiredRoles: ['Head Referee'],
-           requiredCourses: ['2025 FRC Referee Training', '2025 FRC Head Referee Training']
-       },
-       'Referee': {
-           requiredRoles: ['Referee'],
-           requiredCourses: ['2025 FRC Referee Training']
-       },
-       'Lead Robot Inspector': {
-           requiredRoles: ['Lead Robot Inspector'],
-           requiredCourses: ['2025 FRC Robot Inspector Test']
-       },
-       'Robot Inspector': {
-           requiredRoles: ['Robot Inspector'],
-           requiredCourses: ['2025 FRC Robot Inspector Test']
-       },
-       'Lead Queuer': {
-           requiredRoles: ['Lead Queuer'],
-           requiredCourses: ['2025 FRC Lead Queuer Training']
-       },
-       'Safety Manager': {
-           requiredRoles: ['Safety Manager'],
-           requiredCourses: ['2025 FRC Safety Manager Training']
-       },
-       'Pit Admin Supervisor': {
-           requiredRoles: ['Pit Administration Supervisor'],
-           requiredCourses: ['FIRST Data Privacy and Protection Training 2024-2025']
-       },
-       'Accommodation Coordinator (optional role)': {
-           requiredRoles: ['Accommodation Coordinator'],
-           requiredCourses: ['24-25 Accommodation Coordinator Training', 'FIRST Data Privacy and Protection Training 2024-2025']
-       }
-   };
+// Role configurations with required roles and courses
+const ROLE_CONFIGS = {
+    'Judge': {
+        requiredRoles: ['Judge'],
+        requiredCourses: ['2025 FRC General Judge Training']
+    },
+    'Judge - Dean\'s List Award': {
+        requiredRoles: ['Judge - Dean\'s List Award'],
+        requiredCourses: ['2025 FRC Dean\'s List Judge Training', 'FIRST Data Privacy and Protection Training 2024-2025']
+    },
+    'Judge - FIRST Impact Award': {
+        requiredRoles: ['Judge - FIRST Impact Award'],
+        requiredCourses: ['2025 FRC FIRST Impact Award Judge Training', '2025 FRC General Judge Training']
+    },
+    'Judge Advisor': {
+        requiredRoles: ['Judge Advisor'],
+        requiredCourses: ['2025 FRC Judge Advisor Training', 'FIRST Data Privacy and Protection Training 2024-2025']
+    },
+   'Head Referee': {
+        requiredRoles: ['Head Referee'],
+        requiredCourses: ['2025 FRC Referee Training', '2025 FRC Head Referee Training']
+    },
+    'Referee': {
+        requiredRoles: ['Referee'],
+        requiredCourses: ['2025 FRC Referee Training']
+    },
+    'Lead Robot Inspector': {
+        requiredRoles: ['Lead Robot Inspector'],
+        requiredCourses: ['2025 FRC Robot Inspector Test']
+    },
+    'Robot Inspector': {
+        requiredRoles: ['Robot Inspector'],
+        requiredCourses: ['2025 FRC Robot Inspector Test']
+    },
+    'Lead Queuer': {
+        requiredRoles: ['Lead Queuer'],
+        requiredCourses: ['2025 FRC Lead Queuer Training']
+    },
+    'Safety Manager': {
+        requiredRoles: ['Safety Manager'],
+        requiredCourses: ['2025 FRC Safety Manager Training']
+    },
+    'Pit Admin Supervisor': {
+        requiredRoles: ['Pit Administration Supervisor'],
+        requiredCourses: ['FIRST Data Privacy and Protection Training 2024-2025']
+    },
+    'Accommodation Coordinator (optional role)': {
+        requiredRoles: ['Accommodation Coordinator'],
+        requiredCourses: ['24-25 Accommodation Coordinator Training', 'FIRST Data Privacy and Protection Training 2024-2025']
+    }
+};
 
-   const dropzone = document.getElementById('dropzone');
-   const fileInput = document.getElementById('fileInput');
-   const errorDiv = document.getElementById('error');
-   const resultsContainer = document.getElementById('resultsContainer');
-   let personData = {}; // Global variable to store person data with emails
+// Initialize everything after DOM is fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const resultsContainer = document.getElementById('resultsContainer');
+    
+    if (!dropzone || !fileInput) {
+        console.error('Required elements not found: dropzone or fileInput');
+        return;
+    }
+    
+    // Initialize drag and drop functionality
+    setupDragAndDrop(dropzone, fileInput, handleFiles);
+});
 
-   // Drag and drop event handlers
-   ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-       dropzone.addEventListener(eventName, preventDefaults, false);
-   });
+let personData = {}; // Global variable to store person data with emails
 
-   function preventDefaults(e) {
-       e.preventDefault();
-       e.stopPropagation();
-   }
+function handleFiles(files) {
+    const resultsContainer = document.getElementById('resultsContainer');
+    
+    if (files.target) {
+        files = files.target.files;
+    }
 
-   ['dragenter', 'dragover'].forEach(eventName => {
-       dropzone.addEventListener(eventName, highlight, false);
-   });
+    if (files.length === 0) return;
 
-   ['dragleave', 'drop'].forEach(eventName => {
-       dropzone.addEventListener(eventName, unhighlight, false);
-   });
+    const file = files[0];
 
-   function highlight() {
-       dropzone.classList.add('dragover');
-   }
+    if (!validateCSVFile(file)) {
+        if (resultsContainer) {
+            resultsContainer.innerHTML = '';
+        }
+        return;
+    }
 
-   function unhighlight() {
-       dropzone.classList.remove('dragover');
-   }
+    Papa.parse(file, {
+        complete: function(results) {
+            processCSV(results.data);
+        },
+        error: function(error) {
+            showError('Error parsing file. Please make sure this is a Training and Certifications report from VMS. Details: ' + error);
+        },
+        skipEmptyLines: true,
+        header: false
+    });
+}
 
-   dropzone.addEventListener('click', () => fileInput.click(), false);
-   dropzone.addEventListener('drop', handleDrop, false);
-   fileInput.addEventListener('change', handleFiles, false);
+function findHeaderRow(rows) {
+    const expectedHeaders = ['Minor', 'Preferred First Name', 'Last Name', 'Email', 'Phone', 'Role', 'Course Name', 'Enrollment Date', 'Completion Date', 'Required?'];
 
-   function handleDrop(e) {
-       const dt = e.dataTransfer;
-       const files = dt.files;
-       handleFiles(files);
-   }
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        if (row.length < expectedHeaders.length) continue;
 
-   function handleFiles(files) {
-       if (files.target) {
-           files = files.target.files;
-       }
+        const headersMatch = expectedHeaders.every((header, index) =>
+            row[index] && row[index].trim().toLowerCase() === header.toLowerCase()
+        );
 
-       if (files.length === 0) return;
+        if (headersMatch) {
+            return i;
+        }
+    }
 
-       const file = files[0];
+    return -1;
+}
 
-       if (!file.name.endsWith('.csv')) {
-           showError('Please upload a CSV file.');
-           return;
-       }
+function processCSV(rows) {
+    clearError();
 
-       Papa.parse(file, {
-           complete: function(results) {
-               processCSV(results.data);
-           },
-           error: function(error) {
-               showError('Error parsing file. Please make sure this is a Training and Certifications report from VMS. Details: ' + error);
-           },
-           skipEmptyLines: true,
-           header: false
-       });
-   }
+    // Find header row
+    const headerRowIndex = findHeaderRow(rows);
 
-   function showError(message) {
-       errorDiv.textContent = message;
-       resultsContainer.innerHTML = '';
-   }
+    if (headerRowIndex === -1) {
+        showError('Invalid CSV format. Could not find matching header row.');
+        return;
+    }
 
-   function findHeaderRow(rows) {
-       const expectedHeaders = ['Minor', 'Preferred First Name', 'Last Name', 'Email', 'Phone', 'Role', 'Course Name', 'Enrollment Date', 'Completion Date', 'Required?'];
+    // Process data rows (starting from the row after headers)
+    const dataRows = rows.slice(headerRowIndex + 1);
+    const processedData = processData(dataRows);
+    renderResults(processedData);
+}
 
-       for (let i = 0; i < rows.length; i++) {
-           const row = rows[i];
-           if (row.length < expectedHeaders.length) continue;
+function processData(rows) {
+    personData = {}; // Reset global person data
 
-           const headersMatch = expectedHeaders.every((header, index) =>
-               row[index] && row[index].trim().toLowerCase() === header.toLowerCase()
-           );
+    // Collect person information
+    rows.forEach(row => {
+        // Skip rows with insufficient columns
+        if (row.length < 10) return;
 
-           if (headersMatch) {
-               return i;
-           }
-       }
+        // Extract and trim fields
+        const [minor, firstName, lastName, email, phone, role, courseName, enrollmentDate, completionDate] =
+            row.slice(0, 10).map(field => (field || '').trim());
 
-       return -1;
-   }
+        const fullName = `${firstName} ${lastName}`.trim();
 
-   function processCSV(rows) {
-       errorDiv.textContent = '';
+        if (!fullName) return; // Skip rows without a name
 
-       // Find header row
-       const headerRowIndex = findHeaderRow(rows);
+        if (!personData[fullName]) {
+            personData[fullName] = {
+                roles: [],
+                courses: {},
+                email: email
+            };
+        }
 
-       if (headerRowIndex === -1) {
-           showError('Invalid CSV format. Could not find matching header row.');
-           return;
-       }
+        // Track roles and courses
+        if (role) {
+            personData[fullName].roles.push(role);
+        }
 
-       // Process data rows (starting from the row after headers)
-       const dataRows = rows.slice(headerRowIndex + 1);
-       const processedData = processData(dataRows);
-       renderResults(processedData);
-   }
+        personData[fullName].courses[courseName] = {
+            enrollmentDate: enrollmentDate,
+            completionDate: completionDate
+        };
+    });
 
-   function processData(rows) {
-       personData = {}; // Reset global person data
+    // Determine role eligibility
+    const roleResults = {};
+    Object.keys(ROLE_CONFIGS).forEach(role => {
+        roleResults[role] = {
+            complete: [],
+            inProgress: [],
+            incomplete: []
+        };
+    });
 
-       // Collect person information
-       rows.forEach(row => {
-           // Skip rows with insufficient columns
-           if (row.length < 10) return;
+    // Process each person's data
+    Object.entries(personData).forEach(([name, personInfo]) => {
+        Object.entries(ROLE_CONFIGS).forEach(([roleName, config]) => {
+            // Check if person's role matches required roles
+            const hasRequiredRole = config.requiredRoles.some(requiredRole =>
+                personInfo.roles.includes(requiredRole)
+            );
 
-           // Extract and trim fields
-           const [minor, firstName, lastName, email, phone, role, courseName, enrollmentDate, completionDate] =
-               row.slice(0, 10).map(field => (field || '').trim());
+            if (!hasRequiredRole) return;
 
-           const fullName = `${firstName} ${lastName}`.trim();
+            // Check course status
+           const courseStatus = config.requiredCourses.map(course =>
+                personInfo.courses[course] ? determineCourseStatus(personInfo.courses[course]) : '❌'
+            );
 
-           if (!fullName) return; // Skip rows without a name
+            // Check if all required courses have a valid status
+            const allCoursesValid = courseStatus.every(status => status !== null);
+            const allCoursesCompleted = courseStatus.every(status => status === '✅');
 
-           if (!personData[fullName]) {
-               personData[fullName] = {
-                   roles: [],
-                   courses: {},
-                   email: email
-               };
-           }
+            // Categorize results
+            if (allCoursesValid) {
+                if (allCoursesCompleted) {
+                    roleResults[roleName].complete.push(name);
+                } else if (courseStatus.some(status => status === '⏰')) {
+                    roleResults[roleName].inProgress.push(name);
+                } else {
+                    roleResults[roleName].incomplete.push(name);
+                }
+            }
+        });
+    });
 
-           // Track roles and courses
-           if (role) {
-               personData[fullName].roles.push(role);
-           }
+    return roleResults;
+}
 
-           personData[fullName].courses[courseName] = {
-               enrollmentDate: enrollmentDate,
-               completionDate: completionDate
-           };
-       });
+function determineCourseStatus(course) {
+    if (course.enrollmentDate && course.completionDate) return '✅';
+    if (course.enrollmentDate) return '⏰';
+    return '❌';
+}
 
-       // Determine role eligibility
-       const roleResults = {};
-       Object.keys(ROLE_CONFIGS).forEach(role => {
-           roleResults[role] = {
-               complete: [],
-               inProgress: [],
-               incomplete: []
-           };
-       });
+function renderResults(processedData) {
+    const resultsContainer = document.getElementById('resultsContainer');
+    if (!resultsContainer) {
+        console.error('Results container not found');
+        return;
+    }
+    
+    // Clear previous results
+    resultsContainer.innerHTML = '';
 
-       // Process each person's data
-       Object.entries(personData).forEach(([name, personInfo]) => {
-           Object.entries(ROLE_CONFIGS).forEach(([roleName, config]) => {
-               // Check if person's role matches required roles
-               const hasRequiredRole = config.requiredRoles.some(requiredRole =>
-                   personInfo.roles.includes(requiredRole)
-               );
+    // Create a table with 4 columns
+    let tableContent = '<table><tr>';
+    const roles = Object.keys(ROLE_CONFIGS);
 
-               if (!hasRequiredRole) return;
+    for (let i = 0; i < roles.length; i++) {
+        const role = roles[i];
+        const roleData = processedData[role];
 
-               // Check course status
-              const courseStatus = config.requiredCourses.map(course =>
-                   personInfo.courses[course] ? determineCourseStatus(personInfo.courses[course]) : '❌'
-               );
+        // Collect emails for each category
+        const completeEmails = getEmailsForCategory(roleData.complete);
+        const inProgressEmails = getEmailsForCategory(roleData.inProgress);
+        const incompleteEmails = getEmailsForCategory(roleData.incomplete);
 
-               // Check if all required courses have a valid status
-               const allCoursesValid = courseStatus.every(status => status !== null);
-               const allCoursesCompleted = courseStatus.every(status => status === '✅');
+        // Create role section with conditional rendering
+        let roleHtml = `
+            <div class="role-section">
+                <h4>${role}</h4>
+                ${renderSection('Complete', roleData.complete, completeEmails)}
+                ${renderSection('In Progress', roleData.inProgress, inProgressEmails)}
+                ${renderSection('Incomplete', roleData.incomplete, incompleteEmails)}
+            </div>
+        `;
 
-               // Categorize results
-               if (allCoursesValid) {
-                   if (allCoursesCompleted) {
-                       roleResults[roleName].complete.push(name);
-                   } else if (courseStatus.some(status => status === '⏰')) {
-                       roleResults[roleName].inProgress.push(name);
-                   } else {
-                       roleResults[roleName].incomplete.push(name);
-                   }
-               }
-           });
-       });
+        // Add to table cell
+        tableContent += `<td>${roleHtml}</td>`;
 
-       return roleResults;
-   }
+        // Start new row every 4 columns
+        if ((i + 1) % 4 === 0 && i < roles.length - 1) {
+            tableContent += '</tr><tr>';
+        }
+    }
 
-   function determineCourseStatus(course) {
-       if (course.enrollmentDate && course.completionDate) return '✅';
-       if (course.enrollmentDate) return '⏰';
-       return '❌';
-   }
+    // Close last row
+    tableContent += '</tr></table>';
 
-  function renderResults(processedData) {
-       // Clear previous results
-       resultsContainer.innerHTML = '';
-
-       // Create a table with 4 columns
-       let tableContent = '<table><tr>';
-       const roles = Object.keys(ROLE_CONFIGS);
-
-       for (let i = 0; i < roles.length; i++) {
-           const role = roles[i];
-           const roleData = processedData[role];
-
-           // Collect emails for each category
-           const completeEmails = getEmailsForCategory(roleData.complete);
-           const inProgressEmails = getEmailsForCategory(roleData.inProgress);
-           const incompleteEmails = getEmailsForCategory(roleData.incomplete);
-
-           // Create role section with conditional rendering
-           let roleHtml = `
-               <div class="role-section">
-                   <h4>${role}</h4>
-                   ${renderSection('Complete', roleData.complete, completeEmails)}
-                   ${renderSection('In Progress', roleData.inProgress, inProgressEmails)}
-                   ${renderSection('Incomplete', roleData.incomplete, incompleteEmails)}
-               </div>
-           `;
-
-           // Add to table cell
-           tableContent += `<td>${roleHtml}</td>`;
-
-           // Start new row every 4 columns
-           if ((i + 1) % 4 === 0 && i < roles.length - 1) {
-               tableContent += '</tr><tr>';
-           }
-       }
-
-       // Close last row
-       tableContent += '</tr></table>';
-
-       resultsContainer.innerHTML = tableContent;
-   }
+    resultsContainer.innerHTML = tableContent;
+}
 
 function renderSection(sectionTitle, names, emails) {
-       // Only render if there are names
-       if (names.length === 0) return '';
+    // Only render if there are names
+    if (names.length === 0) return '';
 
-       // Create email button if emails exist
-       const emailButton = emails.length > 0
-           ? `<a href="mailto:?bcc=${emails.join(',')}" target="_blank" class="email-button">Email</a>`
-           : '';
+    // Create email button if emails exist
+    const emailButton = emails.length > 0
+        ? `<a href="mailto:?bcc=${emails.join(',')}" target="_blank" class="email-button">Email</a>`
+        : '';
 
-       const sectionEmoji = sectionTitle === 'Complete' ? '✅' : sectionTitle === 'In Progress' ? '⏰' : '❌';
+    const sectionEmoji = sectionTitle === 'Complete' ? '✅' : sectionTitle === 'In Progress' ? '⏰' : '❌';
 
-       return `
-           <div>
-               <h5>
-                   ${sectionTitle} ${sectionEmoji}
-                   ${emailButton}
-               </h5>
-               <p>${names.join(', ')}</p>
-           </div>
-       `;
-   }
+    return `
+        <div>
+            <h5>
+                ${sectionTitle} ${sectionEmoji}
+                ${emailButton}
+            </h5>
+            <p>${names.join(', ')}</p>
+        </div>
+    `;
+}
 
-   function getEmailsForCategory(names) {
-       return names.map(name => {
-           const person = Object.entries(personData).find(([fullName]) => fullName === name);
-           return person ? person[1].email : '';
-       }).filter(email => email);
-   }
+function getEmailsForCategory(names) {
+    return names.map(name => {
+        const person = Object.entries(personData).find(([fullName]) => fullName === name);
+        return person ? person[1].email : '';
+    }).filter(email => email);
+}

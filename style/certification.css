@@ -1,34 +1,5 @@
-    #dropzone {
-        border: 2px dashed #ccc;
-        border-radius: 20px;
-        width: 100%;
-        font-family: sans-serif;
-        margin: 10px auto;
-        padding: 10px;
-        text-align: center;
-    }
-    #dropzone.dragover {
-        border-color: #000;
-        background-color: #f0f0f0;
-    }
-    table {
-        width: 100%;
-        table-layout: fixed;
-        border-collapse: collapse;
-    }
-    table td {
-        width: 25%;
-        vertical-align: top;
-    }
-    th {
-        background-color: #f2f2f2;
-        text-align: left;
-        padding: 8px;
-    }
-    td {
-        padding: 8px;
-        vertical-align: top;
-    }
+      
+ 
     .role-section {
         margin-bottom: 20px;
     }
@@ -41,10 +12,7 @@
         align-items: center;
         margin-bottom: 10px;
     }
-    #error {
-        color: red;
-        margin-top: 20px;
-    }
+
     .email-button {
         background-color: #0dcaf0;
         color: white;

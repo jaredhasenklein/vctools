@@ -10,50 +10,6 @@
     max-width: 250px;
     white-space: normal;
 }
-.footer {
-    margin-top: 40px;
-    padding: 20px 0;
-    text-align: center;
-    background-color: #f8f9fa;
-    border-top: 1px solid #ddd;
-}
-
-/* Added styling from certification.css */
-#dropzone {
-    border: 2px dashed #ccc;
-    border-radius: 20px;
-    width: 100%;
-    font-family: sans-serif;
-    margin: 10px auto;
-    padding: 10px;
-    text-align: center;
-}
-#dropzone.dragover {
-    border-color: #000;
-    background-color: #f0f0f0;
-}
-table {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-}
-table td {
-    width: 25%;
-    vertical-align: top;
-}
-th {
-    background-color: #f2f2f2;
-    text-align: left;
-    padding: 8px;
-}
-td {
-    padding: 8px;
-    vertical-align: top;
-}
-#error {
-    color: red;
-    margin-top: 20px;
-}
 #buttonContainer {
     margin: 15px 0;
 }

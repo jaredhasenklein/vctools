@@ -6,57 +6,32 @@ const columns = [
 document.addEventListener('DOMContentLoaded', function() {
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('csvFile');
-  const errorDiv = document.getElementById('error');
-
-  // Drag and drop event handlers
-  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      dropzone.addEventListener(eventName, preventDefaults, false);
-  });
-
-  function preventDefaults(e) {
-      e.preventDefault();
-      e.stopPropagation();
+  
+  if (!dropzone || !fileInput) {
+    console.error('Required elements not found: dropzone or csvFile');
+    return;
   }
-
-  ['dragenter', 'dragover'].forEach(eventName => {
-      dropzone.addEventListener(eventName, highlight, false);
-  });
-
-  ['dragleave', 'drop'].forEach(eventName => {
-      dropzone.addEventListener(eventName, unhighlight, false);
-  });
-
-  function highlight() {
-      dropzone.classList.add('dragover');
-  }
-
-  function unhighlight() {
-      dropzone.classList.remove('dragover');
-  }
-
-  dropzone.addEventListener('click', () => fileInput.click(), false);
-  dropzone.addEventListener('drop', handleDrop, false);
+  
+  // Initialize drag and drop functionality
+  setupDragAndDrop(dropzone, fileInput, loadFile);
 });
 
-function handleDrop(e) {
-    const dt = e.dataTransfer;
-    const files = dt.files;
-    if (files.length) {
-        document.getElementById('csvFile').files = files;
-        loadFile({target: {files: files}});
-    }
-}
-
 function loadFile(event) {
-  const file = event.target.files[0];
+  let file;
+  
+  if (event.target && event.target.files) {
+    file = event.target.files[0];
+  } else if (event.length) {
+    file = event[0];
+  }
+  
   if (!file) return;
 
   document.getElementById('buttonContainer').innerHTML = '';
   document.getElementById('outputTable').innerHTML = '';
-  document.getElementById('error').textContent = '';
+  clearError();
 
-  if (!file.name.endsWith('.csv')) {
-    document.getElementById('error').textContent = 'Please upload a CSV file.';
+  if (!validateCSVFile(file)) {
     return;
   }
 

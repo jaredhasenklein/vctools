@@ -1,6 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('nameTagForm');
   const labelContainer = document.getElementById('labelContainer');
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+
+  // Set up drag and drop functionality using common code
+  if (dropzone && fileInput) {
+    setupDragAndDrop(dropzone, fileInput, handleFiles);
+  } else {
+    console.error('Required elements not found: dropzone or fileInput');
+  }
 
   // Update the select elements
   const labelTypeSelect = document.getElementById('labelType');
@@ -117,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     return fontSize;
-}
+  }
 
   // Define label styles
   const labelStyles = {
@@ -239,19 +248,27 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Populate select elements
-  labelTypeSelect.innerHTML = Object.entries(labelTypes)
-    .map(([value, type]) => `<option value="${value}">${type.name}</option>`)
-    .join('');
+  if (labelTypeSelect && labelStyleSelect) {
+    labelTypeSelect.innerHTML = Object.entries(labelTypes)
+      .map(([value, type]) => `<option value="${value}">${type.name}</option>`)
+      .join('');
 
-  labelStyleSelect.innerHTML = Object.entries(labelStyles)
-    .map(([value, style]) => `<option value="${value}">${style.name}</option>`)
-    .join('');
+    labelStyleSelect.innerHTML = Object.entries(labelStyles)
+      .map(([value, style]) => `<option value="${value}">${style.name}</option>`)
+      .join('');
+  }
 
+  // Initially hide the generate button
+  const generateButton = document.querySelector('#nameTagForm button[type="submit"]');
+  if (generateButton) {
+    generateButton.style.display = 'none';
+  }
+  
   if (form) {
     form.addEventListener('submit', (event) => {
       event.preventDefault();
 
-      const csvFile = document.getElementById('csvFile').files[0];
+      const csvFile = document.getElementById('fileInput').files[0];
       const labelType = document.getElementById('labelType').value;
       const labelStyle = document.getElementById('labelStyle').value;
       const topText = document.getElementById('topText').value;
@@ -261,6 +278,11 @@ document.addEventListener('DOMContentLoaded', function() {
       const bottomRightCustom = document.getElementById('bottomRightText').value;
 
       if (csvFile) {
+        // Show loading indicator
+        if (labelContainer) {
+          labelContainer.innerHTML = '<div class="loading">Processing file, please wait...</div>';
+        }
+        
         const reader = new FileReader();
         reader.onload = () => {
           const csvData = reader.result;
@@ -275,10 +297,60 @@ document.addEventListener('DOMContentLoaded', function() {
             bottomRightType,
             bottomRightCustom
           );
+          
+          // Clear loading indicator
+          if (labelContainer) {
+            labelContainer.innerHTML = '<div class="success">PDF generated successfully!</div>';
+          }
         };
         reader.readAsText(csvFile);
+      } else {
+        showError('Please select a CSV file.');
       }
     });
+  }
+
+  // Function to handle uploaded files
+  function handleFiles(files) {
+    const generateButton = document.querySelector('#nameTagForm button[type="submit"]');
+    
+    if (files.target) {
+      files = files.target.files;
+    }
+
+    if (files.length === 0) return;
+
+    const file = files[0];
+
+    if (!validateCSVFile(file)) {
+      if (labelContainer) {
+        labelContainer.innerHTML = '';
+      }
+      // Hide the generate button if file validation fails
+      if (generateButton) {
+        generateButton.style.display = 'none';
+      }
+      return;
+    }
+
+    // Just update the file input, don't process until form submit
+    fileInput.files = files instanceof FileList ? files : new DataTransfer().files;
+    clearError();
+    
+    // Show the generate button
+    if (generateButton) {
+      generateButton.style.display = 'block';
+    }
+    
+    // Show file uploaded message
+    if (dropzone) {
+      dropzone.innerHTML = `<div class="file-success">✓ File "${file.name}" uploaded successfully</div>`;
+    }
+    
+    // Add a message to guide the user
+    if (labelContainer) {
+      labelContainer.innerHTML = '<div class="instructions">Click "Generate Labels" to create your PDF.</div>';
+    }
   }
 
   function parseCSV(csvData) {

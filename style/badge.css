@@ -51,3 +51,61 @@ input, select {
 .label .bottomRightText {
   font-size: 10px;
 }
+/* Add these styles to your badge.css file */
+
+/* File upload success indicator */
+.file-success {
+    color: #28a745;
+    font-weight: bold;
+    padding: 10px;
+}
+
+/* Instructions message */
+.instructions {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+    text-align: center;
+    color: #495057;
+}
+
+/* Loading indicator */
+.loading {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+    text-align: center;
+    color: #856404;
+}
+
+/* Success message */
+.success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+    text-align: center;
+    color: #155724;
+}
+
+/* Style the generate button to be more prominent */
+#nameTagForm button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+    font-weight: bold;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 15px;
+}
+
+#nameTagForm button[type="submit"]:hover {
+    background-color: #218838;
+}
