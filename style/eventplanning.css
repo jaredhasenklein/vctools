@@ -27,7 +27,8 @@
     width: 15%;
     text-align: left;
 }
-}#mealTimesGrid {
+
+#mealTimesGrid {
     margin-top: 15px;
 }
 
@@ -137,4 +138,74 @@ tbody tr:hover {
 /* Alternating row colors for better readability */
 tbody tr:nth-child(even) {
     background-color: #f9f9f9;
+}
+
+/* Mobile meal grid styles */
+.mobile-meal-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.mobile-meal-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 12px;
+    background-color: #f9f9f9;
+}
+
+.mobile-meal-label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #0d6efd;
+}
+
+.mobile-meal-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mobile-time-input {
+    width: 100%;
+}
+
+.mobile-time-input input {
+    width: 100%;
+}
+
+.mobile-nomeal-container {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.mobile-nomeal-container label {
+    margin-left: 8px;
+}
+
+/* Responsive design for meals configuration */
+@media screen and (max-width: 1450px) {
+    .time-checkbox-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .time-input-container {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    
+    .nomeal-container {
+        margin-left: 0;
+    }
+    
+    #updateButtonContainer {
+        text-align: center;
+        margin-top: 15px;
+    }
+    
+    #updateMealTimes {
+        width: 100%;
+    }
 }

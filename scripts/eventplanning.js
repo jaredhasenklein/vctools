@@ -44,6 +44,14 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Set up email incomplete volunteers button
   document.getElementById('emailIncomplete').addEventListener('click', emailIncompleteVolunteers);
+  
+  // Make sure the grid is responsive on page load
+  window.addEventListener('load', function() {
+    // If a CSV has already been processed, regenerate the grid
+    if (eventDays && eventDays.length > 0) {
+      generateMealTimesGrid();
+    }
+  });
 });
 
 // Load and process the CSV file
@@ -343,6 +351,83 @@ function generateMealTimesGrid() {
   const container = document.getElementById('mealTimesGrid');
   container.innerHTML = '';
   
+  // Check if the display is mobile (less than 768px)
+  const isMobile = window.innerWidth < 768;
+  
+  if (isMobile) {
+    // Mobile layout - vertical stacking
+    generateMobileLayout(container);
+  } else {
+    // Desktop layout - standard table
+    generateDesktopLayout(container);
+  }
+}
+
+// Generate vertical layout for mobile
+function generateMobileLayout(container) {
+  const mealList = document.createElement('div');
+  mealList.className = 'mobile-meal-grid';
+  
+  eventDays.forEach(day => {
+    ['breakfast', 'lunch', 'dinner'].forEach(meal => {
+      const mealItem = document.createElement('div');
+      mealItem.className = 'mobile-meal-item';
+      
+      // Label for the meal (e.g., "Wed Breakfast")
+      const mealLabel = document.createElement('div');
+      mealLabel.className = 'mobile-meal-label';
+      mealLabel.textContent = `${day} ${meal.charAt(0).toUpperCase() + meal.slice(1)}`;
+      mealItem.appendChild(mealLabel);
+      
+      // Container for controls
+      const controlsContainer = document.createElement('div');
+      controlsContainer.className = 'mobile-meal-controls';
+      
+      // Time input
+      const timeInputContainer = document.createElement('div');
+      timeInputContainer.className = 'mobile-time-input';
+      
+      const timeInput = document.createElement('input');
+      timeInput.type = 'time';
+      timeInput.value = mealTimes[day][meal];
+      timeInput.id = `${day}-${meal}-time`;
+      timeInput.className = 'form-control';
+      timeInput.disabled = disabledMeals[day][meal];
+      
+      timeInputContainer.appendChild(timeInput);
+      controlsContainer.appendChild(timeInputContainer);
+      
+      // No meal checkbox
+      const noMealContainer = document.createElement('div');
+      noMealContainer.className = 'mobile-nomeal-container';
+      
+      const noMealCheckbox = document.createElement('input');
+      noMealCheckbox.type = 'checkbox';
+      noMealCheckbox.id = `${day}-${meal}-disabled`;
+      noMealCheckbox.checked = disabledMeals[day][meal];
+      noMealCheckbox.addEventListener('change', function() {
+        timeInput.disabled = this.checked;
+      });
+      
+      const noMealLabel = document.createElement('label');
+      noMealLabel.setAttribute('for', `${day}-${meal}-disabled`);
+      noMealLabel.className = 'nomeal-label';
+      noMealLabel.textContent = 'No meal';
+      
+      noMealContainer.appendChild(noMealCheckbox);
+      noMealContainer.appendChild(noMealLabel);
+      controlsContainer.appendChild(noMealContainer);
+      
+      mealItem.appendChild(controlsContainer);
+      mealList.appendChild(mealItem);
+    });
+  });
+  
+  container.appendChild(mealList);
+}
+
+// Generate desktop table layout
+function generateDesktopLayout(container) {
   const table = document.createElement('table');
   table.className = 'table table-bordered';
   
@@ -425,6 +510,15 @@ function generateMealTimesGrid() {
   table.appendChild(tbody);
   container.appendChild(table);
 }
+
+// Add a window resize listener to redraw the grid when resizing
+window.addEventListener('resize', function() {
+  // Add debounce to prevent excessive redraws
+  clearTimeout(window.resizeTimer);
+  window.resizeTimer = setTimeout(function() {
+    generateMealTimesGrid();
+  }, 250);
+});
 
 // Update meal times from the grid inputs
 function updateMealTimes() {
