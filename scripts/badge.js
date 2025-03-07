@@ -130,108 +130,131 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Define label styles
   const labelStyles = {
-    'styleA': {
-      name: 'Style A - Full Name',
-      render: (labels, doc, x, y, width, height, config) => {
-        const margin = 0.1;
-        const availableWidth = width - (2 * margin);
+// For Style A
+'styleA': {
+  name: 'Style A - Full Name',
+  render: (labels, doc, x, y, width, height, config) => {
+    const margin = 0.1;
+    const availableWidth = width - (2 * margin);
+    
+    // Draw boundary for debugging (uncomment to see)
+    // doc.setDrawColor(255, 0, 0);
+    // doc.rect(x, y, width, height);
 
-        // Calculate max font size for roles
-        const allRoles = labels.map(label => formatRole(label.roles));
-        const roleFontSize = calculateMaxFontSize(allRoles, doc, availableWidth, 12);
+    // Calculate max font size for roles
+    const allRoles = labels.map(label => formatRole(label.roles));
+    const roleFontSize = calculateMaxFontSize(allRoles, doc, availableWidth, 12);
 
-        // Get current label to render (first in array)
-        const label = labels[0];
+    // Get current label to render (first in array)
+    const label = labels[0];
 
-        // Top text
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'normal');
-        applyFirstItalics(config.topText, doc, x + width / 2, y + 0.15, 'center');
+    // Calculate proportional spacing to use full height
+    const totalHeight = height;
+    const topSection = totalHeight * 0.4;    // Top 40% for name
+    const middleSection = totalHeight * 0.15; // 15% for last name
+    const bottomSection = totalHeight * 0.2;  // 20% for roles section
+    const bottomTextSection = totalHeight * 0.15; // 15% for bottom text
+    const padding = totalHeight * 0.05;      // 5% padding between sections
 
-        // First name
-        doc.setFontSize(18);
-        doc.text((label.firstname || '').toUpperCase(), x + width / 2, y + 0.48, { align: 'center' });
+    // Top text
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    applyFirstItalics(config.topText, doc, x + width / 2, y + padding + 0.15, 'center');
 
-        // Last name
-        doc.setFontSize(12);
-        doc.text((label.lastname || '').toUpperCase(), x + width / 2, y + 0.83, { align: 'center' });
+    // First name
+    doc.setFontSize(18);
+    doc.text((label.firstname || '').toUpperCase(), x + width / 2, y + padding + topSection * 0.6, { align: 'center' });
 
-        // Role
-        const role = formatRole(label.roles);
-        doc.setFillColor(0, 0, 0);
-        doc.rect(x, y + 1.05, width, 0.2, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(roleFontSize);
-        applyFirstItalics(role, doc, x + width / 2, y + 1.2, 'center');
-        doc.setTextColor(0, 0, 0);
+    // Last name
+    doc.setFontSize(12);
+    doc.text((label.lastname || '').toUpperCase(), x + width / 2, y + padding + topSection + middleSection * 0.5, { align: 'center' });
 
-        // Bottom text
-        doc.setFontSize(12);
-        applyFirstItalics(config.bottomLeftText, doc, x + 0.1, y + height - 0.38, 'left');
-        applyFirstItalics(config.bottomRightText, doc, x + width - 0.1, y + height - 0.38, 'right');
-      }
-    },
-    'styleB': {
-      name: 'Style B - First Name with Initial',
-      render: (labels, doc, x, y, width, height, config) => {
-        const margin = 0.1;
-        const availableWidth = width - (2 * margin);
-        const topMargin = 0.15;
-        const bottomMargin = 0.15;
-        const availableHeight = height - topMargin - bottomMargin;
+    // Role - BLACK BAR
+    const roleY = y + padding + topSection + middleSection + padding;
+    doc.setFillColor(0, 0, 0);
+    doc.rect(x, roleY, width, bottomSection, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(roleFontSize);
+    applyFirstItalics(formatRole(label.roles), doc, x + width / 2, roleY + bottomSection * 0.6, 'center');
+    doc.setTextColor(0, 0, 0);
 
-        // Calculate max font sizes across all labels
-        const allNames = labels.map(label =>
-          formatNameWithInitial(
-            (label.firstname || '').toUpperCase(),
-            (label.lastname || '').toUpperCase()
-          )
-        );
-        const allRoles = labels.map(label => formatRole(label.roles));
+    // Bottom text
+    const bottomY = y + height - padding - bottomTextSection * 0.5;
+    doc.setFontSize(12);
+    applyFirstItalics(config.bottomLeftText, doc, x + 0.1, bottomY, 'left');
+    applyFirstItalics(config.bottomRightText, doc, x + width - 0.1, bottomY, 'right');
+  }
+},
 
-        const nameFontSize = calculateMaxFontSize(allNames, doc, availableWidth, 36, true);
-        const roleFontSize = calculateMaxFontSize(allRoles, doc, availableWidth, 24);
+// For Style B
+'styleB': {
+  name: 'Style B - First Name with Initial',
+  render: (labels, doc, x, y, width, height, config) => {
+    const margin = 0.1;
+    const availableWidth = width - (2 * margin);
+    
+    // Draw boundary for debugging (uncomment to see)
+    // doc.setDrawColor(255, 0, 0);
+    // doc.rect(x, y, width, height);
 
-        // Get current label (first in array)
-        const label = labels[0];
+    // Calculate max font sizes across all labels
+    const allNames = labels.map(label =>
+      formatNameWithInitial(
+        (label.firstname || '').toUpperCase(),
+        (label.lastname || '').toUpperCase()
+      )
+    );
+    const allRoles = labels.map(label => formatRole(label.roles));
 
-        // Name
-        const displayName = formatNameWithInitial(
-          (label.firstname || '').toUpperCase(),
-          (label.lastname || '').toUpperCase()
-        );
+    const nameFontSize = calculateMaxFontSize(allNames, doc, availableWidth, 36, true);
+    const roleFontSize = calculateMaxFontSize(allRoles, doc, availableWidth, 24);
 
-        // Calculate heights
-        const nameHeight = nameFontSize / 72;
-        const roleHeight = roleFontSize / 72;
+    // Get current label (first in array)
+    const label = labels[0];
 
-        // Calculate vertical positions
-        const contentHeight = nameHeight + roleHeight + 0.2;
-        const startContentY = y + topMargin + (availableHeight - contentHeight) / 2;
+    // Name
+    const displayName = formatNameWithInitial(
+      (label.firstname || '').toUpperCase(),
+      (label.lastname || '').toUpperCase()
+    );
 
-        // Top text
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'normal');
-        applyFirstItalics(config.topText, doc, x + width / 2, y + topMargin, 'center');
+    // Calculate heights
+    const nameHeight = nameFontSize / 72;
+    const roleHeight = roleFontSize / 72;
+    
+    // Use proportional spacing - divide height into proportional sections
+    const topPadding = height * 0.1;    // 10% padding at top
+    const bottomPadding = height * 0.1; // 10% padding at bottom
+    const contentHeight = height - topPadding - bottomPadding;
+    const nameSectionHeight = contentHeight * 0.55; // 55% for name
+    const roleSectionHeight = contentHeight * 0.35; // 35% for role
+    const spacing = contentHeight * 0.1;           // 10% spacing between
 
-        // Render name
-        doc.setFontSize(nameFontSize);
-        doc.setFont(undefined, 'bold');
-        doc.text(displayName, x + width / 2, startContentY + nameHeight, { align: 'center' });
+    // Top text
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    applyFirstItalics(config.topText, doc, x + width / 2, y + topPadding * 0.5, 'center');
 
-        // Render role
-        const role = formatRole(label.roles);
-        doc.setFontSize(roleFontSize);
-        doc.setFont(undefined, 'normal');
-        applyFirstItalics(role, doc, x + width / 2, startContentY + nameHeight + 0.2 + roleHeight, 'center');
+    // Render name
+    doc.setFontSize(nameFontSize);
+    doc.setFont(undefined, 'bold');
+    doc.text(displayName, x + width / 2, y + topPadding + nameSectionHeight * 0.7, { align: 'center' });
 
-        // Bottom text
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        applyFirstItalics(config.bottomLeftText, doc, x + 0.1, y + height - 0.15, 'left');
-        applyFirstItalics(config.bottomRightText, doc, x + width - 0.1, y + height - 0.15, 'right');
-      }
-    }
+    // Render role
+    const role = formatRole(label.roles);
+    doc.setFontSize(roleFontSize);
+    doc.setFont(undefined, 'normal');
+    applyFirstItalics(role, doc, x + width / 2, 
+                     y + topPadding + nameSectionHeight + spacing + roleSectionHeight * 0.5, 
+                     'center');
+
+    // Bottom text
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    applyFirstItalics(config.bottomLeftText, doc, x + 0.1, y + height - bottomPadding * 0.5, 'left');
+    applyFirstItalics(config.bottomRightText, doc, x + width - 0.1, y + height - bottomPadding * 0.5, 'right');
+  }
+}
   };
 
   // Event listeners to show/hide custom text inputs
@@ -415,67 +438,77 @@ document.addEventListener('DOMContentLoaded', function() {
     return row;
   }
 
-  function createPDF(labels, labelType, labelStyle, topText, bottomLeftType, bottomLeftCustom, bottomRightType, bottomRightCustom) {
-      const { jsPDF } = window.jspdf;
-      const typeConfig = labelTypes[labelType];
-      const styleConfig = labelStyles[labelStyle];
+function createPDF(labels, labelType, labelStyle, topText, bottomLeftType, bottomLeftCustom, bottomRightType, bottomRightCustom) {
+  const { jsPDF } = window.jspdf;
+  const typeConfig = labelTypes[labelType];
+  const styleConfig = labelStyles[labelStyle];
 
-      const doc = new jsPDF(
-        typeConfig.pageOrientation,
-        'in',
-        [typeConfig.pageWidth, typeConfig.pageHeight]
-      );
+  const doc = new jsPDF(
+    typeConfig.pageOrientation,
+    'in',
+    [typeConfig.pageWidth, typeConfig.pageHeight]
+  );
 
-      function getBottomText(type, customText, label) {
-        if (type === 'custom') {
-          return customText;
-        } else if (type === 'pronouns') {
-          return label.personalpronouns === 'Not Specified' ? '' : label.personalpronouns;
-        } else if (type === 'languages') {
-          return label.languagesspoken === 'Not Specified' ? '' : label.languagesspoken;
-        }
-        return '';
-      }
-
-      let currentX = typeConfig.startX;
-      let currentY = typeConfig.startY;
-      let labelCount = 0;
-
-      for (const currentLabel of labels) {
-        if (labelCount > 0 && labelCount % typeConfig.labelsPerPage === 0) {
-          doc.addPage();
-          currentX = typeConfig.startX;
-          currentY = typeConfig.startY;
-        }
-
-        styleConfig.render(
-          [currentLabel, ...labels], // Current label first, but include all labels for font calculations
-          doc,
-          currentX,
-          currentY,
-          typeConfig.labelWidth,
-          typeConfig.labelHeight,
-          {
-            topText,
-            bottomLeftText: getBottomText(bottomLeftType, bottomLeftCustom, currentLabel),
-            bottomRightText: getBottomText(bottomRightType, bottomRightCustom, currentLabel)
-          }
-        );
-
-        labelCount++;
-        if (typeConfig.labelsPerRow > 1) {
-          currentX += typeConfig.labelWidth + (typeConfig.columnGap || 0);
-          if (labelCount % typeConfig.labelsPerRow === 0) {
-            currentX = typeConfig.startX;
-            currentY += typeConfig.labelHeight + (typeConfig.rowGap || 0);
-          }
-        }
-      }
-
-      if (doc.getNumberOfPages() > 1 && labelCount % typeConfig.labelsPerPage === 0) {
-        doc.deletePage(doc.getNumberOfPages());
-      }
-
-      doc.save('labels.pdf');
+  function getBottomText(type, customText, label) {
+    if (type === 'custom') {
+      return customText;
+    } else if (type === 'pronouns') {
+      return label.personalpronouns === 'Not Specified' ? '' : label.personalpronouns;
+    } else if (type === 'languages') {
+      return label.languagesspoken === 'Not Specified' ? '' : label.languagesspoken;
+    }
+    return '';
   }
+
+  // Calculate how many complete rows we'll have
+  const totalRows = Math.ceil(labels.length / typeConfig.labelsPerRow);
+  let pageCount = 0;
+  let labelIndex = 0;
+
+  // Process each label
+  while (labelIndex < labels.length) {
+    // Start a new page if needed
+    if (labelIndex > 0 && labelIndex % typeConfig.labelsPerPage === 0) {
+      doc.addPage();
+      pageCount++;
+    }
+
+    // Calculate current row and column
+    const positionOnPage = labelIndex % typeConfig.labelsPerPage;
+    const row = Math.floor(positionOnPage / typeConfig.labelsPerRow);
+    const col = positionOnPage % typeConfig.labelsPerRow;
+
+    // Calculate exact position
+    // IMPORTANT: Force exact grid positioning based on row and column
+    const currentX = typeConfig.startX + col * (typeConfig.labelWidth + typeConfig.columnGap);
+    const currentY = typeConfig.startY + row * typeConfig.labelHeight;
+
+    // Debug - draw box around label area (uncomment to see boundaries)
+    // doc.setDrawColor(255, 0, 0);
+    // doc.rect(currentX, currentY, typeConfig.labelWidth, typeConfig.labelHeight);
+
+    styleConfig.render(
+      [labels[labelIndex], ...labels], // Current label first, but include all labels for font calculations
+      doc,
+      currentX,
+      currentY,
+      typeConfig.labelWidth,
+      typeConfig.labelHeight,
+      {
+        topText,
+        bottomLeftText: getBottomText(bottomLeftType, bottomLeftCustom, labels[labelIndex]),
+        bottomRightText: getBottomText(bottomRightType, bottomRightCustom, labels[labelIndex])
+      }
+    );
+
+    labelIndex++;
+  }
+
+  // Remove the last page if it's empty
+  if (doc.getNumberOfPages() > 1 && labelIndex % typeConfig.labelsPerPage === 0) {
+    doc.deletePage(doc.getNumberOfPages());
+  }
+
+  doc.save('labels.pdf');
+}
 });
