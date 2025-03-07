@@ -109,3 +109,74 @@ input, select {
 #nameTagForm button[type="submit"]:hover {
     background-color: #218838;
 }
+
+/* NEW STYLES FOR ROLE ABBREVIATION FEATURE */
+
+.role-abbreviation-container {
+    margin-top: 30px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.role-abbreviation-container h3 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.abbreviation-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.sort-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#insertCommonAbbreviations {
+    margin-bottom: 10px;
+}
+
+.role-abbreviation-table {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+}
+
+.role-abbreviation-table th {
+    background-color: #f2f2f2;
+    padding: 8px;
+    text-align: left;
+}
+
+.role-abbreviation-table td {
+    padding: 8px;
+    border-top: 1px solid #ddd;
+    vertical-align: middle;
+}
+
+.role-abbreviation-input {
+    width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .abbreviation-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .sort-control {
+        width: 100%;
+    }
+    
+    .role-abbreviation-table th:nth-child(2),
+    .role-abbreviation-table td:nth-child(2) {
+        display: none;
+    }
+}
