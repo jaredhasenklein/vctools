@@ -79,3 +79,16 @@ table {
         width: 100%;
       }
     }
+    .privacy-section {
+      margin-bottom: 2rem;
+    }
+    .privacy-section h3 {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    .highlight-box {
+      background-color: #f8f9fa;
+      border-left: 4px solid #007bff;
+      padding: 1rem;
+      margin: 1.5rem 0;
+    }
