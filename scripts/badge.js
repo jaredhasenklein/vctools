@@ -551,7 +551,9 @@ document.addEventListener('DOMContentLoaded', function() {
       'ADVISOR': 'ADVSR.',
       'ATTENDANT': '', // Remove entirely
       'SUPERVISOR': 'SUP.',
-      'ASSISTANT': 'ASST.'
+      'ASSISTANT': 'ASST.',
+      ' - DEAN\'S LIST AWARD': '', // Remove entirely
+      ' - FIRST IMPACT AWARD': '' // Remove entirely
     };
     
     // Get all inputs
@@ -678,8 +680,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const row = Math.floor(positionOnPage / typeConfig.labelsPerRow);
       const col = positionOnPage % typeConfig.labelsPerRow;
 
-      // Calculate exact position
-      // IMPORTANT: Force exact grid positioning based on row and column
+      // Calculate and force exact grid positioning based on row and column
       const currentX = typeConfig.startX + col * (typeConfig.labelWidth + typeConfig.columnGap);
       const currentY = typeConfig.startY + row * typeConfig.labelHeight;
 
