@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "VC Tools Integration",
+  "version": "1.0",
+  "description": "Adds a button to export VMS reports directly to VC Tools",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": ["*://*.firstinspires.org/*", "*://volunteer.systems/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://my.firstinspires.org/VMS/Reports/ReportViewer.aspx*"],
+      "js": ["vms-content.js"],
+      "css": ["styles.css"]
+    },
+    {
+      "matches": ["*://my.firstinspires.org/VMS/Events/EventDetails.aspx*"],
+      "js": ["reports-content.js"],
+      "css": ["styles.css"]
+    },
+    {
+      "matches": ["*://volunteer.systems/*"],
+      "js": ["vctools-content.js"]
+    }
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
