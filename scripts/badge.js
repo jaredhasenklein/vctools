@@ -137,10 +137,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const margin = 0.1;
     const availableWidth = width - (2 * margin);
     
-    // Draw boundary for debugging (uncomment to see)
-    // doc.setDrawColor(255, 0, 0);
-    // doc.rect(x, y, width, height);
-
     // Calculate max font size for roles
     const allRoles = labels.map(label => formatRole(label.roles));
     const roleFontSize = calculateMaxFontSize(allRoles, doc, availableWidth, 12);
@@ -150,10 +146,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Calculate proportional spacing to use full height
     const totalHeight = height;
-    const topSection = totalHeight * 0.4;    // Top 40% for name
+    const topSection = totalHeight * 0.4;     // Top 40% for name
     const middleSection = totalHeight * 0.15; // 15% for last name
-    const bottomSection = totalHeight * 0.2;  // 20% for roles section
-    const bottomTextSection = totalHeight * 0.15; // 15% for bottom text
+    
+    // REDUCED HEIGHT FOR BLACK BAR - from 0.2 (20%) to 0.15 (15%)
+    const bottomSection = totalHeight * 0.15;  // 15% for roles section
+    
+    const bottomTextSection = totalHeight * 0.2; // Increased to 20% for bottom text
     const padding = totalHeight * 0.05;      // 5% padding between sections
 
     // Top text
@@ -169,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
     doc.setFontSize(12);
     doc.text((label.lastname || '').toUpperCase(), x + width / 2, y + padding + topSection + middleSection * 0.5, { align: 'center' });
 
-    // Role - BLACK BAR
+    // Role - BLACK BAR with REDUCED HEIGHT
     const roleY = y + padding + topSection + middleSection + padding;
     doc.setFillColor(0, 0, 0);
     doc.rect(x, roleY, width, bottomSection, 'F');
@@ -178,8 +177,9 @@ document.addEventListener('DOMContentLoaded', function() {
     applyFirstItalics(formatRole(label.roles), doc, x + width / 2, roleY + bottomSection * 0.6, 'center');
     doc.setTextColor(0, 0, 0);
 
-    // Bottom text
-    const bottomY = y + height - padding - bottomTextSection * 0.5;
+    // Bottom text - MOVED UP to avoid overlap
+    // Added more space between the black bar and bottom text
+    const bottomY = y + height - padding - bottomTextSection * 0.3;
     doc.setFontSize(12);
     applyFirstItalics(config.bottomLeftText, doc, x + 0.1, bottomY, 'left');
     applyFirstItalics(config.bottomRightText, doc, x + width - 0.1, bottomY, 'right');
