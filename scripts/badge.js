@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
       labelHeight: 2,
       startX: 0,
       startY: 0.05,
+      columnGap: 0,
+      rowGap: 0,
       labelsPerRow: 1,
       labelsPerPage: 1
     }
@@ -86,7 +88,14 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function applyFirstItalics(text, doc, x, y, alignment) {
-    if (!text) return;
+    // Ensure text is not null, undefined, or empty
+    if (!text || text.trim() === '') return;
+
+    // Check if coordinates are valid numbers
+    if (typeof x !== 'number' || typeof y !== 'number' || isNaN(x) || isNaN(y)) {
+      console.error('Invalid coordinates:', x, y);
+      return; // Skip rendering rather than crashing
+    }
 
     // Split text where "FIRST" appears
     const parts = text.split(/(FIRST)/g);
@@ -97,7 +106,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Calculate total width for alignment
     let totalWidth = 0;
     parts.forEach(part => {
-      totalWidth += doc.getTextWidth(part);
+      if (part) {
+        totalWidth += doc.getTextWidth(part);
+      }
     });
 
     // Adjust starting position based on alignment
@@ -109,12 +120,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Draw each part
     parts.forEach(part => {
+      if (!part) return; // Skip empty parts
+
       if (part === 'FIRST') {
         doc.setFont(undefined, 'italic');
         doc.text(part, currentX, y);
         currentX += doc.getTextWidth(part);
         doc.setFont(undefined, originalFont.style); // Reset font style after FIRST
-      } else if (part) {
+      } else {
         doc.setFont(undefined, 'normal'); // Ensure non-FIRST parts are normal
         doc.text(part, currentX, y);
         currentX += doc.getTextWidth(part);
