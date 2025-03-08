@@ -160,82 +160,100 @@ document.addEventListener('DOMContentLoaded', function() {
   // Define label styles
   const labelStyles = {
     // For Style A
-  'styleA': {
-    name: 'Style A - Full Name',
-    render: (labels, doc, x, y, width, height, config) => {
-      const margin = 0.1;
-      const availableWidth = width - (2 * margin);
+    'styleA': {
+      name: 'Style A - Full Name',
+      render: (labels, doc, x, y, width, height, config) => {
+        const margin = 0.1;
+        const availableWidth = width - (2 * margin);
 
-      // Get current label to render (first in array)
-      const label = labels[0];
+        // Get current label to render (first in array)
+        const label = labels[0];
 
-      // Apply role abbreviation if available
-      const role = formatRole(label.roles);
-      const abbreviatedRole = applyRoleAbbreviation(role);
-
-      // Calculate max font sizes for all elements across all labels
-      const allFirstNames = labels.map(label => (label.firstname || '').toUpperCase());
-      const allLastNames = labels.map(label => (label.lastname || '').toUpperCase());
-      const allRoles = labels.map(label => {
+        // Apply role abbreviation if available
         const role = formatRole(label.roles);
-        return applyRoleAbbreviation(role);
-      });
+        const abbreviatedRole = applyRoleAbbreviation(role);
 
-      // Set higher initial font sizes for dynamic calculation but limit maximum sizes
-      // to prevent overlap issues
-      const firstNameFontSize = Math.min(calculateMaxFontSize(allFirstNames, doc, availableWidth * 0.9, 36, true), 30);
-      const lastNameFontSize = Math.min(calculateMaxFontSize(allLastNames, doc, availableWidth * 0.9, 24), 20);
-      const roleFontSize = Math.min(calculateMaxFontSize(allRoles, doc, availableWidth * 0.9, 18), 16);
+        // Calculate max font sizes for all elements across all labels
+        const allFirstNames = labels.map(label => (label.firstname || '').toUpperCase());
+        const allLastNames = labels.map(label => (label.lastname || '').toUpperCase());
+        const allRoles = labels.map(label => {
+          const role = formatRole(label.roles);
+          return applyRoleAbbreviation(role);
+        });
 
-      // Keep the original proportional spacing structure
-      const totalHeight = height;
-      const topSection = totalHeight * 0.4;     // Top 40% for name
-      const middleSection = totalHeight * 0.15; // 15% for last name
-      const bottomSection = totalHeight * 0.15; // 15% for roles section
-      const bottomTextSection = totalHeight * 0.2; // 20% for bottom text
-      const padding = totalHeight * 0.05;      // 5% padding between sections
+        // Set higher initial font sizes for dynamic calculation but limit maximum sizes
+        // to prevent overlap issues
+        const firstNameFontSize = Math.min(calculateMaxFontSize(allFirstNames, doc, availableWidth * 0.9, 36, true), 30);
+        const lastNameFontSize = Math.min(calculateMaxFontSize(allLastNames, doc, availableWidth * 0.9, 24), 20);
+        const roleFontSize = Math.min(calculateMaxFontSize(allRoles, doc, availableWidth * 0.9, 18), 16);
 
-      // Modify vertical positions to increase separation
-      const topTextY = y + padding * 1.5;  // Move top text up slightly
-      const firstNameY = y + padding + topSection * 0.6;  // Keep first name position
-      const lastNameY = y + padding + topSection + middleSection * 0.5;  // Keep last name position
-      const roleY = y + padding + topSection + middleSection + padding * 1.5;  // Add extra padding before role bar
+        // Keep the original proportional spacing structure
+        const totalHeight = height;
+        const topSection = totalHeight * 0.4;     // Top 40% for name
+        const middleSection = totalHeight * 0.15; // 15% for last name
+        const bottomSection = totalHeight * 0.15; // 15% for roles section
+        const bottomTextSection = totalHeight * 0.2; // 20% for bottom text
+        const padding = totalHeight * 0.05;      // 5% padding between sections
 
-      // Adjust bottom text position to add more padding above it
-      // Move it up slightly from the very bottom to create more space
-      const bottomY = y + height - (padding * 1.8);  // Increased from padding * 0.3 to padding * 1.8
+        // Reorganize spacing to make gaps consistent
+        // Calculate available space in top section (for top text, first name, last name)
+        const topAreaHeight = topSection + middleSection;
 
-      // Top text - slightly higher
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'normal');
-      applyFirstItalics(config.topText, doc, x + width / 2, topTextY, 'center');
+        // Calculate equal spacing between elements
+        // We need 2 equal spaces (between top text & first name, and between first name & last name)
+        const equalSpacing = topAreaHeight / 4; // Divide by 4 to get 2 spaces + 2 text areas
 
-      // First name - with dynamic size
-      doc.setFontSize(firstNameFontSize);
-      doc.setFont(undefined, 'bold');
-      doc.text((label.firstname || '').toUpperCase(), x + width / 2, firstNameY, { align: 'center' });
+        // Position elements with equal spacing
+        const topTextY = y + padding + equalSpacing * 0.5;  // Center text in first area
+        const firstNameY = y + padding + equalSpacing * 2;  // Center text in second area (after first equal space)
+        const lastNameY = y + padding + equalSpacing * 3.5;  // Center text in third area (after second equal space)
+        const roleY = y + padding + topSection + middleSection + padding * 1.5;  // Add extra padding before role bar
 
-      // Last name - with dynamic size
-      doc.setFontSize(lastNameFontSize);
-      doc.setFont(undefined, 'normal');
-      doc.text((label.lastname || '').toUpperCase(), x + width / 2, lastNameY, { align: 'center' });
+        // Adjust bottom text position to add more padding above it
+        // Move it up slightly from the very bottom to create more space
+        const bottomY = y + height - (padding * 1.8);  // Increased from padding * 0.3 to padding * 1.8
 
-      // Role - BLACK BAR
-      doc.setFillColor(0, 0, 0);
-      doc.rect(x, roleY, width, bottomSection, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(roleFontSize);
-      doc.setFont(undefined, 'normal');
-      applyFirstItalics(abbreviatedRole, doc, x + width / 2, roleY + bottomSection * 0.6, 'center');
-      doc.setTextColor(0, 0, 0);
+        // Top text - slightly higher
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        applyFirstItalics(config.topText, doc, x + width / 2, topTextY, 'center');
 
-      // Bottom text - with more padding above
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'normal');
-      applyFirstItalics(config.bottomLeftText, doc, x + 0.1, bottomY, 'left');
-      applyFirstItalics(config.bottomRightText, doc, x + width - 0.1, bottomY, 'right');
-    }
-  },
+        // First name - with dynamic size
+        doc.setFontSize(firstNameFontSize);
+        doc.setFont(undefined, 'bold');
+        doc.text((label.firstname || '').toUpperCase(), x + width / 2, firstNameY, { align: 'center' });
+
+        // Last name - with dynamic size
+        doc.setFontSize(lastNameFontSize);
+        doc.setFont(undefined, 'normal');
+        doc.text((label.lastname || '').toUpperCase(), x + width / 2, lastNameY, { align: 'center' });
+
+        // Role - BLACK BAR
+        doc.setFillColor(0, 0, 0);
+        doc.rect(x, roleY, width, bottomSection, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(roleFontSize);
+        doc.setFont(undefined, 'normal');
+
+        // Calculate the center of the black bar for perfect vertical centering of the text
+        // The 0.6 coefficient was causing the issue. We need to calculate the exact middle.
+        const roleCenterY = roleY + (bottomSection / 2);
+
+        // jsPDF positions text from the baseline, not the center
+        // So we need to add an offset based on the font size (roughly half the font size)
+        const fontOffset = roleFontSize / 72 * 0.35; // Convert font size to inches and adjust
+        const roleTextY = roleCenterY + fontOffset;
+
+        applyFirstItalics(abbreviatedRole, doc, x + width / 2, roleTextY, 'center');
+        doc.setTextColor(0, 0, 0);
+
+        // Bottom text - with more padding above
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        applyFirstItalics(config.bottomLeftText, doc, x + 0.1, bottomY, 'left');
+        applyFirstItalics(config.bottomRightText, doc, x + width - 0.1, bottomY, 'right');
+      }
+    },
 
     // For Style B
     'styleB': {
