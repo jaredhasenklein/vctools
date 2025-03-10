@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const labelContainer = document.getElementById('labelContainer');
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
-  
+
   // Role abbreviations storage
   let roleAbbreviations = {};
   let parsedLabels = [];
@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
       labelHeight: 2,
       startX: 0,
       startY: 0.05,
+      columnGap: 0,
+      rowGap: 0,
       labelsPerRow: 1,
       labelsPerPage: 1
     }
@@ -76,17 +78,24 @@ document.addEventListener('DOMContentLoaded', function() {
   // New function to apply abbreviations to roles
   function applyRoleAbbreviation(role) {
     if (!role || Object.keys(roleAbbreviations).length === 0) return role;
-    
+
     // Check if the exact role has an abbreviation
     if (roleAbbreviations[role] && roleAbbreviations[role].trim() !== '') {
       return roleAbbreviations[role];
     }
-    
+
     return role;
   }
 
   function applyFirstItalics(text, doc, x, y, alignment) {
-    if (!text) return;
+    // Ensure text is not null, undefined, or empty
+    if (!text || text.trim() === '') return;
+
+    // Check if coordinates are valid numbers
+    if (typeof x !== 'number' || typeof y !== 'number' || isNaN(x) || isNaN(y)) {
+      console.error('Invalid coordinates:', x, y);
+      return; // Skip rendering rather than crashing
+    }
 
     // Split text where "FIRST" appears
     const parts = text.split(/(FIRST)/g);
@@ -97,7 +106,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Calculate total width for alignment
     let totalWidth = 0;
     parts.forEach(part => {
-      totalWidth += doc.getTextWidth(part);
+      if (part) {
+        totalWidth += doc.getTextWidth(part);
+      }
     });
 
     // Adjust starting position based on alignment
@@ -109,12 +120,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Draw each part
     parts.forEach(part => {
+      if (!part) return; // Skip empty parts
+
       if (part === 'FIRST') {
         doc.setFont(undefined, 'italic');
         doc.text(part, currentX, y);
         currentX += doc.getTextWidth(part);
         doc.setFont(undefined, originalFont.style); // Reset font style after FIRST
-      } else if (part) {
+      } else {
         doc.setFont(undefined, 'normal'); // Ensure non-FIRST parts are normal
         doc.text(part, currentX, y);
         currentX += doc.getTextWidth(part);
@@ -152,58 +165,91 @@ document.addEventListener('DOMContentLoaded', function() {
       render: (labels, doc, x, y, width, height, config) => {
         const margin = 0.1;
         const availableWidth = width - (2 * margin);
-        
+
         // Get current label to render (first in array)
         const label = labels[0];
-        
+
         // Apply role abbreviation if available
         const role = formatRole(label.roles);
         const abbreviatedRole = applyRoleAbbreviation(role);
-        
-        // Calculate max font size for roles
+
+        // Calculate max font sizes for all elements across all labels
+        const allFirstNames = labels.map(label => (label.firstname || '').toUpperCase());
+        const allLastNames = labels.map(label => (label.lastname || '').toUpperCase());
         const allRoles = labels.map(label => {
           const role = formatRole(label.roles);
           return applyRoleAbbreviation(role);
         });
-        const roleFontSize = calculateMaxFontSize(allRoles, doc, availableWidth, 12);
 
-        // Calculate proportional spacing to use full height
+        // Set higher initial font sizes for dynamic calculation but limit maximum sizes
+        // to prevent overlap issues
+        const firstNameFontSize = Math.min(calculateMaxFontSize(allFirstNames, doc, availableWidth * 0.9, 36, true), 30);
+        const lastNameFontSize = Math.min(calculateMaxFontSize(allLastNames, doc, availableWidth * 0.9, 24), 20);
+        const roleFontSize = Math.min(calculateMaxFontSize(allRoles, doc, availableWidth * 0.9, 18), 16);
+
+        // Keep the original proportional spacing structure
         const totalHeight = height;
         const topSection = totalHeight * 0.4;     // Top 40% for name
         const middleSection = totalHeight * 0.15; // 15% for last name
-        
-        // REDUCED HEIGHT FOR BLACK BAR - from 0.2 (20%) to 0.15 (15%)
-        const bottomSection = totalHeight * 0.15;  // 15% for roles section
-        
-        const bottomTextSection = totalHeight * 0.2; // Increased to 20% for bottom text
+        const bottomSection = totalHeight * 0.15; // 15% for roles section
+        const bottomTextSection = totalHeight * 0.2; // 20% for bottom text
         const padding = totalHeight * 0.05;      // 5% padding between sections
 
-        // Top text
+        // Reorganize spacing to make gaps consistent
+        // Calculate available space in top section (for top text, first name, last name)
+        const topAreaHeight = topSection + middleSection;
+
+        // Calculate equal spacing between elements
+        // We need 2 equal spaces (between top text & first name, and between first name & last name)
+        const equalSpacing = topAreaHeight / 4; // Divide by 4 to get 2 spaces + 2 text areas
+
+        // Position elements with equal spacing
+        const topTextY = y + padding + equalSpacing * 0.5;  // Center text in first area
+        const firstNameY = y + padding + equalSpacing * 2;  // Center text in second area (after first equal space)
+        const lastNameY = y + padding + equalSpacing * 3.5;  // Center text in third area (after second equal space)
+        const roleY = y + padding + topSection + middleSection + padding * 1.5;  // Add extra padding before role bar
+
+        // Adjust bottom text position to add more padding above it
+        // Move it up slightly from the very bottom to create more space
+        const bottomY = y + height - (padding * 1.8);  // Increased from padding * 0.3 to padding * 1.8
+
+        // Top text - slightly higher
         doc.setFontSize(12);
         doc.setFont(undefined, 'normal');
-        applyFirstItalics(config.topText, doc, x + width / 2, y + padding + 0.15, 'center');
+        applyFirstItalics(config.topText, doc, x + width / 2, topTextY, 'center');
 
-        // First name
-        doc.setFontSize(18);
-        doc.text((label.firstname || '').toUpperCase(), x + width / 2, y + padding + topSection * 0.6, { align: 'center' });
+        // First name - with dynamic size
+        doc.setFontSize(firstNameFontSize);
+        doc.setFont(undefined, 'bold');
+        doc.text((label.firstname || '').toUpperCase(), x + width / 2, firstNameY, { align: 'center' });
 
-        // Last name
-        doc.setFontSize(12);
-        doc.text((label.lastname || '').toUpperCase(), x + width / 2, y + padding + topSection + middleSection * 0.5, { align: 'center' });
+        // Last name - with dynamic size
+        doc.setFontSize(lastNameFontSize);
+        doc.setFont(undefined, 'normal');
+        doc.text((label.lastname || '').toUpperCase(), x + width / 2, lastNameY, { align: 'center' });
 
-        // Role - BLACK BAR with REDUCED HEIGHT
-        const roleY = y + padding + topSection + middleSection + padding;
+        // Role - BLACK BAR
         doc.setFillColor(0, 0, 0);
         doc.rect(x, roleY, width, bottomSection, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(roleFontSize);
-        applyFirstItalics(abbreviatedRole, doc, x + width / 2, roleY + bottomSection * 0.6, 'center');
+        doc.setFont(undefined, 'normal');
+
+        // Calculate the center of the black bar for perfect vertical centering of the text
+        // The 0.6 coefficient was causing the issue. We need to calculate the exact middle.
+        const roleCenterY = roleY + (bottomSection / 2);
+
+        // jsPDF positions text from the baseline, not the center
+        // So we need to add an offset based on the font size (roughly half the font size)
+        const fontOffset = roleFontSize / 72 * 0.35; // Convert font size to inches and adjust
+        const roleTextY = roleCenterY + fontOffset;
+
+        applyFirstItalics(abbreviatedRole, doc, x + width / 2, roleTextY, 'center');
         doc.setTextColor(0, 0, 0);
 
-        // Bottom text - MOVED UP to avoid overlap
-        // Added more space between the black bar and bottom text
-        const bottomY = y + height - padding - bottomTextSection * 0.3;
+        // Bottom text - with more padding above
         doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
         applyFirstItalics(config.bottomLeftText, doc, x + 0.1, bottomY, 'left');
         applyFirstItalics(config.bottomRightText, doc, x + width - 0.1, bottomY, 'right');
       }
@@ -215,10 +261,10 @@ document.addEventListener('DOMContentLoaded', function() {
       render: (labels, doc, x, y, width, height, config) => {
         const margin = 0.1;
         const availableWidth = width - (2 * margin);
-        
+
         // Get current label (first in array)
         const label = labels[0];
-        
+
         // Apply role abbreviation if available
         const role = formatRole(label.roles);
         const abbreviatedRole = applyRoleAbbreviation(role);
@@ -247,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Calculate heights
         const nameHeight = nameFontSize / 72;
         const roleHeight = roleFontSize / 72;
-        
+
         // Use proportional spacing - divide height into proportional sections
         const topPadding = height * 0.1;    // 10% padding at top
         const bottomPadding = height * 0.1; // 10% padding at bottom
@@ -269,8 +315,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Render role
         doc.setFontSize(roleFontSize);
         doc.setFont(undefined, 'normal');
-        applyFirstItalics(abbreviatedRole, doc, x + width / 2, 
-                         y + topPadding + nameSectionHeight + spacing + roleSectionHeight * 0.5, 
+        applyFirstItalics(abbreviatedRole, doc, x + width / 2,
+                         y + topPadding + nameSectionHeight + spacing + roleSectionHeight * 0.5,
                          'center');
 
         // Bottom text
@@ -311,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (generateButton) {
     generateButton.style.display = 'none';
   }
-  
+
   if (form) {
     form.addEventListener('submit', (event) => {
       event.preventDefault();
@@ -335,17 +381,17 @@ document.addEventListener('DOMContentLoaded', function() {
             abbreviationContainer = abbreviationContainer.cloneNode(true);
           }
         }
-        
+
         // Show loading indicator
         if (labelContainer) {
           labelContainer.innerHTML = '<div class="loading">Processing file, please wait...</div>';
-          
+
           // Re-add the abbreviation container if it existed
           if (abbreviationContainer) {
             labelContainer.appendChild(abbreviationContainer);
           }
         }
-        
+
         const reader = new FileReader();
         reader.onload = () => {
           const csvData = reader.result;
@@ -360,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
             bottomRightType,
             bottomRightCustom
           );
-          
+
           // Update success message but preserve abbreviation table
           if (labelContainer) {
             // Remove loading message
@@ -368,12 +414,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (loadingMessage) {
               loadingMessage.remove();
             }
-            
+
             // Add success message at the beginning of the container
             const successMessage = document.createElement('div');
             successMessage.className = 'success';
             successMessage.textContent = 'PDF generated successfully!';
-            
+
             // Insert at the beginning
             labelContainer.insertBefore(successMessage, labelContainer.firstChild);
           }
@@ -388,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Function to handle uploaded files
   function handleFiles(files) {
     const generateButton = document.querySelector('#nameTagForm button[type="submit"]');
-    
+
     if (files.target) {
       files = files.target.files;
     }
@@ -411,24 +457,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update the file input
     fileInput.files = files instanceof FileList ? files : new DataTransfer().files;
     clearError();
-    
+
     // Process the file to get roles and display the abbreviation interface
     const reader = new FileReader();
     reader.onload = () => {
       const csvData = reader.result;
       parsedLabels = parseCSV(csvData);
-      
+
       // Clear any existing abbreviations
       roleAbbreviations = {};
-      
+
       // Show file uploaded message
       if (dropzone) {
         dropzone.innerHTML = `<div class="file-success">✓ File "${file.name}" uploaded successfully</div>`;
       }
-      
+
       // Display the role abbreviation interface
       displayRoleAbbreviationInterface(parsedLabels);
-      
+
       // Show the generate button
       if (generateButton) {
         generateButton.style.display = 'block';
@@ -440,23 +486,23 @@ document.addEventListener('DOMContentLoaded', function() {
   // Function to create and display the role abbreviation interface
   function displayRoleAbbreviationInterface(labels) {
     if (!labelContainer) return;
-    
+
     // Extract unique roles
     const uniqueRoles = new Set();
     labels.forEach(label => {
       const formattedRole = formatRole(label.roles);
       if (formattedRole) uniqueRoles.add(formattedRole);
     });
-    
+
     // Convert to array for sorting
     let rolesArray = Array.from(uniqueRoles);
-    
+
     // Create and append the interface
     const interfaceHTML = `
       <div class="role-abbreviation-container">
         <h3>Role Abbreviations</h3>
         <p>Long role names may appear in a small font on badges. Use this table to create abbreviations for roles.</p>
-        
+
         <div class="abbreviation-controls">
           <button id="insertCommonAbbreviations" class="btn btn-secondary">Insert Common Abbreviations</button>
           <div class="sort-control">
@@ -467,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </select>
           </div>
         </div>
-        
+
         <div class="table-responsive">
           <table class="table role-abbreviation-table">
             <thead>
@@ -484,30 +530,30 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       </div>
     `;
-    
+
     // Append the interface after showing success message
     labelContainer.innerHTML = `
       ${interfaceHTML}
     `;
-    
+
     // Sort and populate the table
     updateRoleAbbreviationTable(rolesArray, 'length');
-    
+
     // Add event listeners
     document.getElementById('insertCommonAbbreviations').addEventListener('click', applyCommonAbbreviations);
     document.getElementById('roleSortOrder').addEventListener('change', function() {
       updateRoleAbbreviationTable(rolesArray, this.value);
     });
   }
-  
+
   // Update the role abbreviation table with sorted roles
   function updateRoleAbbreviationTable(roles, sortOrder) {
     const tableBody = document.getElementById('roleAbbreviationTableBody');
     if (!tableBody) return;
-    
+
     // Sort the roles based on selected order
     let sortedRoles;
-    
+
     if (sortOrder === 'length') {
       // Sort by length (longest first)
       sortedRoles = [...roles].sort((a, b) => b.length - a.length);
@@ -515,10 +561,10 @@ document.addEventListener('DOMContentLoaded', function() {
       // Sort alphabetically
       sortedRoles = [...roles].sort();
     }
-    
+
     // Clear the table
     tableBody.innerHTML = '';
-    
+
     // Add rows for each role
     sortedRoles.forEach((role, index) => {
       const row = document.createElement('tr');
@@ -526,15 +572,15 @@ document.addEventListener('DOMContentLoaded', function() {
         <td>${role}</td>
         <td>${role.length}</td>
         <td>
-          <input type="text" class="form-control role-abbreviation-input" 
-                 data-original-role="${role}" 
-                 value="${roleAbbreviations[role] || ''}" 
+          <input type="text" class="form-control role-abbreviation-input"
+                 data-original-role="${role}"
+                 value="${roleAbbreviations[role] || ''}"
                  placeholder="Enter abbreviation">
         </td>
       `;
       tableBody.appendChild(row);
     });
-    
+
     // Add event listeners to the abbreviation inputs
     document.querySelectorAll('.role-abbreviation-input').forEach(input => {
       input.addEventListener('input', function() {
@@ -543,7 +589,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
-  
+
   // Function to apply common abbreviations
   function applyCommonAbbreviations() {
     const replacements = {
@@ -555,21 +601,21 @@ document.addEventListener('DOMContentLoaded', function() {
       ' - DEAN\'S LIST AWARD': '', // Remove entirely
       ' - FIRST IMPACT AWARD': '' // Remove entirely
     };
-    
+
     // Get all inputs
     const inputs = document.querySelectorAll('.role-abbreviation-input');
-    
+
     inputs.forEach(input => {
       const originalRole = input.getAttribute('data-original-role');
       let abbreviated = originalRole;
-      
+
       // Apply the replacements
       Object.entries(replacements).forEach(([word, replacement]) => {
         // Use case-insensitive regex to find the word
         const regex = new RegExp(`\\b${word}\\b`, 'gi');
         abbreviated = abbreviated.replace(regex, replacement);
       });
-      
+
       // Only update if there was a change
       if (abbreviated !== originalRole) {
         input.value = abbreviated;
