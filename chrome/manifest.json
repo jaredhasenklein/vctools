@@ -3,7 +3,7 @@
   "name": "VC Tools Integration",
   "version": "1.0",
   "description": "Adds a button to export VMS reports directly to VC Tools",
-  "permissions": ["storage", "tabs"],
+  "permissions": ["storage"],
   "host_permissions": ["*://*.firstinspires.org/*", "*://volunteer.systems/*"],
   "background": {
     "service_worker": "background.js"
