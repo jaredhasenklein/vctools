@@ -1,5 +1,4 @@
 // Common functions for file handling and CSV processing
-// Don't initialize errorDiv here, as it might not be available when the script loads
 
 // Drag and drop event handlers
 function setupDragAndDrop(dropzone, fileInput, handleFiles) {
