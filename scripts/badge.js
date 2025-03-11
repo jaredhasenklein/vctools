@@ -4,18 +4,18 @@ document.addEventListener('DOMContentLoaded', function() {
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
 
-  // Role abbreviations storage
+  // Storage for role abbreviations and parsed labels
   let roleAbbreviations = {};
   let parsedLabels = [];
 
-  // Set up drag and drop functionality using common code
+  // Set up drag and drop functionality
   if (dropzone && fileInput) {
     setupDragAndDrop(dropzone, fileInput, handleFiles);
   } else {
     console.error('Required elements not found: dropzone or fileInput');
   }
 
-  // Update the select elements
+  // Get UI elements
   const labelTypeSelect = document.getElementById('labelType');
   const labelStyleSelect = document.getElementById('labelStyle');
 
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return filteredRoles.map(r => r.toUpperCase()).join(' / ');
   }
 
-  // New function to apply abbreviations to roles
+  // Apply abbreviations to roles
   function applyRoleAbbreviation(role) {
     if (!role || Object.keys(roleAbbreviations).length === 0) return role;
 
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if coordinates are valid numbers
     if (typeof x !== 'number' || typeof y !== 'number' || isNaN(x) || isNaN(y)) {
       console.error('Invalid coordinates:', x, y);
-      return; // Skip rendering rather than crashing
+      return;
     }
 
     // Split text where "FIRST" appears
@@ -120,15 +120,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Draw each part
     parts.forEach(part => {
-      if (!part) return; // Skip empty parts
+      if (!part) return;
 
       if (part === 'FIRST') {
         doc.setFont(undefined, 'italic');
         doc.text(part, currentX, y);
         currentX += doc.getTextWidth(part);
-        doc.setFont(undefined, originalFont.style); // Reset font style after FIRST
+        doc.setFont(undefined, originalFont.style);
       } else {
-        doc.setFont(undefined, 'normal'); // Ensure non-FIRST parts are normal
+        doc.setFont(undefined, 'normal');
         doc.text(part, currentX, y);
         currentX += doc.getTextWidth(part);
       }
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Define label styles
   const labelStyles = {
-    // For Style A
+    // Style A - Full Name
     'styleA': {
       name: 'Style A - Full Name',
       render: (labels, doc, x, y, width, height, config) => {
@@ -181,13 +181,12 @@ document.addEventListener('DOMContentLoaded', function() {
           return applyRoleAbbreviation(role);
         });
 
-        // Set higher initial font sizes for dynamic calculation but limit maximum sizes
-        // to prevent overlap issues
+        // Calculate font sizes with maximum limits
         const firstNameFontSize = Math.min(calculateMaxFontSize(allFirstNames, doc, availableWidth * 0.9, 36, true), 30);
         const lastNameFontSize = Math.min(calculateMaxFontSize(allLastNames, doc, availableWidth * 0.9, 24), 20);
         const roleFontSize = Math.min(calculateMaxFontSize(allRoles, doc, availableWidth * 0.9, 18), 16);
 
-        // Keep the original proportional spacing structure
+        // Determine sections for layout
         const totalHeight = height;
         const topSection = totalHeight * 0.4;     // Top 40% for name
         const middleSection = totalHeight * 0.15; // 15% for last name
@@ -195,59 +194,48 @@ document.addEventListener('DOMContentLoaded', function() {
         const bottomTextSection = totalHeight * 0.2; // 20% for bottom text
         const padding = totalHeight * 0.05;      // 5% padding between sections
 
-        // Reorganize spacing to make gaps consistent
-        // Calculate available space in top section (for top text, first name, last name)
+        // Calculate spacing for consistent layout
         const topAreaHeight = topSection + middleSection;
-
-        // Calculate equal spacing between elements
-        // We need 2 equal spaces (between top text & first name, and between first name & last name)
         const equalSpacing = topAreaHeight / 4; // Divide by 4 to get 2 spaces + 2 text areas
 
-        // Position elements with equal spacing
-        const topTextY = y + padding + equalSpacing * 0.5;  // Center text in first area
-        const firstNameY = y + padding + equalSpacing * 2;  // Center text in second area (after first equal space)
-        const lastNameY = y + padding + equalSpacing * 3.5;  // Center text in third area (after second equal space)
-        const roleY = y + padding + topSection + middleSection + padding * 1.5;  // Add extra padding before role bar
+        // Position elements
+        const topTextY = y + padding + equalSpacing * 0.5;
+        const firstNameY = y + padding + equalSpacing * 2;
+        const lastNameY = y + padding + equalSpacing * 3.5;
+        const roleY = y + padding + topSection + middleSection + padding * 1.5;
+        const bottomY = y + height - (padding * 1.8);
 
-        // Adjust bottom text position to add more padding above it
-        // Move it up slightly from the very bottom to create more space
-        const bottomY = y + height - (padding * 1.8);  // Increased from padding * 0.3 to padding * 1.8
-
-        // Top text - slightly higher
+        // Top text
         doc.setFontSize(12);
         doc.setFont(undefined, 'normal');
         applyFirstItalics(config.topText, doc, x + width / 2, topTextY, 'center');
 
-        // First name - with dynamic size
+        // First name
         doc.setFontSize(firstNameFontSize);
         doc.setFont(undefined, 'bold');
         doc.text((label.firstname || '').toUpperCase(), x + width / 2, firstNameY, { align: 'center' });
 
-        // Last name - with dynamic size
+        // Last name
         doc.setFontSize(lastNameFontSize);
         doc.setFont(undefined, 'normal');
         doc.text((label.lastname || '').toUpperCase(), x + width / 2, lastNameY, { align: 'center' });
 
-        // Role - BLACK BAR
+        // Role bar
         doc.setFillColor(0, 0, 0);
         doc.rect(x, roleY, width, bottomSection, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(roleFontSize);
         doc.setFont(undefined, 'normal');
 
-        // Calculate the center of the black bar for perfect vertical centering of the text
-        // The 0.6 coefficient was causing the issue. We need to calculate the exact middle.
+        // Calculate exact center for role text
         const roleCenterY = roleY + (bottomSection / 2);
-
-        // jsPDF positions text from the baseline, not the center
-        // So we need to add an offset based on the font size (roughly half the font size)
         const fontOffset = roleFontSize / 72 * 0.35; // Convert font size to inches and adjust
         const roleTextY = roleCenterY + fontOffset;
 
         applyFirstItalics(abbreviatedRole, doc, x + width / 2, roleTextY, 'center');
         doc.setTextColor(0, 0, 0);
 
-        // Bottom text - with more padding above
+        // Bottom text
         doc.setFontSize(12);
         doc.setFont(undefined, 'normal');
         applyFirstItalics(config.bottomLeftText, doc, x + 0.1, bottomY, 'left');
@@ -255,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     },
 
-    // For Style B
+    // Style B - First Name with Initial
     'styleB': {
       name: 'Style B - First Name with Initial',
       render: (labels, doc, x, y, width, height, config) => {
@@ -294,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const nameHeight = nameFontSize / 72;
         const roleHeight = roleFontSize / 72;
 
-        // Use proportional spacing - divide height into proportional sections
+        // Use proportional spacing
         const topPadding = height * 0.1;    // 10% padding at top
         const bottomPadding = height * 0.1; // 10% padding at bottom
         const contentHeight = height - topPadding - bottomPadding;
@@ -431,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Function to handle uploaded files
+  // Handle uploaded files
   function handleFiles(files) {
     const generateButton = document.querySelector('#nameTagForm button[type="submit"]');
 
@@ -483,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
     reader.readAsText(file);
   }
 
-  // Function to create and display the role abbreviation interface
+  // Create and display the role abbreviation interface
   function displayRoleAbbreviationInterface(labels) {
     if (!labelContainer) return;
 
@@ -590,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Function to apply common abbreviations
+  // Apply common abbreviations
   function applyCommonAbbreviations() {
     const replacements = {
       'MANAGER': 'MGR.',
@@ -726,7 +714,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const row = Math.floor(positionOnPage / typeConfig.labelsPerRow);
       const col = positionOnPage % typeConfig.labelsPerRow;
 
-      // Calculate and force exact grid positioning based on row and column
+      // Calculate exact grid positioning based on row and column
       const currentX = typeConfig.startX + col * (typeConfig.labelWidth + typeConfig.columnGap);
       const currentY = typeConfig.startY + row * typeConfig.labelHeight;
 
