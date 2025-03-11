@@ -2,29 +2,29 @@ const columns = [
   'Minor', 'Legal First Name', 'Preferred First Name', 'Last Name', 'Personal Pronouns', 'Email', 'Phone', 'Languages Spoken', 'FIRST Youth Protection Policy', 'Certified', 'Shirt Size', 'Self-Reported Accommodations', 'Team Affiliation', 'Employer', 'Alumni', 'Emergency Contact', 'Emergency Contact Phone Number', 'Affiliations', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
 ];
 
-// Added elements and event listeners for drag and drop
+// Eent listeners for drag and drop
 document.addEventListener('DOMContentLoaded', function() {
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('csvFile');
-  
+
   if (!dropzone || !fileInput) {
     console.error('Required elements not found: dropzone or csvFile');
     return;
   }
-  
+
   // Initialize drag and drop functionality
   setupDragAndDrop(dropzone, fileInput, loadFile);
 });
 
 function loadFile(event) {
   let file;
-  
+
   if (event.target && event.target.files) {
     file = event.target.files[0];
   } else if (event.length) {
     file = event[0];
   }
-  
+
   if (!file) return;
 
   document.getElementById('buttonContainer').innerHTML = '';
@@ -106,7 +106,7 @@ function displayData(reformattedData) {
   // Filter out columns where all rows have null or undefined values
   const visibleColumns = columns.filter(header => reformattedData.some(row => row[header] !== null && row[header] !== undefined));
 
-  // Create table header with scope attribute for better accessibility
+  // Create table header with scope attribute
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
   visibleColumns.forEach(header => {
@@ -118,7 +118,7 @@ function displayData(reformattedData) {
   thead.appendChild(headerRow);
   table.appendChild(thead);
 
-  // Create table body
+  // Table body
   const tbody = document.createElement('tbody');
 
   reformattedData.forEach(row => {
