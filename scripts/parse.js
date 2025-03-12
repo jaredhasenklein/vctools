@@ -2,7 +2,31 @@ const columns = [
   'Minor', 'Legal First Name', 'Preferred First Name', 'Last Name', 'Personal Pronouns', 'Email', 'Phone', 'Languages Spoken', 'FIRST Youth Protection Policy', 'Certified', 'Shirt Size', 'Self-Reported Accommodations', 'Team Affiliation', 'Employer', 'Alumni', 'Emergency Contact', 'Emergency Contact Phone Number', 'Affiliations', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
 ];
 
-// Eent listeners for drag and drop
+// List of key volunteer roles
+const keyVolunteerRoles = [
+  'Control System Advisor',
+  'Emcee',
+  'Field Supervisor',
+  'FIRST Technical Advisor',
+  'FIRST Technical Advisor Assistant',
+  'Game Announcer',
+  'Head Referee',
+  'Judge Advisor',
+  'Lead Queuer',
+  'Lead Robot Inspector',
+  'Pit Administration Supervisor',
+  'Referee',
+  'Robot Inspector',
+  'Safety Manager',
+  'Scorekeeper',
+  'Volunteer Coordinator',
+  'Webcast Operator'
+];
+
+// Keep track of all parsed data for filtering
+let allVolunteerData = [];
+
+// Event listeners for drag and drop
 document.addEventListener('DOMContentLoaded', function() {
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('csvFile');
@@ -40,17 +64,104 @@ function loadFile(event) {
   reader.onload = function() {
     const csvData = reader.result;
     const preprocessedData = preprocessCSV(csvData);
-    const reformattedData = reformatCSV(preprocessedData);
-    displayData(reformattedData);
-
-    const downloadButton = document.createElement('button');
-    downloadButton.textContent = 'Download CSV';
-    downloadButton.onclick = () => downloadCSV(columns, reformattedData);
-    const buttonContainer = document.getElementById('buttonContainer');
-    buttonContainer.appendChild(downloadButton);
+    allVolunteerData = reformatCSV(preprocessedData);
+    
+    // Create filter dropdown
+    createFilterControls();
+    
+    // Display data with current filter
+    applyCurrentFilter();
   };
 
   reader.readAsText(file);
+}
+
+function createFilterControls() {
+  const buttonContainer = document.getElementById('buttonContainer');
+  
+  // Create filter container
+  const filterContainer = document.createElement('div');
+  filterContainer.style.display = 'flex';
+  filterContainer.style.alignItems = 'center';
+  filterContainer.style.gap = '10px';
+  filterContainer.style.marginBottom = '15px';
+  
+  // Create filter label
+  const filterLabel = document.createElement('label');
+  filterLabel.textContent = 'Filter volunteers: ';
+  filterLabel.setAttribute('for', 'volunteerFilter');
+  
+  // Create filter dropdown
+  const filterDropdown = document.createElement('select');
+  filterDropdown.id = 'volunteerFilter';
+  filterDropdown.className = 'form-select';
+  filterDropdown.style.width = 'auto';
+  
+  // Add options
+  const allOption = document.createElement('option');
+  allOption.value = 'all';
+  allOption.textContent = 'All Volunteers';
+  
+  const keyOption = document.createElement('option');
+  keyOption.value = 'key';
+  keyOption.textContent = 'Key Volunteers Only';
+  
+  filterDropdown.appendChild(allOption);
+  filterDropdown.appendChild(keyOption);
+  
+  // Add event listener
+  filterDropdown.addEventListener('change', applyCurrentFilter);
+  
+  // Add elements to container
+  filterContainer.appendChild(filterLabel);
+  filterContainer.appendChild(filterDropdown);
+  
+  // Create download button
+  const downloadButton = document.createElement('button');
+  downloadButton.textContent = 'Download CSV';
+  downloadButton.onclick = () => {
+    const filteredData = getFilteredData();
+    downloadCSV(columns, filteredData);
+  };
+  
+  // Add to DOM
+  buttonContainer.appendChild(filterContainer);
+  buttonContainer.appendChild(downloadButton);
+}
+
+function getFilteredData() {
+  const filterValue = document.getElementById('volunteerFilter').value;
+  
+  if (filterValue === 'all') {
+    return allVolunteerData;
+  } else if (filterValue === 'key') {
+    return allVolunteerData.filter(volunteer => isKeyVolunteer(volunteer));
+  }
+  
+  return allVolunteerData; // Default fallback
+}
+
+function isKeyVolunteer(volunteer) {
+  // Check each day for key volunteer roles
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  
+  for (const day of days) {
+    if (!volunteer[day] || !Array.isArray(volunteer[day])) continue;
+    
+    // Check if any role for this day is a key role
+    for (const role of volunteer[day]) {
+      if (keyVolunteerRoles.includes(role)) {
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}
+
+function applyCurrentFilter() {
+  const filteredData = getFilteredData();
+  displayData(filteredData);
 }
 
 function preprocessCSV(csvData) {
@@ -133,6 +244,21 @@ function displayData(reformattedData) {
   });
 
   table.appendChild(tbody);
+  
+  // Show record count
+  // Remove existing count info if present
+  const existingCountInfo = document.getElementById('volunteerCountInfo');
+  if (existingCountInfo) {
+    existingCountInfo.remove();
+  }
+  
+  // Create new count info with total count
+  const countInfo = document.createElement('div');
+  countInfo.id = 'volunteerCountInfo';
+  countInfo.textContent = `Showing ${reformattedData.length} out of ${allVolunteerData.length} volunteer${allVolunteerData.length !== 1 ? 's' : ''}`;
+  countInfo.style.marginTop = '10px';
+  countInfo.style.marginBottom = '10px';
+  table.before(countInfo);
 }
 
 function downloadCSV(headers, data) {
@@ -150,7 +276,11 @@ function downloadCSV(headers, data) {
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'Assigned Volunteers Reformatted.csv');
+    
+    // Get current filter for filename
+    const filterType = document.getElementById('volunteerFilter').value === 'key' ? 'Key' : 'All';
+    link.setAttribute('download', `${filterType} Volunteers Reformatted.csv`);
+    
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
