@@ -1,64 +1,233 @@
-// Role configurations with required roles and courses
-const ROLE_CONFIGS = {
-    'Judge': {
-        requiredRoles: ['Judge'],
-        requiredCourses: ['2025 FRC General Judge Training']
+// Program-specific role configurations
+const PROGRAM_CONFIGS = {
+    'FRC': {
+        'Judge': {
+            requiredRoles: ['Judge'],
+            requiredCourses: ['FRC General Judge Training']
+        },
+        'Judge - Dean\'s List Award': {
+            requiredRoles: ['Judge - Dean\'s List Award'],
+            requiredCourses: ['FRC Dean\'s List Judge Training', 'FIRST Data Privacy and Protection Training']
+        },
+        'Judge - FIRST Impact Award': {
+            requiredRoles: ['Judge - FIRST Impact Award'],
+            requiredCourses: ['FRC FIRST Impact Award Judge Training', 'FRC General Judge Training']
+        },
+        'Judge Advisor': {
+            requiredRoles: ['Judge Advisor'],
+            requiredCourses: ['FRC Judge Advisor Training', 'FIRST Data Privacy and Protection Training']
+        },
+        'Head Referee': {
+            requiredRoles: ['Head Referee'],
+            requiredCourses: ['FRC Referee Training', 'FRC Head Referee Training']
+        },
+        'Referee': {
+            requiredRoles: ['Referee'],
+            requiredCourses: ['FRC Referee Training']
+        },
+        'Lead Robot Inspector': {
+            requiredRoles: ['Lead Robot Inspector'],
+            requiredCourses: ['FRC Robot Inspector Test']
+        },
+        'Robot Inspector': {
+            requiredRoles: ['Robot Inspector'],
+            requiredCourses: ['FRC Robot Inspector Test']
+        },
+        'Lead Queuer': {
+            requiredRoles: ['Lead Queuer'],
+            requiredCourses: ['FRC Lead Queuer Training']
+        },
+        'Safety Manager': {
+            requiredRoles: ['Safety Manager'],
+            requiredCourses: ['FRC Safety Manager Training']
+        },
+        'Pit Admin Supervisor': {
+            requiredRoles: ['Pit Administration Supervisor'],
+            requiredCourses: ['FIRST Data Privacy and Protection Training']
+        },
+        'Accommodation Coordinator (optional role)': {
+            requiredRoles: ['Accommodation Coordinator'],
+            requiredCourses: ['Accommodation Coordinator Training', 'FIRST Data Privacy and Protection Training']
+        }
     },
-    'Judge - Dean\'s List Award': {
-        requiredRoles: ['Judge - Dean\'s List Award'],
-        requiredCourses: ['2025 FRC Dean\'s List Judge Training', 'FIRST Data Privacy and Protection Training 2024-2025']
+    'FLL': {
+        'Head Referee': {
+            requiredRoles: ['Head Referee'],
+            requiredCourses: ['FIRST LEGO League Challenge Head Referee Training', 'FIRST Data Privacy and Protection Training']
+        },
+        'Judge Advisor': {
+            requiredRoles: ['Judge Advisor'],
+            requiredCourses: ['FIRST LEGO League Challenge Judge Advisor Training', 'FIRST Data Privacy and Protection Training']
+        },
+        'Tournament Director': {
+            requiredRoles: ['Tournament Director'],
+            requiredCourses: ['FIRST Data Privacy and Protection Training']
+        },
+        'Volunteer Coordinator': {
+            requiredRoles: ['Volunteer Coordinator'],
+            requiredCourses: ['FIRST Data Privacy and Protection Training']
+        },
+        'Accommodation Coordinator': {
+            requiredRoles: ['Accommodation Coordinator'],
+            requiredCourses: ['FIRST Data Privacy and Protection Training']
+        },
+        'Judge': {
+            requiredRoles: ['Judge'],
+            requiredCourses: ['FIRST LEGO League Challenge Judge Training', 'FIRST Data Privacy and Protection Training']
+        },
+        'Lead Judge': {
+            requiredRoles: ['Lead Judge'],
+            requiredCourses: ['FIRST LEGO League Challenge Judge Training', 'FIRST Data Privacy and Protection Training']
+        },
+        'Referee': {
+            requiredRoles: ['Referee'],
+            requiredCourses: ['FIRST LEGO League Challenge Referee Training']
+        },
+        'Team Registration': {
+            requiredRoles: ['Team Registration'],
+            requiredCourses: ['FIRST Data Privacy and Protection Training']
+        },
+        'Pit Administrator': {
+            requiredRoles: ['Pit Administrator'],
+            requiredCourses: ['FIRST Data Privacy and Protection Training']
+        }
     },
-    'Judge - FIRST Impact Award': {
-        requiredRoles: ['Judge - FIRST Impact Award'],
-        requiredCourses: ['2025 FRC FIRST Impact Award Judge Training', '2025 FRC General Judge Training']
-    },
-    'Judge Advisor': {
-        requiredRoles: ['Judge Advisor'],
-        requiredCourses: ['2025 FRC Judge Advisor Training', 'FIRST Data Privacy and Protection Training 2024-2025']
-    },
-   'Head Referee': {
-        requiredRoles: ['Head Referee'],
-        requiredCourses: ['2025 FRC Referee Training', '2025 FRC Head Referee Training']
-    },
-    'Referee': {
-        requiredRoles: ['Referee'],
-        requiredCourses: ['2025 FRC Referee Training']
-    },
-    'Lead Robot Inspector': {
-        requiredRoles: ['Lead Robot Inspector'],
-        requiredCourses: ['2025 FRC Robot Inspector Test']
-    },
-    'Robot Inspector': {
-        requiredRoles: ['Robot Inspector'],
-        requiredCourses: ['2025 FRC Robot Inspector Test']
-    },
-    'Lead Queuer': {
-        requiredRoles: ['Lead Queuer'],
-        requiredCourses: ['2025 FRC Lead Queuer Training']
-    },
-    'Safety Manager': {
-        requiredRoles: ['Safety Manager'],
-        requiredCourses: ['2025 FRC Safety Manager Training']
-    },
-    'Pit Admin Supervisor': {
-        requiredRoles: ['Pit Administration Supervisor'],
-        requiredCourses: ['FIRST Data Privacy and Protection Training 2024-2025']
-    },
-    'Accommodation Coordinator (optional role)': {
-        requiredRoles: ['Accommodation Coordinator'],
-        requiredCourses: ['24-25 Accommodation Coordinator Training', 'FIRST Data Privacy and Protection Training 2024-2025']
+    'FTC': {
+        'Field Supervisor': {
+            requiredRoles: ['Field Supervisor'],
+            requiredCourses: ['FTC Field Supervisor', 'FTC Gracious Professionalism']
+        },
+        'FIRST Technical Advisor': {
+            requiredRoles: ['FIRST Technical Advisor'],
+            requiredCourses: ['FTC FIRST Technical Advisor', 'FTC Gracious Professionalism']
+        },
+        'Head Referee': {
+            requiredRoles: ['Head Referee'],
+            requiredCourses: ['FTC Head Referee', 'FTC Referee', 'FTC Gracious Professionalism']
+        },
+        'Judge Advisor': {
+            requiredRoles: ['Judge Advisor'],
+            requiredCourses: ['FIRST Data Privacy and Protection Training', 'FTC Gracious Professionalism', 'FTC Judge Advisor']
+        },
+        'Lead Queuer': {
+            requiredRoles: ['Lead Queuer'],
+            requiredCourses: ['FTC Queuer', 'FTC Gracious Professionalism']
+        },
+        'Queuer': {
+            requiredRoles: ['Queuer'],
+            requiredCourses: ['FTC Queuer', 'FTC Gracious Professionalism']
+        },
+        'Lead Robot Inspector': {
+            requiredRoles: ['Lead Robot Inspector'],
+            requiredCourses: ['FTC Gracious Professionalism', 'FTC Robot Inspector']
+        },
+        'Lead Scorekeeper': {
+            requiredRoles: ['Lead Scorekeeper'],
+            requiredCourses: ['FTC Scorekeeper/Scoring System', 'FTC Gracious Professionalism']
+        },
+        'Scorekeeper': {
+            requiredRoles: ['Scorekeeper'],
+            requiredCourses: ['FTC Scorekeeper/Scoring System', 'FTC Gracious Professionalism']
+        },
+        'Pit Administrator': {
+            requiredRoles: ['Pit Administrator'],
+            requiredCourses: ['FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training', 'FTC Pit Administrator']
+        },
+        'Referee': {
+            requiredRoles: ['Referee'],
+            requiredCourses: ['FTC Referee', 'FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+        },
+        'Volunteer Coordinator': {
+            requiredRoles: ['Volunteer Coordinator'],
+            requiredCourses: ['FTC Volunteer Coordinator', 'FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+        },
+        'Accommodation Coordinator': {
+            requiredRoles: ['Accommodation Coordinator'],
+            requiredCourses: ['FIRST Data Privacy and Protection Training']
+        },
+        'Dean\'s List Reviewers': {
+            requiredRoles: ['Dean\'s List Reviewer'],
+            requiredCourses: ['FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training', 'FTC Dean\'s List Reviewer']
+        },
+        'Emcee': {
+            requiredRoles: ['Emcee'],
+            requiredCourses: ['FTC Emcee and Game Announcer', 'FTC Gracious Professionalism']
+        },
+        'Game Announcer': {
+            requiredRoles: ['Game Announcer'],
+            requiredCourses: ['FTC Emcee and Game Announcer', 'FTC Gracious Professionalism']
+        },
+        'Field Inspector': {
+            requiredRoles: ['Field Inspector'],
+            requiredCourses: ['FTC Field Inspector', 'FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+        },
+        'Lead Field Inspector': {
+            requiredRoles: ['Lead Field Inspector'],
+            requiredCourses: ['FTC Field Inspector', 'FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+        },
+        'FTA Assistant': {
+            requiredRoles: ['FTA Assistant'],
+            requiredCourses: ['[Placeholder for FTA Assistant]']
+        },
+        'FTC Scoring Event Admin': {
+            requiredRoles: ['FTC Scoring Event Admin'],
+            requiredCourses: ['FTC Scoring Event Administrator', 'FTC Gracious Professionalism', '[Placeholder for additional course]']
+        },
+        'Judge': {
+            requiredRoles: ['Judge'],
+            requiredCourses: ['FIRST Data Privacy and Protection Training', 'FTC Gracious Professionalism', 'FTC Judge']
+        },
+        'Judge Advisor Assistant': {
+            requiredRoles: ['Judge Advisor Assistant'],
+            requiredCourses: ['[Placeholder for Judge Advisor Assistant]']
+        },
+        'Judge Match Observer': {
+            requiredRoles: ['Judge Match Observer'],
+            requiredCourses: ['[Placeholder for Judge Match Observer]']
+        },
+        'Robot Inspector': {
+            requiredRoles: ['Robot Inspector'],
+            requiredCourses: ['FTC Robot Inspector', 'FTC Gracious Professionalism']
+        },
+        'Team Registration': {
+            requiredRoles: ['Team Registration'],
+            requiredCourses: ['FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+        },
+        'Volunteer Check In': {
+            requiredRoles: ['Volunteer Check In'],
+            requiredCourses: ['FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+        },
+        'Control System Advisor': {
+            requiredRoles: ['Control System Advisor'],
+            requiredCourses: ['FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+        },
+        'Wi-Fi Technical Advisor': {
+            requiredRoles: ['Wi-Fi Technical Advisor'],
+            requiredCourses: ['[Placeholder for Wi-Fi Technical Advisor]']
+        }
     }
 };
+
+// Current selected program - will be updated when file is processed
+let selectedProgram = 'FRC';
+// Active role configurations based on selected program
+let ROLE_CONFIGS = PROGRAM_CONFIGS[selectedProgram];
 
 // Initialize everything after DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
     const resultsContainer = document.getElementById('resultsContainer');
+    const versionBox = document.querySelector('.version-box');
     
     if (!dropzone || !fileInput) {
         console.error('Required elements not found: dropzone or fileInput');
         return;
+    }
+    
+    // Hide version info initially - it will be shown after processing the CSV
+    if (document.getElementById('version-tag')) {
+        document.getElementById('version-tag').style.display = 'none';
     }
     
     // Initialize drag and drop functionality
@@ -82,6 +251,10 @@ function handleFiles(files) {
         if (resultsContainer) {
             resultsContainer.innerHTML = '';
         }
+        // Hide version tag if validation fails
+        if (document.getElementById('version-tag')) {
+            document.getElementById('version-tag').style.display = 'none';
+        }
         return;
     }
 
@@ -91,6 +264,10 @@ function handleFiles(files) {
         },
         error: function(error) {
             showError('Error parsing file. Please make sure this is a Training and Certifications report from VMS. Details: ' + error);
+            // Hide version tag on error
+            if (document.getElementById('version-tag')) {
+                document.getElementById('version-tag').style.display = 'none';
+            }
         },
         skipEmptyLines: true,
         header: false
@@ -116,6 +293,73 @@ function findHeaderRow(rows) {
     return -1;
 }
 
+// Function to detect program from CSV data
+function detectProgramFromCSV(rows) {
+    // Look for event information in row 4 (index 3) if available
+    if (rows.length > 3) {
+        for (let i = 0; i < 10; i++) { // Check first 10 rows to find event info
+            if (i >= rows.length) break;
+            
+            const row = rows[i];
+            // Check if this row contains event information
+            if (row.length > 0 && typeof row[0] === 'string' && row[0].trim().startsWith('Event:')) {
+                const eventInfo = row[0].trim();
+                console.log("Found event info:", eventInfo);
+                
+                // Extract program code at the end after the last dash
+                const lastDashIndex = eventInfo.lastIndexOf('-');
+                if (lastDashIndex !== -1) {
+                    const programPart = eventInfo.substring(lastDashIndex + 1).trim();
+                    console.log("Program part:", programPart);
+                    
+                    // Check for FTC
+                    if (programPart.includes('FTC') || programPart.includes('Tech Challenge')) {
+                        console.log("Detected FTC");
+                        return 'FTC';
+                    }
+                    // Check for FRC 
+                    else if (programPart.includes('FRC') || programPart.includes('Robotics Competition')) {
+                        console.log("Detected FRC");
+                        return 'FRC';
+                    }
+                    // Check for FLL
+                    else if (programPart.includes('FLL') || programPart.includes('LEGO League')) {
+                        console.log("Detected FLL");
+                        return 'FLL';
+                    }
+                }
+                
+                // If no dash or couldn't detect from last part, check the entire event name
+                if (eventInfo.includes('Tech Challenge') || eventInfo.includes('FTC')) {
+                    console.log("Detected FTC from full event name");
+                    return 'FTC';
+                } else if (eventInfo.includes('Robotics Competition') || eventInfo.includes('FRC')) {
+                    console.log("Detected FRC from full event name");
+                    return 'FRC';
+                } else if (eventInfo.includes('LEGO League') || eventInfo.includes('FLL')) {
+                    console.log("Detected FLL from full event name");
+                    return 'FLL';
+                }
+            }
+        }
+    }
+    
+    // Default to FRC if we can't detect
+    console.log("Could not detect program, defaulting to FRC");
+    return 'FRC';
+}
+
+// Get a display name for a program code
+function getDisplayNameForProgram(programCode) {
+    const displayNames = {
+        'FRC': 'FRC',
+        'FTC': 'FTC',
+        'FLL': 'FLL Challenge'
+    };
+    
+    return displayNames[programCode] || programCode;
+}
+
 function processCSV(rows) {
     clearError();
 
@@ -126,11 +370,48 @@ function processCSV(rows) {
         showError('Invalid CSV format. Could not find matching header row.');
         return;
     }
+    
+    // Detect program from the CSV
+    const detectedProgram = detectProgramFromCSV(rows);
+    
+    // Update the selected program and configurations
+    selectedProgram = detectedProgram;
+    
+    // Handle FLL Challenge differently for display vs. config key
+    if (selectedProgram === 'FLL') {
+        ROLE_CONFIGS = PROGRAM_CONFIGS['FLL']; 
+    } else {
+        ROLE_CONFIGS = PROGRAM_CONFIGS[selectedProgram];
+    }
+    
+    // We no longer need to update a program selector
+    
+    // Update the version box and show the version tag
+    const versionTag = document.getElementById('version-tag');
+    const versionBox = document.querySelector('.version-box');
+    
+    if (versionBox) {
+        versionBox.textContent = getDisplayNameForProgram(selectedProgram);
+    }
+    
+    if (versionTag) {
+        versionTag.style.display = 'block';
+    }
 
     // Process data rows (starting from the row after headers)
     const dataRows = rows.slice(headerRowIndex + 1);
     const processedData = processData(dataRows);
     renderResults(processedData);
+}
+
+// Helper function to check if a course name contains any of the required course patterns
+function matchesCoursePattern(coursePattern, actualCourseName) {
+    if (!actualCourseName) return false;
+    
+    // Handle placeholder courses - they won't match any actual courses
+    if (coursePattern.startsWith('[Placeholder')) return false;
+    
+    return actualCourseName.toLowerCase().includes(coursePattern.toLowerCase());
 }
 
 function processData(rows) {
@@ -188,10 +469,17 @@ function processData(rows) {
 
             if (!hasRequiredRole) return;
 
-            // Check course status
-           const courseStatus = config.requiredCourses.map(course =>
-                personInfo.courses[course] ? determineCourseStatus(personInfo.courses[course]) : '❌'
-            );
+            // Check course status using partial matching
+            const courseStatus = config.requiredCourses.map(requiredCoursePattern => {
+                // Find any course that matches the pattern
+                const matchingCourse = Object.keys(personInfo.courses).find(actualCourseName => 
+                    matchesCoursePattern(requiredCoursePattern, actualCourseName)
+                );
+                
+                return matchingCourse 
+                    ? determineCourseStatus(personInfo.courses[matchingCourse]) 
+                    : '❌';
+            });
 
             // Check if all required courses have a valid status
             const allCoursesValid = courseStatus.every(status => status !== null);
