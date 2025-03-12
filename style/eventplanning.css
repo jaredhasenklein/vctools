@@ -77,6 +77,8 @@ input[type="time"] {
 .meal-report th {
     background-color: #f2f2f2;
     text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #mealTimesGrid td,
@@ -208,4 +210,77 @@ tbody tr:nth-child(even) {
     #updateMealTimes {
         width: 100%;
     }
+
+/* Container for all meal configuration items */
+.meal-config-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
 }
+
+/* Styling for display option dropdown */
+.display-option-container {
+  width: 100%;
+}
+
+.display-select {
+  font-size: 0.8rem;
+  padding: 2px 5px;
+  height: auto;
+}
+
+/* Mobile-specific styles */
+.mobile-display-option {
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+/* More compact styling for the meal configuration table */
+#mealTimesGrid .table td {
+  padding: 8px 5px;
+}
+
+#mealTimesGrid .form-control {
+  padding: 4px 6px;
+  font-size: 0.85rem;
+}
+
+/* Make the "No meal" checkboxes and labels more compact */
+.nomeal-container {
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.nomeal-label {
+  font-size: 0.75rem;
+  margin-left: 2px;
+}
+
+/* Mobile meal item styling updates */
+.mobile-meal-item {
+  padding: 10px;
+}
+
+.mobile-meal-controls {
+  gap: 5px;
+}
+
+/* For very small screens, further reduce padding */
+@media screen and (max-width: 400px) {
+  .mobile-meal-item {
+    padding: 8px;
+  }
+  
+  .mobile-meal-label {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+  }
+  
+  .display-select {
+    font-size: 0.75rem;
+  }
+}
+}
+

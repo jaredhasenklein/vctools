@@ -9,8 +9,10 @@ const DEFAULT_MEAL_TIMES = {
 let parsedData = [];
 let mealTimes = {};
 let disabledMeals = {};
+let mealDisplayOptions = {}; // New variable to store display options
 let eventDays = [];
 let reportData = {}; // Store report data for Excel exports
+let allEnabledMeals = []; // Make this global to fix the scope issue
 
 // Document ready function
 document.addEventListener('DOMContentLoaded', function() {
@@ -42,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Email C&R button
   document.getElementById('emailIncomplete').addEventListener('click', emailIncompleteVolunteers);
-
 
   window.addEventListener('load', function() {
     if (eventDays && eventDays.length > 0) {
@@ -142,7 +143,6 @@ function processCSVData(csvData) {
       throw new Error('Could not find header row in CSV file');
     }
 
-
     // Find required columns with flexible matching
     const dayIndex = findColumnIndex(headerRow, ['Day', 'Days']);
     const startTimeIndex = findColumnIndex(headerRow, ['Start Time', 'Start', 'Start_Time']);
@@ -153,7 +153,6 @@ function processCSVData(csvData) {
     const yearsOfServiceIndex = findColumnIndex(headerRow, ['Years of Service', 'Years', 'Service Years']);
     const shirtSizeIndex = findColumnIndex(headerRow, ['Shirt Size', 'Shirt']);
     const consentIndex = findColumnIndex(headerRow, ['Consent', 'Consent & Release', 'Release']);
-
 
     // Check if essential columns exist, with more specific error messages
     const missingColumns = [];
@@ -178,7 +177,6 @@ function processCSVData(csvData) {
       const row = replaceCommasInQuotes(rows[i], '|').split(',');
 
       if (row.length <= 1) continue; // Skip truly empty rows
-
 
       // Extract data from columns
       const day = row[dayIndex]?.trim();
@@ -234,9 +232,9 @@ function processCSVData(csvData) {
 
     initializeMealTimes();
     document.getElementById('mealTimesConfig').style.display = 'block';
-        generateMealTimesGrid();
-        generateReports();
-        document.getElementById('reportsContainer').style.display = 'block';
+    generateMealTimesGrid();
+    generateReports();
+    document.getElementById('reportsContainer').style.display = 'block';
 
   } catch (error) {
     showError('Error processing CSV: ' + error.message);
@@ -286,9 +284,11 @@ function normalizeTime(timeStr) {
   return timeStr;
 }
 
+// Initialize meal times with display options
 function initializeMealTimes() {
   mealTimes = {};
   disabledMeals = {};
+  mealDisplayOptions = {}; // Initialize the display options
 
   eventDays.forEach(day => {
     mealTimes[day] = {
@@ -301,6 +301,12 @@ function initializeMealTimes() {
       breakfast: false,
       lunch: false,
       dinner: false
+    };
+
+    mealDisplayOptions[day] = {
+      breakfast: 'separate', // Default: separate judges & general volunteers
+      lunch: 'separate',
+      dinner: 'separate'
     };
   });
 }
@@ -320,6 +326,390 @@ function generateMealTimesGrid() {
     // Desktop layout - standard table
     generateDesktopLayout(container);
   }
+}
+
+// Generate desktop layout for meal configuration
+function generateDesktopLayout(container) {
+  const table = document.createElement('table');
+  table.className = 'table table-bordered';
+
+  // Create header row
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+
+  const cornerCell = document.createElement('th');
+  cornerCell.textContent = 'Meal / Day';
+  headerRow.appendChild(cornerCell);
+
+  eventDays.forEach(day => {
+    const dayHeader = document.createElement('th');
+    dayHeader.textContent = day;
+    headerRow.appendChild(dayHeader);
+  });
+
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Create body rows for each meal
+  const tbody = document.createElement('tbody');
+
+  ['breakfast', 'lunch', 'dinner'].forEach(meal => {
+    const row = document.createElement('tr');
+
+    const mealCell = document.createElement('td');
+    mealCell.textContent = meal.charAt(0).toUpperCase() + meal.slice(1);
+    row.appendChild(mealCell);
+
+    eventDays.forEach(day => {
+      const timeCell = document.createElement('td');
+
+      // Create a container for time input, checkbox, and display option
+      const container = document.createElement('div');
+      container.className = 'meal-config-container';
+
+      // Time input container
+      const timeInputContainer = document.createElement('div');
+      timeInputContainer.className = 'time-input-container';
+
+      const timeInput = document.createElement('input');
+      timeInput.type = 'time';
+      timeInput.value = mealTimes[day][meal];
+      timeInput.id = `${day}-${meal}-time`;
+      timeInput.className = 'form-control';
+      timeInput.disabled = disabledMeals[day][meal];
+
+      timeInputContainer.appendChild(timeInput);
+      container.appendChild(timeInputContainer);
+
+      // Display options dropdown container
+      const displayOptionContainer = document.createElement('div');
+      displayOptionContainer.className = 'display-option-container';
+      
+      const displaySelect = document.createElement('select');
+      displaySelect.id = `${day}-${meal}-display`;
+      displaySelect.className = 'form-control form-select form-select-sm display-select';
+      displaySelect.disabled = disabledMeals[day][meal];
+      
+      // Add options
+      const options = [
+        { value: 'separate', text: 'Separate judges & general' },
+        { value: 'combine', text: 'Combine all volunteers' },
+        { value: 'omit-judges', text: 'Omit judges' }
+      ];
+      
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.text;
+        if (mealDisplayOptions[day][meal] === opt.value) {
+          option.selected = true;
+        }
+        displaySelect.appendChild(option);
+      });
+      
+      displayOptionContainer.appendChild(displaySelect);
+      container.appendChild(displayOptionContainer);
+
+      // No meal checkbox container
+      const noMealContainer = document.createElement('div');
+      noMealContainer.className = 'nomeal-container';
+
+      const noMealCheckbox = document.createElement('input');
+      noMealCheckbox.type = 'checkbox';
+      noMealCheckbox.id = `${day}-${meal}-disabled`;
+      noMealCheckbox.checked = disabledMeals[day][meal];
+      noMealCheckbox.addEventListener('change', function() {
+        timeInput.disabled = this.checked;
+        displaySelect.disabled = this.checked;
+      });
+
+      const noMealLabel = document.createElement('label');
+      noMealLabel.setAttribute('for', `${day}-${meal}-disabled`);
+      noMealLabel.className = 'nomeal-label';
+      noMealLabel.textContent = 'No meal';
+
+      noMealContainer.appendChild(noMealCheckbox);
+      noMealContainer.appendChild(noMealLabel);
+      container.appendChild(noMealContainer);
+
+      timeCell.appendChild(container);
+      row.appendChild(timeCell);
+    });
+
+    tbody.appendChild(row);
+  });
+
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+// Export a specific report to Excel
+function exportReportToExcel(reportType) {
+  const workbook = XLSX.utils.book_new();
+
+  if (reportType === 'yearsOfService') {
+    const data = [
+      ['Years of Service', 'Number of Volunteers'],
+      ...reportData.yearsOfService.years.map(year => [year, reportData.yearsOfService.counts[year]])
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Years of Service');
+    XLSX.writeFile(workbook, 'Years_of_Service_Report.xlsx');
+  }
+  else if (reportType === 'shirtSize') {
+    const data = [
+      ['Shirt Size', 'Number of Volunteers'],
+      ...reportData.shirtSizes.sizes.map(size => [size, reportData.shirtSizes.counts[size]])
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Shirt Sizes');
+    XLSX.writeFile(workbook, 'Shirt_Sizes_Report.xlsx');
+  }
+  else if (reportType === 'consent') {
+    const data = [
+      ['Consent & Release Status', 'Number of Volunteers'],
+      ...reportData.consentStatus.statuses.map(status => [status, reportData.consentStatus.counts[status]])
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Consent Status');
+    XLSX.writeFile(workbook, 'Consent_Status_Report.xlsx');
+  }
+  else if (reportType === 'meal-all') {
+    const allMeals = reportData.mealReports.allMeals;
+
+    if (!allMeals || !allMeals.meals || allMeals.meals.length === 0) {
+      alert('No meal data available to export.');
+      return;
+    }
+
+    const data = [];
+
+    // Header rows
+    const headerRow1 = ['Dietary Restriction'];
+    const headerRow2 = [];
+
+    allMeals.meals.forEach((meal, index) => {
+      const mealInfo = allEnabledMeals[index];
+      const displayOption = allMeals.data[meal].displayOption;
+      
+      if (displayOption === 'separate') {
+        headerRow1.push(meal, ''); // Add empty cell for colspan
+        headerRow2.push('General', 'Judge');
+      } else if (displayOption === 'combine') {
+        headerRow1.push(meal);
+        headerRow2.push('All');
+      } else if (displayOption === 'omit-judges') {
+        headerRow1.push(meal);
+        headerRow2.push('General');
+      }
+    });
+
+    data.push(headerRow1, headerRow2);
+
+    // Data rows
+    allMeals.restrictions.forEach(restriction => {
+      const row = [restriction];
+
+      allMeals.meals.forEach(meal => {
+        // Check if data exists for this meal
+        if (!allMeals.data[meal]) {
+          row.push(0); // Add zero if no data
+          if (allMeals.data[meal]?.displayOption === 'separate') {
+            row.push(0); // Add second zero for Judge column
+          }
+          return;
+        }
+
+        const displayOption = allMeals.data[meal].displayOption;
+        
+        if (displayOption === 'separate') {
+          row.push(
+            allMeals.data[meal].general[restriction] || 0,
+            allMeals.data[meal].judge[restriction] || 0
+          );
+        } else if (displayOption === 'combine') {
+          row.push(allMeals.data[meal].combined[restriction] || 0);
+        } else if (displayOption === 'omit-judges') {
+          row.push(allMeals.data[meal].general[restriction] || 0);
+        }
+      });
+
+      data.push(row);
+    });
+
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+    // Apply formatting
+    // Merge cells for meal headers
+    if (!worksheet['!merges']) worksheet['!merges'] = [];
+
+    let colIndex = 1; // Start after the "Dietary Restriction" column
+    allMeals.meals.forEach(meal => {
+      const displayOption = allMeals.data[meal].displayOption;
+      
+      if (displayOption === 'separate') {
+        // Merge cells for the meal header (spans 2 columns)
+        worksheet['!merges'].push({
+          s: {r: 0, c: colIndex},
+          e: {r: 0, c: colIndex + 1}
+        });
+        colIndex += 2; // Move past the two columns (General and Judge)
+      } else {
+        // For 'combine' and 'omit-judges', no merging needed
+        colIndex += 1;
+      }
+    });
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, `All Meals`);
+    XLSX.writeFile(workbook, `Meal_Attendance_Report.xlsx`);
+  }
+}
+
+// Export all reports to a single Excel file
+function exportAllToExcel() {
+  const workbook = XLSX.utils.book_new();
+
+  // Add Years of Service sheet
+  const yosData = [
+    ['Years of Service', 'Number of Volunteers'],
+    ...reportData.yearsOfService.years.map(year => [year, reportData.yearsOfService.counts[year]])
+  ];
+  const yosWorksheet = XLSX.utils.aoa_to_sheet(yosData);
+  XLSX.utils.book_append_sheet(workbook, yosWorksheet, 'Years of Service');
+
+  // Add Shirt Sizes sheet
+  const shirtData = [
+    ['Shirt Size', 'Number of Volunteers'],
+    ...reportData.shirtSizes.sizes.map(size => [size, reportData.shirtSizes.counts[size]])
+  ];
+  const shirtWorksheet = XLSX.utils.aoa_to_sheet(shirtData);
+  XLSX.utils.book_append_sheet(workbook, shirtWorksheet, 'Shirt Sizes');
+
+  // Add Consent Status sheet
+  const consentData = [
+    ['Consent & Release Status', 'Number of Volunteers'],
+    ...reportData.consentStatus.statuses.map(status => [status, reportData.consentStatus.counts[status]])
+  ];
+  const consentWorksheet = XLSX.utils.aoa_to_sheet(consentData);
+  XLSX.utils.book_append_sheet(workbook, consentWorksheet, 'Consent Status');
+
+  // Add Meals sheet
+  const allMeals = reportData.mealReports.allMeals;
+  if (allMeals && allMeals.meals && allMeals.meals.length > 0) {
+    const data = [];
+
+    // Header rows
+    const headerRow1 = ['Dietary Restriction'];
+    const headerRow2 = [];
+    
+    allMeals.meals.forEach((meal, index) => {
+      const displayOption = allMeals.data[meal].displayOption;
+      
+      if (displayOption === 'separate') {
+        headerRow1.push(meal, ''); // Add empty cell for colspan
+        headerRow2.push('General', 'Judge');
+      } else if (displayOption === 'combine') {
+        headerRow1.push(meal);
+        headerRow2.push('All');
+      } else if (displayOption === 'omit-judges') {
+        headerRow1.push(meal);
+        headerRow2.push('General');
+      }
+    });
+
+    data.push(headerRow1, headerRow2);
+
+    // Data rows
+    allMeals.restrictions.forEach(restriction => {
+      const row = [restriction];
+
+      allMeals.meals.forEach(meal => {
+        // Check if data exists for this meal
+        if (!allMeals.data[meal]) {
+          row.push(0);
+          if (allMeals.data[meal]?.displayOption === 'separate') {
+            row.push(0); // Add a second zero for Judge column
+          }
+          return;
+        }
+
+        const displayOption = allMeals.data[meal].displayOption;
+        
+        if (displayOption === 'separate') {
+          row.push(
+            allMeals.data[meal].general[restriction] || 0,
+            allMeals.data[meal].judge[restriction] || 0
+          );
+        } else if (displayOption === 'combine') {
+          row.push(allMeals.data[meal].combined[restriction] || 0);
+        } else if (displayOption === 'omit-judges') {
+          row.push(allMeals.data[meal].general[restriction] || 0);
+        }
+      });
+
+      data.push(row);
+    });
+
+    const mealsWorksheet = XLSX.utils.aoa_to_sheet(data);
+
+    // Apply formatting - merge cells for meal headers with separate columns
+    if (!mealsWorksheet['!merges']) mealsWorksheet['!merges'] = [];
+
+    let colIndex = 1; // Reset column index
+    allMeals.meals.forEach(meal => {
+      const displayOption = allMeals.data[meal].displayOption;
+      
+      if (displayOption === 'separate') {
+        // Merge cells for the meal header (spans 2 columns)
+        mealsWorksheet['!merges'].push({
+          s: {r: 0, c: colIndex},
+          e: {r: 0, c: colIndex + 1}
+        });
+        colIndex += 2; // Move past the two columns
+      } else {
+        colIndex += 1; // Just move to the next column
+      }
+    });
+
+    XLSX.utils.book_append_sheet(workbook, mealsWorksheet, 'Meal Attendance');
+  }
+
+  XLSX.writeFile(workbook, 'Volunteer_Metrics_Report.xlsx');
+}
+
+// Function to create a mailto link for incomplete volunteers
+function emailIncompleteVolunteers() {
+  // Find volunteers with "Incomplete" consent status
+  const incompleteEmails = [];
+
+  // Create a map of email to consent status to deduplicate volunteers
+  const emailConsent = new Map();
+
+  parsedData.forEach(volunteer => {
+    if (volunteer.email) {
+      emailConsent.set(volunteer.email, volunteer.consentStatus);
+    }
+  });
+
+  // Find all unique emails with incomplete status
+  emailConsent.forEach((status, email) => {
+    if (status && status.toLowerCase().includes('incomplete')) {
+      incompleteEmails.push(email);
+    }
+  });
+
+  if (incompleteEmails.length === 0) {
+    alert('No volunteers with incomplete consent status found.');
+    return;
+  }
+
+  // Create the mailto link with BCC only
+  const mailtoLink = `mailto:?bcc=${incompleteEmails.join(',')}`;
+
+  window.open(mailtoLink);
 }
 
 // Generate vertical layout for mobile
@@ -356,6 +746,35 @@ function generateMobileLayout(container) {
       timeInputContainer.appendChild(timeInput);
       controlsContainer.appendChild(timeInputContainer);
 
+      // Display options dropdown
+      const displayOptionContainer = document.createElement('div');
+      displayOptionContainer.className = 'mobile-display-option';
+      
+      const displaySelect = document.createElement('select');
+      displaySelect.id = `${day}-${meal}-display`;
+      displaySelect.className = 'form-control form-select form-select-sm display-select';
+      displaySelect.disabled = disabledMeals[day][meal];
+      
+      // Add options
+      const options = [
+        { value: 'separate', text: 'Separate judges & general' },
+        { value: 'combine', text: 'Combine all volunteers' },
+        { value: 'omit-judges', text: 'Omit judges' }
+      ];
+      
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.text;
+        if (mealDisplayOptions[day][meal] === opt.value) {
+          option.selected = true;
+        }
+        displaySelect.appendChild(option);
+      });
+      
+      displayOptionContainer.appendChild(displaySelect);
+      controlsContainer.appendChild(displayOptionContainer);
+
       // No meal checkbox
       const noMealContainer = document.createElement('div');
       noMealContainer.className = 'mobile-nomeal-container';
@@ -366,6 +785,7 @@ function generateMobileLayout(container) {
       noMealCheckbox.checked = disabledMeals[day][meal];
       noMealCheckbox.addEventListener('change', function() {
         timeInput.disabled = this.checked;
+        displaySelect.disabled = this.checked;
       });
 
       const noMealLabel = document.createElement('label');
@@ -385,91 +805,6 @@ function generateMobileLayout(container) {
   container.appendChild(mealList);
 }
 
-// Generate desktop table layout
-function generateDesktopLayout(container) {
-  const table = document.createElement('table');
-  table.className = 'table table-bordered';
-
-  // Create header row
-  const thead = document.createElement('thead');
-  const headerRow = document.createElement('tr');
-
-  const cornerCell = document.createElement('th');
-  cornerCell.textContent = 'Meal / Day';
-  headerRow.appendChild(cornerCell);
-
-  eventDays.forEach(day => {
-    const dayHeader = document.createElement('th');
-    dayHeader.textContent = day;
-    headerRow.appendChild(dayHeader);
-  });
-
-  thead.appendChild(headerRow);
-  table.appendChild(thead);
-
-  // Create body rows for each meal
-  const tbody = document.createElement('tbody');
-
-  ['breakfast', 'lunch', 'dinner'].forEach(meal => {
-    const row = document.createElement('tr');
-
-    const mealCell = document.createElement('td');
-    mealCell.textContent = meal.charAt(0).toUpperCase() + meal.slice(1);
-    row.appendChild(mealCell);
-
-    eventDays.forEach(day => {
-      const timeCell = document.createElement('td');
-
-      // Create a container for both time input and checkbox
-      const container = document.createElement('div');
-      container.className = 'time-checkbox-container';
-
-      // Time input container
-      const timeInputContainer = document.createElement('div');
-      timeInputContainer.className = 'time-input-container';
-
-      const timeInput = document.createElement('input');
-      timeInput.type = 'time';
-      timeInput.value = mealTimes[day][meal];
-      timeInput.id = `${day}-${meal}-time`;
-      timeInput.className = 'form-control';
-      timeInput.disabled = disabledMeals[day][meal];
-
-      timeInputContainer.appendChild(timeInput);
-      container.appendChild(timeInputContainer);
-
-      // No meal checkbox container
-      const noMealContainer = document.createElement('div');
-      noMealContainer.className = 'nomeal-container';
-
-      const noMealCheckbox = document.createElement('input');
-      noMealCheckbox.type = 'checkbox';
-      noMealCheckbox.id = `${day}-${meal}-disabled`;
-      noMealCheckbox.checked = disabledMeals[day][meal];
-      noMealCheckbox.addEventListener('change', function() {
-        timeInput.disabled = this.checked;
-      });
-
-      const noMealLabel = document.createElement('label');
-      noMealLabel.setAttribute('for', `${day}-${meal}-disabled`);
-      noMealLabel.className = 'nomeal-label';
-      noMealLabel.textContent = 'No meal';
-
-      noMealContainer.appendChild(noMealCheckbox);
-      noMealContainer.appendChild(noMealLabel);
-      container.appendChild(noMealContainer);
-
-      timeCell.appendChild(container);
-      row.appendChild(timeCell);
-    });
-
-    tbody.appendChild(row);
-  });
-
-  table.appendChild(tbody);
-  container.appendChild(table);
-}
-
 // Add a window resize listener to redraw the grid when resizing
 window.addEventListener('resize', function() {
   // Add debounce to prevent excessive redraws
@@ -485,6 +820,7 @@ function updateMealTimes() {
     ['breakfast', 'lunch', 'dinner'].forEach(meal => {
       const input = document.getElementById(`${day}-${meal}-time`);
       const disabledCheckbox = document.getElementById(`${day}-${meal}-disabled`);
+      const displaySelect = document.getElementById(`${day}-${meal}-display`);
 
       if (input) {
         mealTimes[day][meal] = input.value;
@@ -492,6 +828,10 @@ function updateMealTimes() {
 
       if (disabledCheckbox) {
         disabledMeals[day][meal] = disabledCheckbox.checked;
+      }
+
+      if (displaySelect) {
+        mealDisplayOptions[day][meal] = displaySelect.value;
       }
     });
   });
@@ -535,9 +875,9 @@ function getMealFromTime(day, time) {
 // Standardize dietary restriction string
 function standardizeDietaryRestriction(restriction) {
   if (!restriction) return '';
-    let standardized = restriction.toLowerCase();
-    standardized = standardized.replace(/:/g, '').trim();
-    standardized = standardized.replace(/^other\s+/i, '');
+  let standardized = restriction.toLowerCase();
+  standardized = standardized.replace(/:/g, '').trim();
+  standardized = standardized.replace(/^other\s+/i, '');
 
   return standardized;
 }
@@ -615,7 +955,7 @@ function generateMealReportsByDay() {
   headerRow1.appendChild(restrictionHeader);
 
   // Get all enabled meals in chronological order
-  const allEnabledMeals = [];
+  allEnabledMeals = []; // Reset the global variable
   const mealLabels = [];
 
   eventDays.forEach(day => {
@@ -629,6 +969,7 @@ function generateMealReportsByDay() {
         day,
         meal,
         mealTime: mealTimes[day][meal],
+        displayOption: mealDisplayOptions[day][meal],
         sortOrder: (dayOrder[day] || 99) * 10 + (['breakfast', 'lunch', 'dinner'].indexOf(meal) + 1)
       });
     });
@@ -642,10 +983,13 @@ function generateMealReportsByDay() {
   reportData.mealReports.allMeals.restrictions = ['Total', 'None'].concat(restrictions);
 
   // Initialize data structure for Excel export
-  mealLabels.forEach(label => {
+  mealLabels.forEach((label, index) => {
+    const mealInfo = allEnabledMeals[index];
     reportData.mealReports.allMeals.data[label] = {
       general: {},
-      judge: {}
+      judge: {},
+      combined: {},
+      displayOption: mealInfo.displayOption
     };
   });
 
@@ -659,30 +1003,57 @@ function generateMealReportsByDay() {
     return;
   }
 
-  // Add column headers for each meal
+  // Add column headers for each meal based on display option
   allEnabledMeals.forEach((mealInfo, index) => {
     const mealHeader = document.createElement('th');
     mealHeader.className = 'meal-header';
     mealHeader.textContent = `${mealInfo.day} ${mealInfo.meal.charAt(0).toUpperCase() + mealInfo.meal.slice(1)}`;
-    mealHeader.colSpan = 2;
+    
+    // Set colspan based on display option
+    if (mealInfo.displayOption === 'separate') {
+      mealHeader.colSpan = 2; // General and Judge
+    } else {
+      mealHeader.colSpan = 1; // Combined or General only
+    }
+    
     headerRow1.appendChild(mealHeader);
   });
 
   const headerRow2 = document.createElement('tr');
-  allEnabledMeals.forEach(() => {
-    const generalHeader = document.createElement('th');
-    generalHeader.className = 'rotated-header';
-    const generalDiv = document.createElement('div');
-    generalDiv.textContent = 'General';
-    generalHeader.appendChild(generalDiv);
-    headerRow2.appendChild(generalHeader);
+  
+  allEnabledMeals.forEach((mealInfo) => {
+    if (mealInfo.displayOption === 'separate') {
+      // Add both General and Judge headers
+      const generalHeader = document.createElement('th');
+      generalHeader.className = 'rotated-header';
+      const generalDiv = document.createElement('div');
+      generalDiv.textContent = 'General';
+      generalHeader.appendChild(generalDiv);
+      headerRow2.appendChild(generalHeader);
 
-    const judgeHeader = document.createElement('th');
-    judgeHeader.className = 'rotated-header';
-    const judgeDiv = document.createElement('div');
-    judgeDiv.textContent = 'Judge';
-    judgeHeader.appendChild(judgeDiv);
-    headerRow2.appendChild(judgeHeader);
+      const judgeHeader = document.createElement('th');
+      judgeHeader.className = 'rotated-header';
+      const judgeDiv = document.createElement('div');
+      judgeDiv.textContent = 'Judge';
+      judgeHeader.appendChild(judgeDiv);
+      headerRow2.appendChild(judgeHeader);
+    } else if (mealInfo.displayOption === 'combine') {
+      // Add a single "All" header
+      const allHeader = document.createElement('th');
+      allHeader.className = 'rotated-header';
+      const allDiv = document.createElement('div');
+      allDiv.textContent = 'All';
+      allHeader.appendChild(allDiv);
+      headerRow2.appendChild(allHeader);
+    } else if (mealInfo.displayOption === 'omit-judges') {
+      // Add only General header
+      const generalHeader = document.createElement('th');
+      generalHeader.className = 'rotated-header';
+      const generalDiv = document.createElement('div');
+      generalDiv.textContent = 'General';
+      generalHeader.appendChild(generalDiv);
+      headerRow2.appendChild(generalHeader);
+    }
   });
 
   thead.appendChild(headerRow1);
@@ -715,19 +1086,34 @@ function generateMealReportsByDay() {
 
     const generalCount = generalEmails.size;
     const judgeCount = judgeEmails.size;
+    const combinedCount = generalCount + judgeCount;
 
     // Store for Excel export
     const mealKey = mealLabels[index];
     reportData.mealReports.allMeals.data[mealKey].general['Total'] = generalCount;
     reportData.mealReports.allMeals.data[mealKey].judge['Total'] = judgeCount;
+    reportData.mealReports.allMeals.data[mealKey].combined['Total'] = combinedCount;
 
-    const generalCell = document.createElement('td');
-    generalCell.textContent = generalCount;
-    totalRow.appendChild(generalCell);
+    if (mealInfo.displayOption === 'separate') {
+      // Add separate cells for General and Judge
+      const generalCell = document.createElement('td');
+      generalCell.textContent = generalCount;
+      totalRow.appendChild(generalCell);
 
-    const judgeCell = document.createElement('td');
-    judgeCell.textContent = judgeCount;
-    totalRow.appendChild(judgeCell);
+      const judgeCell = document.createElement('td');
+      judgeCell.textContent = judgeCount;
+      totalRow.appendChild(judgeCell);
+    } else if (mealInfo.displayOption === 'combine') {
+      // Add single cell with combined count
+      const combinedCell = document.createElement('td');
+      combinedCell.textContent = combinedCount;
+      totalRow.appendChild(combinedCell);
+    } else if (mealInfo.displayOption === 'omit-judges') {
+      // Add only General count
+      const generalCell = document.createElement('td');
+      generalCell.textContent = generalCount;
+      totalRow.appendChild(generalCell);
+    }
   });
 
   tbody.appendChild(totalRow);
@@ -759,19 +1145,34 @@ function generateMealReportsByDay() {
 
     const generalCount = generalEmails.size;
     const judgeCount = judgeEmails.size;
+    const combinedCount = generalCount + judgeCount;
 
     // Store for Excel export
     const mealKey = mealLabels[index];
     reportData.mealReports.allMeals.data[mealKey].general['None'] = generalCount;
     reportData.mealReports.allMeals.data[mealKey].judge['None'] = judgeCount;
+    reportData.mealReports.allMeals.data[mealKey].combined['None'] = combinedCount;
 
-    const generalCell = document.createElement('td');
-    generalCell.textContent = generalCount;
-    noneRow.appendChild(generalCell);
+    if (mealInfo.displayOption === 'separate') {
+      // Add separate cells for General and Judge
+      const generalCell = document.createElement('td');
+      generalCell.textContent = generalCount;
+      noneRow.appendChild(generalCell);
 
-    const judgeCell = document.createElement('td');
-    judgeCell.textContent = judgeCount;
-    noneRow.appendChild(judgeCell);
+      const judgeCell = document.createElement('td');
+      judgeCell.textContent = judgeCount;
+      noneRow.appendChild(judgeCell);
+    } else if (mealInfo.displayOption === 'combine') {
+      // Add single cell with combined count
+      const combinedCell = document.createElement('td');
+      combinedCell.textContent = combinedCount;
+      noneRow.appendChild(combinedCell);
+    } else if (mealInfo.displayOption === 'omit-judges') {
+      // Add only General count
+      const generalCell = document.createElement('td');
+      generalCell.textContent = generalCount;
+      noneRow.appendChild(generalCell);
+    }
   });
 
   tbody.appendChild(noneRow);
@@ -808,6 +1209,7 @@ function generateMealReportsByDay() {
 
       const generalCount = generalEmails.size;
       const judgeCount = judgeEmails.size;
+      const combinedCount = generalCount + judgeCount;
 
       if (generalCount > 0 || judgeCount > 0) {
         anyNonZeroCount = true;
@@ -817,14 +1219,28 @@ function generateMealReportsByDay() {
       const mealKey = mealLabels[index];
       reportData.mealReports.allMeals.data[mealKey].general[restriction] = generalCount;
       reportData.mealReports.allMeals.data[mealKey].judge[restriction] = judgeCount;
+      reportData.mealReports.allMeals.data[mealKey].combined[restriction] = combinedCount;
 
-      const generalCell = document.createElement('td');
-      generalCell.textContent = generalCount;
-      row.appendChild(generalCell);
+      if (mealInfo.displayOption === 'separate') {
+        // Add separate cells for General and Judge
+        const generalCell = document.createElement('td');
+        generalCell.textContent = generalCount;
+        row.appendChild(generalCell);
 
-      const judgeCell = document.createElement('td');
-      judgeCell.textContent = judgeCount;
-      row.appendChild(judgeCell);
+        const judgeCell = document.createElement('td');
+        judgeCell.textContent = judgeCount;
+        row.appendChild(judgeCell);
+      } else if (mealInfo.displayOption === 'combine') {
+        // Add single cell with combined count
+        const combinedCell = document.createElement('td');
+        combinedCell.textContent = combinedCount;
+        row.appendChild(combinedCell);
+      } else if (mealInfo.displayOption === 'omit-judges') {
+        // Add only General count
+        const generalCell = document.createElement('td');
+        generalCell.textContent = generalCount;
+        row.appendChild(generalCell);
+      }
     });
 
     // Only add this row if there's at least one non-zero count
@@ -1079,211 +1495,4 @@ function generateConsentReport() {
 
   table.appendChild(tbody);
   container.appendChild(table);
-}
-
-// Export a specific report to Excel
-function exportReportToExcel(reportType) {
-  const workbook = XLSX.utils.book_new();
-
-  if (reportType === 'yearsOfService') {
-    const data = [
-      ['Years of Service', 'Number of Volunteers'],
-      ...reportData.yearsOfService.years.map(year => [year, reportData.yearsOfService.counts[year]])
-    ];
-
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Years of Service');
-    XLSX.writeFile(workbook, 'Years_of_Service_Report.xlsx');
-  }
-  else if (reportType === 'shirtSize') {
-    const data = [
-      ['Shirt Size', 'Number of Volunteers'],
-      ...reportData.shirtSizes.sizes.map(size => [size, reportData.shirtSizes.counts[size]])
-    ];
-
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Shirt Sizes');
-    XLSX.writeFile(workbook, 'Shirt_Sizes_Report.xlsx');
-  }
-  else if (reportType === 'consent') {
-    const data = [
-      ['Consent & Release Status', 'Number of Volunteers'],
-      ...reportData.consentStatus.statuses.map(status => [status, reportData.consentStatus.counts[status]])
-    ];
-
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Consent Status');
-    XLSX.writeFile(workbook, 'Consent_Status_Report.xlsx');
-  }
-  else if (reportType === 'meal-all') {
-    const allMeals = reportData.mealReports.allMeals;
-
-    if (!allMeals || !allMeals.meals || allMeals.meals.length === 0) {
-      alert('No meal data available to export.');
-      return;
-    }
-
-    const data = [];
-
-    // Header rows
-    const headerRow1 = ['Dietary Restriction'];
-    const headerRow2 = [];
-
-    allMeals.meals.forEach(meal => {
-      headerRow1.push(meal, ''); // Add empty cell for colspan
-      headerRow2.push('General', 'Judge');
-    });
-
-    data.push(headerRow1, headerRow2);
-
-    // Data rows
-    allMeals.restrictions.forEach(restriction => {
-      const row = [restriction];
-
-      allMeals.meals.forEach(meal => {
-        // Check if data exists for this meal
-        if (!allMeals.data[meal] || !allMeals.data[meal].general || !allMeals.data[meal].judge) {
-          row.push(0, 0); // Add zeros if no data
-          return;
-        }
-
-        row.push(
-          allMeals.data[meal].general[restriction] || 0,
-          allMeals.data[meal].judge[restriction] || 0
-        );
-      });
-
-      data.push(row);
-    });
-
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-
-    // Apply formatting
-    // Merge cells for meal headers
-    if (!worksheet['!merges']) worksheet['!merges'] = [];
-
-    allMeals.meals.forEach((_, index) => {
-      worksheet['!merges'].push({
-        s: {r: 0, c: 1 + index * 2},
-        e: {r: 0, c: 2 + index * 2}
-      });
-    });
-
-    XLSX.utils.book_append_sheet(workbook, worksheet, `All Meals`);
-    XLSX.writeFile(workbook, `Meal_Attendance_Report.xlsx`);
-  }
-}
-
-// Export all reports to a single Excel file
-function exportAllToExcel() {
-  const workbook = XLSX.utils.book_new();
-
-  // Add Years of Service sheet
-  const yosData = [
-    ['Years of Service', 'Number of Volunteers'],
-    ...reportData.yearsOfService.years.map(year => [year, reportData.yearsOfService.counts[year]])
-  ];
-  const yosWorksheet = XLSX.utils.aoa_to_sheet(yosData);
-  XLSX.utils.book_append_sheet(workbook, yosWorksheet, 'Years of Service');
-
-  // Add Shirt Sizes sheet
-  const shirtData = [
-    ['Shirt Size', 'Number of Volunteers'],
-    ...reportData.shirtSizes.sizes.map(size => [size, reportData.shirtSizes.counts[size]])
-  ];
-  const shirtWorksheet = XLSX.utils.aoa_to_sheet(shirtData);
-  XLSX.utils.book_append_sheet(workbook, shirtWorksheet, 'Shirt Sizes');
-
-  // Add Consent Status sheet
-  const consentData = [
-    ['Consent & Release Status', 'Number of Volunteers'],
-    ...reportData.consentStatus.statuses.map(status => [status, reportData.consentStatus.counts[status]])
-  ];
-  const consentWorksheet = XLSX.utils.aoa_to_sheet(consentData);
-  XLSX.utils.book_append_sheet(workbook, consentWorksheet, 'Consent Status');
-
-  // Add Meals sheet
-  const allMeals = reportData.mealReports.allMeals;
-  if (allMeals && allMeals.meals && allMeals.meals.length > 0) {
-    const data = [];
-
-    // Header rows
-    const headerRow1 = ['Dietary Restriction'];
-    const headerRow2 = [];
-
-    allMeals.meals.forEach(meal => {
-      headerRow1.push(meal, ''); // Add empty cell for colspan
-      headerRow2.push('General', 'Judge');
-    });
-
-    data.push(headerRow1, headerRow2);
-
-    // Data rows
-    allMeals.restrictions.forEach(restriction => {
-      const row = [restriction];
-
-      allMeals.meals.forEach(meal => {
-        // Check if data exists for this meal
-        if (!allMeals.data[meal] || !allMeals.data[meal].general || !allMeals.data[meal].judge) {
-          row.push(0, 0); // Add zeros if no data
-          return; // Use return instead of continue in forEach
-        }
-
-        row.push(
-          allMeals.data[meal].general[restriction] || 0,
-          allMeals.data[meal].judge[restriction] || 0
-        );
-      });
-
-      data.push(row);
-    });
-
-    const mealsWorksheet = XLSX.utils.aoa_to_sheet(data);
-
-    // Apply formatting - merge cells for meal headers
-    if (!mealsWorksheet['!merges']) mealsWorksheet['!merges'] = [];
-
-    allMeals.meals.forEach((_, index) => {
-      mealsWorksheet['!merges'].push({
-        s: {r: 0, c: 1 + index * 2},
-        e: {r: 0, c: 2 + index * 2}
-      });
-    });
-
-    XLSX.utils.book_append_sheet(workbook, mealsWorksheet, 'Meal Attendance');
-  }
-
-  XLSX.writeFile(workbook, 'Volunteer_Metrics_Report.xlsx');
-}
-
-// Function to create a mailto link for incomplete volunteers
-function emailIncompleteVolunteers() {
-  // Find volunteers with "Incomplete" consent status
-  const incompleteEmails = [];
-
-  // Create a map of email to consent status to deduplicate volunteers
-  const emailConsent = new Map();
-
-  parsedData.forEach(volunteer => {
-    if (volunteer.email) {
-      emailConsent.set(volunteer.email, volunteer.consentStatus);
-    }
-  });
-
-  // Find all unique emails with incomplete status
-  emailConsent.forEach((status, email) => {
-    if (status && status.toLowerCase().includes('incomplete')) {
-      incompleteEmails.push(email);
-    }
-  });
-
-  if (incompleteEmails.length === 0) {
-    alert('No volunteers with incomplete consent status found.');
-    return;
-  }
-
-  // Create the mailto link with BCC only
-  const mailtoLink = `mailto:?bcc=${incompleteEmails.join(',')}`;
-
-  window.open(mailtoLink);
 }
