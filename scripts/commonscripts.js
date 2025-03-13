@@ -1,3 +1,8 @@
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-LNHZ3NT97K');
+
 // Drag and drop event handlers
 function setupDragAndDrop(dropzone, fileInput, handleFiles) {
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -96,7 +101,7 @@ function addDarkModeToggle() {
   // Toggle dark mode on click
   toggleButton.addEventListener('click', () => {
     document.body.classList.toggle('dark-mode');
-    
+
     // Save preference to localStorage
     if (document.body.classList.contains('dark-mode')) {
       localStorage.setItem('theme', 'dark');
@@ -163,7 +168,7 @@ function addDarkModeCSS() {
       --email-button-bg: #0dcaf0; /* For email buttons */
       --email-button-text: white; /* For email button text */
     }
-    
+
     /* Dark mode class that will be toggled */
     .dark-mode {
       --background-color: #121212;
@@ -206,180 +211,180 @@ function addDarkModeCSS() {
       --email-button-bg: #0080c7; /* For email buttons in dark mode */
       --email-button-text: white; /* For email button text in dark mode */
     }
-    
+
     /* Apply variables to elements */
     body {
       background-color: var(--background-color);
       color: var(--text-color);
       transition: background-color 0.3s, color 0.3s;
     }
-    
+
     /* Fix for instruction boxes */
     table td p, table td ol, table td ul, table td li {
       color: var(--instructions-text);
     }
-    
+
     /* Fix for the instructions box background */
     table td {
       background-color: var(--background-color);
     }
-    
+
     /* Fix for dropzone text */
     #dropzone {
       background-color: var(--dropzone-bg);
       border-color: var(--dropzone-border);
       color: var(--dropzone-text);
     }
-    
+
     #dropzone.dragover {
       background-color: var(--dropzone-hover-bg);
     }
-    
+
     /* Fix for homepage tiles */
     .tile {
       background-color: var(--tile-bg);
       border-color: var(--border-color);
     }
-    
+
     .tile h2, .tile p {
       color: var(--tile-text);
     }
-    
+
     /* General table styling */
     table {
       color: var(--text-color);
       border-color: var(--table-border);
     }
-    
+
     th {
       background-color: var(--table-header-bg);
       color: var(--text-color);
       border-color: var(--table-border);
     }
-    
+
     td {
       border-color: var(--table-border);
     }
-    
+
     .table {
       color: var(--text-color);
     }
-    
+
     .table-striped tbody tr:nth-of-type(odd) {
       background-color: var(--secondary-bg-color);
     }
-    
+
     .table-hover tbody tr:hover {
       background-color: var(--table-hover-bg);
     }
-    
+
     .table-bordered {
       border-color: var(--table-border);
     }
-    
+
     .card, .report-section {
       background-color: var(--secondary-bg-color);
       border-color: var(--border-color);
     }
-    
+
     button, .btn {
       transition: background-color 0.3s;
     }
-    
+
     .btn-primary, #buttonContainer button, .export-btn {
       background-color: var(--primary-button-bg);
       color: var(--primary-button-text);
       border-color: var(--primary-button-bg);
     }
-    
+
     .btn-primary:hover, #buttonContainer button:hover, .export-btn:hover {
       background-color: var(--primary-button-hover-bg);
       border-color: var(--primary-button-hover-bg);
     }
-    
+
     .btn-secondary {
       background-color: var(--secondary-button-bg);
       color: var(--secondary-button-text);
     }
-    
+
     input, select, textarea, .form-control {
       background-color: var(--input-bg);
       color: var(--input-text);
       border-color: var(--input-border);
     }
-    
+
     /* Fix placeholder text color */
     ::placeholder {
       color: var(--placeholder-text) !important;
       opacity: 0.7 !important;
     }
-    
+
     input[type="time"] {
       color-scheme: var(--color-scheme, light);
     }
-    
+
     .dark-mode input[type="time"] {
       --color-scheme: dark;
     }
-    
+
     select option {
       background-color: var(--dropdown-bg);
       color: var(--dropdown-text);
     }
-    
+
     /* Fix disabled inputs */
     input:disabled, select:disabled, textarea:disabled, .form-control:disabled {
       background-color: var(--disabled-bg) !important;
       color: var(--disabled-text) !important;
       opacity: 0.8 !important;
     }
-    
+
     #error {
       color: var(--error-text);
     }
-    
+
     .footer {
       background-color: var(--footer-bg);
       border-color: var(--border-color);
     }
-    
+
     .modal-content {
       background-color: var(--modal-bg);
       color: var(--text-color);
     }
-    
+
     .extension-button {
       background-color: var(--extension-button-bg);
       color: var(--extension-button-text);
     }
-    
+
     .success {
       background-color: var(--success-bg);
       color: var(--success-text);
     }
-    
+
     .loading, .instructions {
       background-color: var(--secondary-bg-color);
       color: var(--text-color);
       border-color: var(--border-color);
     }
-    
+
     .warning {
       background-color: var(--warning-bg);
       color: var(--warning-text);
     }
-    
+
     /* Fix for charts and tables in dark mode */
     .meal-report th.rotated-header > div,
     .total-row {
       color: var(--text-color);
     }
-    
+
     .meal-report td:first-child,
     .meal-report th:first-child {
       color: var(--text-color);
     }
-    
+
     /* Dark mode toggle button styling */
     .theme-toggle {
       position: fixed;
@@ -399,91 +404,91 @@ function addDarkModeCSS() {
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
       transition: transform 0.3s ease;
     }
-    
+
     .theme-toggle:hover {
       transform: scale(1.1);
     }
-    
+
     .theme-toggle svg {
       width: 24px;
       height: 24px;
       transition: transform 0.5s ease;
     }
-    
+
     .dark-mode .theme-toggle .sun-icon {
       display: block;
     }
-    
+
     .dark-mode .theme-toggle .moon-icon {
       display: none;
     }
-    
+
     .theme-toggle .sun-icon {
       display: none;
     }
-    
+
     .theme-toggle .moon-icon {
       display: block;
     }
-    
+
     /* Fix links in dark mode */
     .dark-mode a:not(.btn):not(.extension-button) {
       color: #4dabf7;
     }
-    
+
     .dark-mode a:not(.btn):not(.extension-button):hover {
       color: #74c0fc;
     }
-    
+
     /* Additional fixes for specific elements */
     .dark-mode .highlight-box {
       background-color: var(--secondary-bg-color);
       border-color: var(--primary-button-bg);
     }
-    
+
     .dark-mode .privacy-section h3 {
       color: var(--text-color);
     }
-    
+
     /* Fix for bootstrap components in dark mode */
-    .dark-mode .container, 
+    .dark-mode .container,
     .dark-mode .container-fluid {
       background-color: var(--background-color);
     }
 
     /* Comprehensive fixes for dark mode across all pages */
-    
+
     /* Fix for tables with class="table" in dark mode - more specific selector */
     .dark-mode table.table,
     .dark-mode .table {
       color: var(--text-color) !important;
     }
-    
+
     .dark-mode table.table td,
     .dark-mode .table td {
       background-color: var(--background-color) !important;
       color: var(--text-color) !important;
     }
-    
+
     .dark-mode table.table th,
     .dark-mode .table th {
       background-color: var(--table-header-bg) !important;
       color: var(--text-color) !important;
     }
-    
+
     /* Fix for table row hover in dark mode */
     .dark-mode .table-hover tbody tr:hover {
       background-color: var(--secondary-bg-color) !important;
       color: var(--text-color) !important;
     }
-    
+
     /* Fix for Badge page sample table - preserve colors regardless of mode */
     table[style*="text-align: center"][style*="margin: 0px auto"] {
       /* This targets the sample badge table specifically */
       background-color: white !important;
       color: black !important;
     }
-    
+
     table[style*="text-align: center"][style*="margin: 0px auto"] td,
     table[style*="text-align: center"][style*="margin: 0px auto"] p,
     table[style*="text-align: center"][style*="margin: 0px auto"] input,
@@ -491,44 +496,44 @@ function addDarkModeCSS() {
       background-color: white !important;
       color: black !important;
     }
-    
+
     /* Exception for the black background row in the badge table */
     table[style*="text-align: center"][style*="margin: 0px auto"] td[bgcolor="black"] {
       background-color: black !important;
     }
-    
+
     table[style*="text-align: center"][style*="margin: 0px auto"] td[bgcolor="black"] p {
       color: white !important;
     }
-    
+
     /* Fix for abbreviation tables in dark mode */
     .dark-mode .role-abbreviation-container h3,
     .dark-mode .role-abbreviation-container p {
       color: var(--text-color) !important;
     }
-    
+
     .dark-mode .role-abbreviation-table th {
       background-color: var(--table-header-bg) !important;
       color: var(--text-color) !important;
     }
-    
+
     .dark-mode .role-abbreviation-table td {
       background-color: var(--background-color) !important;
       color: var(--text-color) !important;
     }
-    
+
     .dark-mode .role-abbreviation-input {
       background-color: var(--input-bg) !important;
       color: var(--input-text) !important;
       border-color: var(--input-border) !important;
     }
-    
+
     /* Fix for placeholder text in role abbreviation inputs */
     .dark-mode .role-abbreviation-input::placeholder {
       color: #aaaaaa !important;
       opacity: 0.8 !important;
     }
-    
+
     /* Fix for select elements in dark mode */
     .dark-mode select,
     .dark-mode #roleSortOrder,
@@ -538,67 +543,67 @@ function addDarkModeCSS() {
       background-color: var(--dropdown-bg) !important;
       color: var(--dropdown-text) !important;
     }
-    
+
     /* Fix for homepage tile hover in dark mode */
     .dark-mode .tile:hover {
       background-color: var(--secondary-bg-color) !important;
     }
-    
+
     .dark-mode .tile:hover h2,
     .dark-mode .tile:hover p {
       color: var(--text-color) !important;
     }
-    
+
     /* Fix for parser page table */
     .dark-mode #outputTable th,
     .dark-mode #outputTable td {
       background-color: var(--table-header-bg) !important;
       color: var(--text-color) !important;
     }
-    
+
     .dark-mode #outputTable tbody td {
       background-color: var(--background-color) !important;
     }
-    
+
     /* Fix for certification page */
     .dark-mode .role-section h4 {
       border-bottom-color: var(--text-color) !important;
       color: var(--text-color) !important;
     }
-    
+
     .dark-mode .role-section h5 {
       color: var(--text-color) !important;
     }
-    
+
     .dark-mode #version-tag,
     .dark-mode label[for="programSelector"],
     .dark-mode .program-selector-container label {
       color: var(--text-color) !important;
     }
-    
+
     .dark-mode i {
       color: var(--text-color) !important;
     }
-    
+
     /* Fix for email buttons */
     .email-button {
       background-color: var(--email-button-bg) !important;
       color: var(--email-button-text) !important;
       border: none !important;
     }
-    
+
     .dark-mode .email-button {
       background-color: var(--email-button-bg) !important;
       color: var(--email-button-text) !important;
       border: none !important;
     }
-    
+
     /* Fix for event planning reporter */
     .dark-mode .meal-report th,
     .dark-mode .meal-report td {
       color: var(--text-color) !important;
     }
-    
+
     .dark-mode #yearsOfServiceReport th,
     .dark-mode #yearsOfServiceReport td,
     .dark-mode #shirtSizeReport th,
@@ -607,26 +612,26 @@ function addDarkModeCSS() {
     .dark-mode #consentReport td {
       color: var(--text-color) !important;
     }
-    
+
     /* Fix for time inputs in event planning */
     .dark-mode .time-input-container input[type="time"] {
       background-color: var(--input-bg) !important;
       color: var(--input-text) !important;
       border-color: var(--input-border) !important;
     }
-    
+
     /* Fix for disabled time inputs in event planning */
     .dark-mode .time-input-container input[type="time"]:disabled {
       background-color: var(--disabled-bg) !important;
       color: var(--disabled-text) !important;
       opacity: 0.8 !important;
     }
-    
+
     /* Fix for time checkbox labels */
     .dark-mode .nomeal-label {
       color: var(--text-color) !important;
     }
-    
+
     /* Fix for any other form controls that might be affected */
     .dark-mode button,
     .dark-mode .btn,
@@ -635,7 +640,7 @@ function addDarkModeCSS() {
     .dark-mode textarea {
       color: var(--input-text) !important;
     }
-    
+
     /* Fix for instructions text */
     .dark-mode table td small,
     .dark-mode table td i,
@@ -643,66 +648,66 @@ function addDarkModeCSS() {
     .dark-mode .table td i {
       color: var(--text-color) !important;
     }
-    
+
     /* General fix for various text elements */
-    .dark-mode h1, 
-    .dark-mode h2, 
-    .dark-mode h3, 
-    .dark-mode h4, 
-    .dark-mode h5, 
-    .dark-mode h6, 
-    .dark-mode p, 
-    .dark-mode span, 
+    .dark-mode h1,
+    .dark-mode h2,
+    .dark-mode h3,
+    .dark-mode h4,
+    .dark-mode h5,
+    .dark-mode h6,
+    .dark-mode p,
+    .dark-mode span,
     .dark-mode div {
       color: var(--text-color);
     }
-    
+
     /* Fix for any additional borders */
-    .dark-mode hr, 
-    .dark-mode .border, 
+    .dark-mode hr,
+    .dark-mode .border,
     .dark-mode *[class*="border"] {
       border-color: var(--border-color) !important;
     }
-    
+
     /* Fix specifically for the "See more resources" button */
     .dark-mode .btn-primary {
       background-color: var(--primary-button-bg) !important;
       color: var(--primary-button-text) !important;
       border-color: var(--primary-button-bg) !important;
     }
-    
+
     .dark-mode .btn-primary:hover {
       background-color: var(--primary-button-hover-bg) !important;
     }
-    
+
     /* ADDITIONAL FIXES BASED ON FEEDBACK */
-    
+
     /* Badges: Role box - remove white background and ensure black box with white text */
     table[style*="text-align: center"][style*="margin: 0px auto"] td[bgcolor="black"] td,
     table[style*="text-align: center"][style*="margin: 0px auto"] td[bgcolor="black"] div {
       background-color: transparent !important;
     }
-    
+
     /* Badges: "Sort by" selector in dark mode */
     .dark-mode #roleSortOrder {
       background-color: var(--dropdown-bg) !important;
       color: var(--dropdown-text) !important;
       border-color: var(--input-border) !important;
     }
-    
+
     /* Badges: Placeholder text in abbreviation fields */
     .dark-mode .role-abbreviation-input::placeholder {
       color: #aaaaaa !important;
       opacity: 1 !important;
     }
-    
+
     /* Parser: "Filter volunteers" selector */
     .dark-mode #volunteerFilter {
       background-color: var(--dropdown-bg) !important;
       color: var(--dropdown-text) !important;
       border-color: var(--input-border) !important;
     }
-    
+
     /* Certification: Email button text */
     .email-button {
       background-color: #0dcaf0 !important;
@@ -710,21 +715,21 @@ function addDarkModeCSS() {
       font-weight: bold !important;
       border: none !important;
     }
-    
+
     .dark-mode .email-button {
       background-color: #0080c7 !important;
       color: #ffffff !important; /* Light text on dark background */
       font-weight: bold !important;
       border: none !important;
     }
-    
+
     /* Certification: "Select program" selector */
     .dark-mode #programSelector {
       background-color: var(--dropdown-bg) !important;
       color: var(--dropdown-text) !important;
       border-color: var(--input-border) !important;
     }
-    
+
     /* Event Planning: Disabled fields for "no meal" checkboxes */
     .dark-mode input[type="time"]:disabled,
     .dark-mode select:disabled {
@@ -732,7 +737,7 @@ function addDarkModeCSS() {
       color: #aaaaaa !important; /* Light gray text for better contrast */
       opacity: 0.8 !important;
     }
-    
+
     /* Event Planning: Time selectors */
     .dark-mode input[type="time"] {
       background-color: var(--input-bg) !important;
@@ -756,7 +761,7 @@ function addDarkModeCSS() {
             background-color: white !important;
             color: black !important;
           }
-          
+
           table[style*="text-align: center"][style*="margin: 0px auto"] td,
           table[style*="text-align: center"][style*="margin: 0px auto"] p,
           table[style*="text-align: center"][style*="margin: 0px auto"] input,
@@ -764,12 +769,12 @@ function addDarkModeCSS() {
             background-color: white !important;
             color: black !important;
           }
-          
+
           /* Keep black background row black */
           table[style*="text-align: center"][style*="margin: 0px auto"] td[bgcolor="black"] {
             background-color: black !important;
           }
-          
+
           table[style*="text-align: center"][style*="margin: 0px auto"] td[bgcolor="black"] p {
             color: white !important;
           }
@@ -823,7 +828,7 @@ function addCommonElements() {
         padding: 8px 12px;
         font-size: 14px;
       }
-      
+
       .extension-button img {
         width: 20px;
         height: 20px;
@@ -838,16 +843,16 @@ function addCommonElements() {
   button.href = 'https://chromewebstore.google.com/detail/vc-tools-integration/bgndacoknekjiadmlogmnechjnabggjf';
   button.className = 'extension-button';
   button.target = '_blank';
-  
+
   // Create the inline SVG for Chrome logo
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('width', '24');
   svg.setAttribute('height', '24');
   svg.setAttribute('viewBox', '0 0 48 48');
   svg.style.marginRight = '8px';
- 
+
   const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-  
+
   const gradients = [
     {
       id: 'a',
@@ -874,7 +879,7 @@ function addCommonElements() {
       ]
     }
   ];
-  
+
   gradients.forEach(gradient => {
     const linearGradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
     linearGradient.setAttribute('id', gradient.id);
@@ -883,19 +888,19 @@ function addCommonElements() {
     linearGradient.setAttribute('x2', gradient.x2);
     linearGradient.setAttribute('y2', gradient.y2);
     linearGradient.setAttribute('gradientUnits', 'userSpaceOnUse');
-    
+
     gradient.stops.forEach(stop => {
       const stopElement = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
       stopElement.setAttribute('offset', stop.offset);
       stopElement.setAttribute('stop-color', stop.color);
       linearGradient.appendChild(stopElement);
     });
-    
+
     defs.appendChild(linearGradient);
   });
-  
+
   svg.appendChild(defs);
-  
+
   // Create the main SVG elements
   const elements = [
     {
@@ -941,32 +946,32 @@ function addCommonElements() {
       }
     }
   ];
-  
+
   // Add each element to the SVG
   elements.forEach(element => {
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', element.type);
-    
+
     // Set all attributes
     for (const [key, value] of Object.entries(element.attrs)) {
       svgElement.setAttribute(key, value);
     }
-    
+
     svg.appendChild(svgElement);
   });
-  
+
   // Create the button text
   const buttonText = document.createTextNode('Add to Chrome');
-  
+
   // Assemble the button
   button.appendChild(svg);
   button.appendChild(buttonText);
-  
+
   // Add the button to the page
   document.body.appendChild(button);
-  
+
   // Footer (checks first for existing footer and omits)
   let existingFooter = document.querySelector('.footer');
-  
+
   if (!existingFooter) {
     const footerStyle = document.createElement('style');
     footerStyle.textContent = `
@@ -978,31 +983,31 @@ function addCommonElements() {
         border-top: 1px solid #ddd;
         width: 100%;
       }
-      
+
       .footer p {
         margin-bottom: 0;
       }
-      
+
       .footer a {
         color: #007bff;
         text-decoration: none;
       }
-      
+
       .footer a:hover {
         text-decoration: underline;
       }
     `;
     document.head.appendChild(footerStyle);
-    
+
     const footer = document.createElement('div');
     footer.className = 'footer';
-    
+
     const p = document.createElement('p');
-    
+
     p.innerHTML = '<a href="https://www.nytimes.com/2025/02/27/technology/personaltech/vibecoding-ai-software-programming.html">Vibecoded</a> by <a href="mailto:tools@jaredhk.com">Jared Hasen-Klein</a> with help from <a href="https://www.anthropic.com/news/introducing-claude">Claude</a> and <a href="https://github.com/jaredhasenklein/vctools">you (hopefully)</a>.<br><small><a href="privacy.html">Privacy Policy</a></small>';
-    
+
     footer.appendChild(p);
-    
+
     document.body.appendChild(footer);
   }
 

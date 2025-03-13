@@ -3,22 +3,14 @@
 <head>
     <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNHZ3NT97K"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-LNHZ3NT97K');
-  </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FIRST Certification Status Checker</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="scripts/commonscripts.js"></script>
-    <script src="scripts/certification.js" defer></script>
+    <script src="scripts/certification.js"></script>
     <link rel="stylesheet" href="style/commonstyle.css">
     <link rel="stylesheet" href="style/certification.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
 <body class="container-fluid">
 <div class="content-wrapper">
@@ -49,12 +41,12 @@
   </tr>
       </table>
     </div>
-    
+
     <div id="version-tag" style="display:none;">
         Currently Configured For: <span class="version-box"></span>
 <br><i>Please note that FTC and FLL role mappings are still in beta.</i>
     </div>
-    
+
     <div id="resultsContainer"></div>
 </div>
 
