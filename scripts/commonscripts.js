@@ -1154,15 +1154,18 @@ function addFooter() {
 }
 
 async function addCommonElements() {
+  // Check if top bar already exists to avoid duplicates
+  const existingTopBar = document.getElementById('top-bar');
+  if (existingTopBar) {
+    return; // Top bar already exists, so exit
+  }
+  
   // Generate buttons first
   const homeButton = addHomeButton();
   const extensionButton = await addExtensionButton();
   
-  // Get existing home button to remove
-  const existingHomeButton = document.querySelector('a[href="index"].btn.btn-primary');
-  if (existingHomeButton) {
-    existingHomeButton.remove();
-  }
+  // Remove any existing standalone home buttons
+  // IMPORTANT: Do this AFTER the top bar is created and inserted
   
   // Create top bar with buttons
   if (homeButton || extensionButton) {
@@ -1177,16 +1180,25 @@ async function addCommonElements() {
     
     // Initialize scrolling behavior
     initScrollBehavior(topBar);
+    
+    // NOW remove any existing standalone home buttons
+    // This ensures we don't remove buttons until after the top bar is added
+    const existingHomeButtons = document.querySelectorAll('a[href="index"].btn.btn-primary:not(.home-button)');
+    existingHomeButtons.forEach(button => {
+      button.remove();
+    });
   }
 
-  // Add footer
+  // Add footer if it doesn't exist yet
   addFooter();
 
-  // Add dark mode toggle and CSS
-  addDarkModeCSS();
-  addDarkModeToggle();
+  // Add dark mode toggle and CSS if not added yet
+  const darkModeToggle = document.querySelector('.theme-toggle');
+  if (!darkModeToggle) {
+    addDarkModeCSS();
+    addDarkModeToggle();
+  }
 }
-
 // Run when the DOM is fully loaded
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', addCommonElements);
