@@ -159,92 +159,96 @@ document.addEventListener('DOMContentLoaded', function() {
   // Define label styles
   const labelStyles = {
     // Style A
-    'styleA': {
-      name: 'Style A - Full Name',
-      render: (labels, doc, x, y, width, height, config) => {
-        const margin = 0.1;
-        const availableWidth = width - (2 * margin);
+    // Style A
+'styleA': {
+  name: 'Style A - Full Name',
+  render: (labels, doc, x, y, width, height, config) => {
+    const margin = 0.1;
+    const availableWidth = width - (2 * margin);
 
-        // Get current label to render (first in array)
-        const label = labels[0];
+    // Get current label to render (first in array)
+    const label = labels[0];
 
-        // Apply role abbreviation if available
-        const role = formatRole(label.roles);
-        const abbreviatedRole = applyRoleAbbreviation(role);
+    // Apply role abbreviation if available
+    const role = formatRole(label.roles);
+    const abbreviatedRole = applyRoleAbbreviation(role);
 
-        // Calculate max font sizes for all elements across all labels
-        const allFirstNames = labels.map(label => (label.firstname || '').toUpperCase());
-        const allLastNames = labels.map(label => (label.lastname || '').toUpperCase());
-        const allRoles = labels.map(label => {
-          const role = formatRole(label.roles);
-          return applyRoleAbbreviation(role);
-        });
+    // Calculate max font sizes for all elements across all labels
+    const allFirstNames = labels.map(label => (label.firstname || '').toUpperCase());
+    const allLastNames = labels.map(label => (label.lastname || '').toUpperCase());
+    const allRoles = labels.map(label => {
+      const role = formatRole(label.roles);
+      return applyRoleAbbreviation(role);
+    });
 
-        // Set maximum font sizes to prevent overlap
-        const firstNameFontSize = Math.min(calculateMaxFontSize(allFirstNames, doc, availableWidth * 0.9, 36, true), 30);
-        const lastNameFontSize = Math.min(calculateMaxFontSize(allLastNames, doc, availableWidth * 0.9, 24), 20);
-        const roleFontSize = Math.min(calculateMaxFontSize(allRoles, doc, availableWidth * 0.9, 18), 16);
+    // Set maximum font sizes to prevent overlap
+    const firstNameFontSize = Math.min(calculateMaxFontSize(allFirstNames, doc, availableWidth * 0.9, 36, true), 30);
+    const lastNameFontSize = Math.min(calculateMaxFontSize(allLastNames, doc, availableWidth * 0.9, 24), 20);
+    const roleFontSize = Math.min(calculateMaxFontSize(allRoles, doc, availableWidth * 0.9, 18), 16);
 
-        // Proportional spacing structure
-        const totalHeight = height;
-        const topSection = totalHeight * 0.4;     // Top 40% for name
-        const middleSection = totalHeight * 0.15; // 15% for last name
-        const bottomSection = totalHeight * 0.15; // 15% for roles section
-        const bottomTextSection = totalHeight * 0.2; // 20% for bottom text
-        const padding = totalHeight * 0.05;      // 5% padding between sections
+    // Proportional spacing structure
+    const totalHeight = height;
+    const topSection = totalHeight * 0.4;     // Top 40% for name
+    const middleSection = totalHeight * 0.15; // 15% for last name
+    const bottomSection = totalHeight * 0.15; // 15% for roles section
+    const bottomTextSection = totalHeight * 0.2; // 20% for bottom text
+    const padding = totalHeight * 0.05;      // 5% padding between sections
 
-        // Calculate available space in top section
-        const topAreaHeight = topSection + middleSection;
+    // Calculate available space in top section
+    const topAreaHeight = topSection + middleSection;
 
-        // Calculate equal spacing between elements
-        const equalSpacing = topAreaHeight / 4; // Divide by 4 to get 2 spaces + 2 text areas
+    // Calculate equal spacing between elements
+    const equalSpacing = topAreaHeight / 4; // Divide by 4 to get 2 spaces + 2 text areas
 
-        // Position elements with equal spacing
-        const topTextY = y + padding + equalSpacing * 0.5;
-        const firstNameY = y + padding + equalSpacing * 2;
-        const lastNameY = y + padding + equalSpacing * 3.5;
-        const roleY = y + padding + topSection + middleSection + padding * 2;
-        const bottomY = y + height - (padding * 1.8);
+    // Position elements with equal spacing
+    const topTextY = y + padding + equalSpacing * 0.5;
+    const firstNameY = y + padding + equalSpacing * 2;
+    const lastNameY = y + padding + equalSpacing * 3.5;
 
-        // Top text
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'normal');
-        applyFirstItalics(config.topText, doc, x + width / 2, topTextY, 'center');
+const roleY = lastNameY + (lastNameFontSize / 72) * 0.5;
 
-        // First name
-        doc.setFontSize(firstNameFontSize);
-        doc.setFont(undefined, 'bold');
-        doc.text((label.firstname || '').toUpperCase(), x + width / 2, firstNameY, { align: 'center' });
+    // Keep the bottom text in its original position
+    const bottomY = y + height - (padding * 1.8);
 
-        // Last name
-        doc.setFontSize(lastNameFontSize);
-        doc.setFont(undefined, 'normal');
-        doc.text((label.lastname || '').toUpperCase(), x + width / 2, lastNameY, { align: 'center' });
+    // Top text
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    applyFirstItalics(config.topText, doc, x + width / 2, topTextY, 'center');
 
-        // Role - BLACK BAR
-        doc.setFillColor(0, 0, 0);
-        doc.rect(x, roleY, width, bottomSection, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(roleFontSize);
-        doc.setFont(undefined, 'normal');
+    // First name
+    doc.setFontSize(firstNameFontSize);
+    doc.setFont(undefined, 'bold');
+    doc.text((label.firstname || '').toUpperCase(), x + width / 2, firstNameY, { align: 'center' });
 
-        // Calculate center of black bar for vertical centering
-        const roleCenterY = roleY + (bottomSection / 2);
+    // Last name
+    doc.setFontSize(lastNameFontSize);
+    doc.setFont(undefined, 'normal');
+    doc.text((label.lastname || '').toUpperCase(), x + width / 2, lastNameY, { align: 'center' });
 
-        // Add font offset for proper baseline positioning
-        const fontOffset = roleFontSize / 72 * 0.35;
-        const roleTextY = roleCenterY + fontOffset;
+    // Role - BLACK BAR
+    doc.setFillColor(0, 0, 0);
+    doc.rect(x, roleY, width, bottomSection, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(roleFontSize);
+    doc.setFont(undefined, 'normal');
 
-        applyFirstItalics(abbreviatedRole, doc, x + width / 2, roleTextY, 'center');
-        doc.setTextColor(0, 0, 0);
+    // Calculate center of black bar for vertical centering
+    const roleCenterY = roleY + (bottomSection / 2);
 
-        // Bottom text
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'normal');
-        applyFirstItalics(config.bottomLeftText, doc, x + 0.1, bottomY, 'left');
-        applyFirstItalics(config.bottomRightText, doc, x + width - 0.1, bottomY, 'right');
-      }
-    },
+    // Add font offset for proper baseline positioning
+    const fontOffset = roleFontSize / 72 * 0.35;
+    const roleTextY = roleCenterY + fontOffset;
+
+    applyFirstItalics(abbreviatedRole, doc, x + width / 2, roleTextY, 'center');
+    doc.setTextColor(0, 0, 0);
+
+    // Bottom text
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    applyFirstItalics(config.bottomLeftText, doc, x + 0.1, bottomY, 'left');
+    applyFirstItalics(config.bottomRightText, doc, x + width - 0.1, bottomY, 'right');
+  }
+},
 
     // Style B
     'styleB': {
