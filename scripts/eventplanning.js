@@ -384,19 +384,19 @@ function generateDesktopLayout(container) {
       // Display options dropdown container
       const displayOptionContainer = document.createElement('div');
       displayOptionContainer.className = 'display-option-container';
-      
+
       const displaySelect = document.createElement('select');
       displaySelect.id = `${day}-${meal}-display`;
       displaySelect.className = 'form-control form-select form-select-sm display-select';
       displaySelect.disabled = disabledMeals[day][meal];
-      
+
       // Add options
       const options = [
         { value: 'separate', text: 'Separate judges & general' },
         { value: 'combine', text: 'Combine all volunteers' },
         { value: 'omit-judges', text: 'Omit judges' }
       ];
-      
+
       options.forEach(opt => {
         const option = document.createElement('option');
         option.value = opt.value;
@@ -406,7 +406,7 @@ function generateDesktopLayout(container) {
         }
         displaySelect.appendChild(option);
       });
-      
+
       displayOptionContainer.appendChild(displaySelect);
       container.appendChild(displayOptionContainer);
 
@@ -489,12 +489,12 @@ function exportReportToExcel(reportType) {
 
     // Header rows
     const headerRow1 = ['Dietary Restriction'];
-    const headerRow2 = [];
+    const headerRow2 = [''];  // Add empty cell for "Dietary Restriction" column
 
     allMeals.meals.forEach((meal, index) => {
       const mealInfo = allEnabledMeals[index];
       const displayOption = allMeals.data[meal].displayOption;
-      
+
       if (displayOption === 'separate') {
         headerRow1.push(meal, ''); // Add empty cell for colspan
         headerRow2.push('General', 'Judge');
@@ -516,24 +516,30 @@ function exportReportToExcel(reportType) {
       allMeals.meals.forEach(meal => {
         // Check if data exists for this meal
         if (!allMeals.data[meal]) {
-          row.push(0); // Add zero if no data
-          if (allMeals.data[meal]?.displayOption === 'separate') {
-            row.push(0); // Add second zero for Judge column
-          }
-          return;
-        }
+          // Parse the meal label to get day and meal type
+          const parts = meal.split(' ');
+          const day = parts[0];
+          const mealType = parts[1].toLowerCase();
 
-        const displayOption = allMeals.data[meal].displayOption;
-        
-        if (displayOption === 'separate') {
-          row.push(
-            allMeals.data[meal].general[restriction] || 0,
-            allMeals.data[meal].judge[restriction] || 0
-          );
-        } else if (displayOption === 'combine') {
-          row.push(allMeals.data[meal].combined[restriction] || 0);
-        } else if (displayOption === 'omit-judges') {
-          row.push(allMeals.data[meal].general[restriction] || 0);
+          // Look up the display option in mealDisplayOptions
+          if (mealDisplayOptions[day] && mealDisplayOptions[day][mealType] === 'separate') {
+            row.push(0, 0); // Add zeros for General and Judge columns
+          } else {
+            row.push(0); // Add a single zero for 'combine' or 'omit-judges'
+          }
+        } else {
+          const displayOption = allMeals.data[meal].displayOption;
+
+          if (displayOption === 'separate') {
+            row.push(
+              allMeals.data[meal].general[restriction] || 0,
+              allMeals.data[meal].judge[restriction] || 0
+            );
+          } else if (displayOption === 'combine') {
+            row.push(allMeals.data[meal].combined[restriction] || 0);
+          } else if (displayOption === 'omit-judges') {
+            row.push(allMeals.data[meal].general[restriction] || 0);
+          }
         }
       });
 
@@ -548,18 +554,39 @@ function exportReportToExcel(reportType) {
 
     let colIndex = 1; // Start after the "Dietary Restriction" column
     allMeals.meals.forEach(meal => {
-      const displayOption = allMeals.data[meal].displayOption;
-      
-      if (displayOption === 'separate') {
-        // Merge cells for the meal header (spans 2 columns)
-        worksheet['!merges'].push({
-          s: {r: 0, c: colIndex},
-          e: {r: 0, c: colIndex + 1}
-        });
-        colIndex += 2; // Move past the two columns (General and Judge)
+      // Check if data exists for this meal
+      if (!allMeals.data[meal]) {
+        // Parse the meal label to get day and meal type
+        const parts = meal.split(' ');
+        const day = parts[0];
+        const mealType = parts[1].toLowerCase();
+
+        // Look up the display option in mealDisplayOptions
+        if (mealDisplayOptions[day] && mealDisplayOptions[day][mealType] === 'separate') {
+          // Merge cells for the meal header (spans 2 columns)
+          worksheet['!merges'].push({
+            s: {r: 0, c: colIndex},
+            e: {r: 0, c: colIndex + 1}
+          });
+          colIndex += 2; // Move past the two columns (General and Judge)
+        } else {
+          // For 'combine' and 'omit-judges', no merging needed
+          colIndex += 1;
+        }
       } else {
-        // For 'combine' and 'omit-judges', no merging needed
-        colIndex += 1;
+        const displayOption = allMeals.data[meal].displayOption;
+
+        if (displayOption === 'separate') {
+          // Merge cells for the meal header (spans 2 columns)
+          worksheet['!merges'].push({
+            s: {r: 0, c: colIndex},
+            e: {r: 0, c: colIndex + 1}
+          });
+          colIndex += 2; // Move past the two columns (General and Judge)
+        } else {
+          // For 'combine' and 'omit-judges', no merging needed
+          colIndex += 1;
+        }
       }
     });
 
@@ -603,11 +630,11 @@ function exportAllToExcel() {
 
     // Header rows
     const headerRow1 = ['Dietary Restriction'];
-    const headerRow2 = [];
-    
+    const headerRow2 = [''];  // Add empty cell for "Dietary Restriction" column
+
     allMeals.meals.forEach((meal, index) => {
       const displayOption = allMeals.data[meal].displayOption;
-      
+
       if (displayOption === 'separate') {
         headerRow1.push(meal, ''); // Add empty cell for colspan
         headerRow2.push('General', 'Judge');
@@ -629,24 +656,30 @@ function exportAllToExcel() {
       allMeals.meals.forEach(meal => {
         // Check if data exists for this meal
         if (!allMeals.data[meal]) {
-          row.push(0);
-          if (allMeals.data[meal]?.displayOption === 'separate') {
-            row.push(0); // Add a second zero for Judge column
-          }
-          return;
-        }
+          // Parse the meal label to get day and meal type
+          const parts = meal.split(' ');
+          const day = parts[0];
+          const mealType = parts[1].toLowerCase();
 
-        const displayOption = allMeals.data[meal].displayOption;
-        
-        if (displayOption === 'separate') {
-          row.push(
-            allMeals.data[meal].general[restriction] || 0,
-            allMeals.data[meal].judge[restriction] || 0
-          );
-        } else if (displayOption === 'combine') {
-          row.push(allMeals.data[meal].combined[restriction] || 0);
-        } else if (displayOption === 'omit-judges') {
-          row.push(allMeals.data[meal].general[restriction] || 0);
+          // Look up the display option in mealDisplayOptions
+          if (mealDisplayOptions[day] && mealDisplayOptions[day][mealType] === 'separate') {
+            row.push(0, 0); // Add zeros for General and Judge columns
+          } else {
+            row.push(0); // Add a single zero for 'combine' or 'omit-judges'
+          }
+        } else {
+          const displayOption = allMeals.data[meal].displayOption;
+
+          if (displayOption === 'separate') {
+            row.push(
+              allMeals.data[meal].general[restriction] || 0,
+              allMeals.data[meal].judge[restriction] || 0
+            );
+          } else if (displayOption === 'combine') {
+            row.push(allMeals.data[meal].combined[restriction] || 0);
+          } else if (displayOption === 'omit-judges') {
+            row.push(allMeals.data[meal].general[restriction] || 0);
+          }
         }
       });
 
@@ -660,17 +693,37 @@ function exportAllToExcel() {
 
     let colIndex = 1; // Reset column index
     allMeals.meals.forEach(meal => {
-      const displayOption = allMeals.data[meal].displayOption;
-      
-      if (displayOption === 'separate') {
-        // Merge cells for the meal header (spans 2 columns)
-        mealsWorksheet['!merges'].push({
-          s: {r: 0, c: colIndex},
-          e: {r: 0, c: colIndex + 1}
-        });
-        colIndex += 2; // Move past the two columns
+      // Check if data exists for this meal
+      if (!allMeals.data[meal]) {
+        // Parse the meal label to get day and meal type
+        const parts = meal.split(' ');
+        const day = parts[0];
+        const mealType = parts[1].toLowerCase();
+
+        // Look up the display option in mealDisplayOptions
+        if (mealDisplayOptions[day] && mealDisplayOptions[day][mealType] === 'separate') {
+          // Merge cells for the meal header (spans 2 columns)
+          mealsWorksheet['!merges'].push({
+            s: {r: 0, c: colIndex},
+            e: {r: 0, c: colIndex + 1}
+          });
+          colIndex += 2; // Move past the two columns
+        } else {
+          colIndex += 1; // Just move to the next column
+        }
       } else {
-        colIndex += 1; // Just move to the next column
+        const displayOption = allMeals.data[meal].displayOption;
+
+        if (displayOption === 'separate') {
+          // Merge cells for the meal header (spans 2 columns)
+          mealsWorksheet['!merges'].push({
+            s: {r: 0, c: colIndex},
+            e: {r: 0, c: colIndex + 1}
+          });
+          colIndex += 2; // Move past the two columns
+        } else {
+          colIndex += 1; // Just move to the next column
+        }
       }
     });
 
@@ -749,19 +802,19 @@ function generateMobileLayout(container) {
       // Display options dropdown
       const displayOptionContainer = document.createElement('div');
       displayOptionContainer.className = 'mobile-display-option';
-      
+
       const displaySelect = document.createElement('select');
       displaySelect.id = `${day}-${meal}-display`;
       displaySelect.className = 'form-control form-select form-select-sm display-select';
       displaySelect.disabled = disabledMeals[day][meal];
-      
+
       // Add options
       const options = [
         { value: 'separate', text: 'Separate judges & general' },
         { value: 'combine', text: 'Combine all volunteers' },
         { value: 'omit-judges', text: 'Omit judges' }
       ];
-      
+
       options.forEach(opt => {
         const option = document.createElement('option');
         option.value = opt.value;
@@ -771,7 +824,7 @@ function generateMobileLayout(container) {
         }
         displaySelect.appendChild(option);
       });
-      
+
       displayOptionContainer.appendChild(displaySelect);
       controlsContainer.appendChild(displayOptionContainer);
 
@@ -1008,19 +1061,19 @@ function generateMealReportsByDay() {
     const mealHeader = document.createElement('th');
     mealHeader.className = 'meal-header';
     mealHeader.textContent = `${mealInfo.day} ${mealInfo.meal.charAt(0).toUpperCase() + mealInfo.meal.slice(1)}`;
-    
+
     // Set colspan based on display option
     if (mealInfo.displayOption === 'separate') {
       mealHeader.colSpan = 2; // General and Judge
     } else {
       mealHeader.colSpan = 1; // Combined or General only
     }
-    
+
     headerRow1.appendChild(mealHeader);
   });
 
   const headerRow2 = document.createElement('tr');
-  
+
   allEnabledMeals.forEach((mealInfo) => {
     if (mealInfo.displayOption === 'separate') {
       // Add both General and Judge headers
