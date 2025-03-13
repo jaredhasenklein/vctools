@@ -698,7 +698,7 @@ function addDarkModeCSS() {
       border-color: var(--border-color) !important;
     }
 
-    /* Fix specifically for the "See more resources" button */
+    
     .dark-mode .btn-primary {
       background-color: var(--primary-button-bg) !important;
       color: var(--primary-button-text) !important;
@@ -709,7 +709,7 @@ function addDarkModeCSS() {
       background-color: var(--primary-button-hover-bg) !important;
     }
 
-    /* ADDITIONAL FIXES BASED ON FEEDBACK */
+ 
 
     /* Badges: Role box - remove white background and ensure black box with white text */
     table[style*="text-align: center"][style*="margin: 0px auto"] td[bgcolor="black"] td,
@@ -839,9 +839,6 @@ function isChromiumBrowser() {
          navigator.userAgent.indexOf("OPR") !== -1 || 
          navigator.userAgent.indexOf("CriOS") !== -1;
 }
-
-
-
 
 
 
