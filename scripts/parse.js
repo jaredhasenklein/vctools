@@ -62,18 +62,59 @@ function loadFile(event) {
   const reader = new FileReader();
 
   reader.onload = function() {
-    const csvData = reader.result;
-    const preprocessedData = preprocessCSV(csvData);
-    allVolunteerData = reformatCSV(preprocessedData);
-    
-    // Create filter dropdown
-    createFilterControls();
-    
-    // Display data with current filter
-    applyCurrentFilter();
+    try {
+      const csvData = reader.result;
+      
+      // Pre-process the CSV to handle line breaks within quoted fields
+      const processedCsv = preprocessCSVWithLineBreaks(csvData);
+      const preprocessedData = preprocessCSV(processedCsv);
+      allVolunteerData = reformatCSV(preprocessedData);
+      
+      // Create filter dropdown
+      createFilterControls();
+      
+      // Display data with current filter
+      applyCurrentFilter();
+    } catch (error) {
+      console.error('Error processing file:', error);
+      showError(`Error processing file: ${error.message || "Unknown error"}. Please check console for details.`);
+    }
   };
 
-  reader.readAsText(file);
+  reader.onerror = function() {
+    showError('Error reading file. Please try again.');
+  };
+
+  reader.readAsText(file, 'UTF-8');
+}
+
+// Special function to handle line breaks in quoted fields
+function preprocessCSVWithLineBreaks(csvData) {
+  if (!csvData) return '';
+  
+  // Process the CSV to properly handle quoted fields with line breaks
+  let inQuote = false;
+  let result = '';
+  
+  for (let i = 0; i < csvData.length; i++) {
+    const char = csvData[i];
+    
+    // Toggle quote state when we see a quote
+    if (char === '"') {
+      inQuote = !inQuote;
+      result += char;
+    } 
+    // Replace newlines within quotes with a placeholder
+    else if ((char === '\n' || char === '\r') && inQuote) {
+      result += '[NEWLINE]';
+    }
+    // Keep everything else as is
+    else {
+      result += char;
+    }
+  }
+  
+  return result;
 }
 
 function createFilterControls() {
@@ -171,34 +212,125 @@ function preprocessCSV(csvData) {
   });
 }
 
+function safeGetValue(array, index) {
+  // Safely get a value from an array at the given index
+  // Returns empty string if index is out of bounds or value is undefined/null
+  if (!array || index < 0 || index >= array.length) {
+    return '';
+  }
+  return array[index] || '';
+}
+
+function safeReplace(str, search, replace) {
+  // Safely replace all occurrences of search with replace in str
+  // Returns empty string if str is undefined/null/not a string
+  if (!str || typeof str !== 'string') {
+    return '';
+  }
+  return str.replace(search, replace);
+}
+
 function reformatCSV(csvData) {
   const rows = csvData.trim().split('\n');
+  console.log('Total rows:', rows.length);
+  
+  if (rows.length <= 11) {
+    console.error('Not enough rows in CSV file');
+    return [];
+  }
+  
   const headerRow = rows[11].split(',');
+  console.log('Header row:', headerRow);
+  
   const dayIndex = headerRow.indexOf('Day');
+  const emailIndex = headerRow.indexOf('Email');
+  
+  // Find role column - try several possible column names
+  let roleIndex = headerRow.indexOf('Roles');
+  if (roleIndex === -1) {
+    roleIndex = headerRow.indexOf('Roles Assigned');
+    if (roleIndex === -1) {
+      roleIndex = headerRow.indexOf('Role');
+      if (roleIndex === -1) {
+        roleIndex = headerRow.findIndex(col => col && col.includes('Role'));
+      }
+    }
+  }
+  
+  // Find accommodation column index
+  const accommodationIndex = headerRow.findIndex(col => 
+    col && (col.includes('Accommodation') || col.includes('accommodation'))
+  );
+  
+  console.log('Column indices found - Day:', dayIndex, 'Email:', emailIndex, 'Role:', roleIndex, 'Accommodation:', accommodationIndex);
+  
+  // Validate required columns exist
+  if (dayIndex === -1 || emailIndex === -1 || roleIndex === -1) {
+    throw new Error(`CSV format is invalid. Missing required columns - Day: ${dayIndex !== -1 ? 'Found' : 'Missing'}, Email: ${emailIndex !== -1 ? 'Found' : 'Missing'}, Roles: ${roleIndex !== -1 ? 'Found' : 'Missing'}`);
+  }
 
   const data = [];
 
   for (let i = 12; i < rows.length; i++) {
-    const row = replaceCommasInQuotes(rows[i], '|').split(',');
-    const email = row[5];
-    const day = row[dayIndex];
-    const role = row[7];
-
-    const person = data.find(p => p.email === email) || {};
-
-    for (let j = 0; j < headerRow.length; j++) {
-      if (headerRow[j] !== 'Day' && headerRow[j] !== 'Start Time' && headerRow[j] !== 'End Time' && headerRow[j] !== 'Roles') {
-        person[headerRow[j]] = row[j].replace(/\|/g, ',').replace(/^"(.*)"$/, '$1') || '';
+    try {
+      if (!rows[i] || rows[i].trim() === '') continue;
+      
+      const row = replaceCommasInQuotes(rows[i], '|').split(',');
+      
+      // Skip rows with insufficient columns for required fields
+      if (row.length <= Math.max(emailIndex, dayIndex, roleIndex)) {
+        console.warn(`Row ${i} has insufficient columns (${row.length}), needs at least ${Math.max(emailIndex, dayIndex, roleIndex) + 1}.`);
+        continue;
       }
-    }
+      
+      // Use safe methods to get and process values
+      const email = safeReplace(safeGetValue(row, emailIndex), /\|/g, ',').replace(/^"(.*)"$/, '$1');
+      const day = safeReplace(safeGetValue(row, dayIndex), /\|/g, ',').replace(/^"(.*)"$/, '$1');
+      const role = safeReplace(safeGetValue(row, roleIndex), /\|/g, ',').replace(/^"(.*)"$/, '$1');
+      
+      // Skip rows without a valid email
+      if (!email) {
+        console.warn(`Row ${i} has no email, skipping`);
+        continue;
+      }
 
-    if (day) {
-      person[day] = (person[day] || []).concat(role);
-    }
+      // Find or create person entry
+      let person = data.find(p => p.email === email);
+      if (!person) {
+        person = { email };
+        data.push(person);
+      }
 
-    if (!data.find(p => p.email === email)) {
-      person.email = email;
-      data.push(person);
+      // Copy other columns
+      for (let j = 0; j < headerRow.length; j++) {
+        if (j >= row.length) continue; // Skip if row doesn't have this column
+        
+        const columnName = headerRow[j];
+        if (columnName !== 'Day' && columnName !== 'Start Time' && columnName !== 'End Time' && 
+            columnName !== 'Roles' && columnName !== 'Roles Assigned' && columnName !== 'Role') {
+            
+          let value = safeReplace(safeGetValue(row, j), /\|/g, ',').replace(/^"(.*)"$/, '$1');
+          
+          // Special handling for accommodations field
+          if (j === accommodationIndex && value.includes('[NEWLINE]')) {
+            value = "This user entered an accommodation request which cannot be displayed";
+            console.log(`Replaced accommodation field with placeholder for user ${email}`);
+          } else if (value.includes('[NEWLINE]')) {
+            // Replace any other fields with newlines with cleaned version
+            value = value.replace(/\[NEWLINE\]/g, ' ');
+          }
+          
+          person[columnName] = value;
+        }
+      }
+
+      // Add role to appropriate day
+      if (day) {
+        person[day] = (person[day] || []).concat(role);
+      }
+    } catch (rowError) {
+      console.warn(`Error processing row ${i}:`, rowError);
+      // Continue with next row
     }
   }
 
@@ -206,13 +338,33 @@ function reformatCSV(csvData) {
 }
 
 function replaceCommasInQuotes(str, replacement) {
-  const regex = /"((?:[^"\\]|\\.)*)"/g;
-  return str.replace(regex, match => match.replace(/,/g, replacement));
+  if (!str || typeof str !== 'string') {
+    return '';
+  }
+  
+  try {
+    const regex = /"((?:[^"\\]|\\.)*)"/g;
+    return str.replace(regex, match => match.replace(/,/g, replacement));
+  } catch (e) {
+    console.error('Error in replaceCommasInQuotes:', e, 'for string:', str);
+    return str; // Return original string if there's an error
+  }
 }
 
 function displayData(reformattedData) {
   const table = document.getElementById('outputTable');
   table.innerHTML = '';
+
+  if (!reformattedData || reformattedData.length === 0) {
+    const noDataRow = document.createElement('tr');
+    const noDataCell = document.createElement('td');
+    noDataCell.textContent = 'No data available';
+    noDataCell.style.padding = '20px';
+    noDataCell.style.textAlign = 'center';
+    noDataRow.appendChild(noDataCell);
+    table.appendChild(noDataRow);
+    return;
+  }
 
   // Filter out columns where all rows have null or undefined values
   const visibleColumns = columns.filter(header => reformattedData.some(row => row[header] !== null && row[header] !== undefined));
