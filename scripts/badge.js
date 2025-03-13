@@ -3,8 +3,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const labelContainer = document.getElementById('labelContainer');
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
+  const labelTypeSelect = document.getElementById('labelType');
+  const labelStyleSelect = document.getElementById('labelStyle');
+  const generateButton = document.querySelector('#nameTagForm button[type="submit"]');
 
-  // Storage for role abbreviations and parsed labels
+  // Role abbreviations storage
   let roleAbbreviations = {};
   let parsedLabels = [];
 
@@ -14,10 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     console.error('Required elements not found: dropzone or fileInput');
   }
-
-  // Get UI elements
-  const labelTypeSelect = document.getElementById('labelType');
-  const labelStyleSelect = document.getElementById('labelStyle');
 
   // Define label types and their properties
   const labelTypes = {
@@ -94,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if coordinates are valid numbers
     if (typeof x !== 'number' || typeof y !== 'number' || isNaN(x) || isNaN(y)) {
       console.error('Invalid coordinates:', x, y);
-      return;
+      return; // Skip rendering rather than crashing
     }
 
     // Split text where "FIRST" appears
@@ -120,15 +119,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Draw each part
     parts.forEach(part => {
-      if (!part) return;
+      if (!part) return; // Skip empty parts
 
       if (part === 'FIRST') {
         doc.setFont(undefined, 'italic');
         doc.text(part, currentX, y);
         currentX += doc.getTextWidth(part);
-        doc.setFont(undefined, originalFont.style);
+        doc.setFont(undefined, originalFont.style); // Reset font style after FIRST
       } else {
-        doc.setFont(undefined, 'normal');
+        doc.setFont(undefined, 'normal'); // Ensure non-FIRST parts are normal
         doc.text(part, currentX, y);
         currentX += doc.getTextWidth(part);
       }
@@ -159,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Define label styles
   const labelStyles = {
-    // Style A - Full Name
+    // Style A
     'styleA': {
       name: 'Style A - Full Name',
       render: (labels, doc, x, y, width, height, config) => {
@@ -181,12 +180,12 @@ document.addEventListener('DOMContentLoaded', function() {
           return applyRoleAbbreviation(role);
         });
 
-        // Calculate font sizes with maximum limits
+        // Set maximum font sizes to prevent overlap
         const firstNameFontSize = Math.min(calculateMaxFontSize(allFirstNames, doc, availableWidth * 0.9, 36, true), 30);
         const lastNameFontSize = Math.min(calculateMaxFontSize(allLastNames, doc, availableWidth * 0.9, 24), 20);
         const roleFontSize = Math.min(calculateMaxFontSize(allRoles, doc, availableWidth * 0.9, 18), 16);
 
-        // Determine sections for layout
+        // Proportional spacing structure
         const totalHeight = height;
         const topSection = totalHeight * 0.4;     // Top 40% for name
         const middleSection = totalHeight * 0.15; // 15% for last name
@@ -194,15 +193,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const bottomTextSection = totalHeight * 0.2; // 20% for bottom text
         const padding = totalHeight * 0.05;      // 5% padding between sections
 
-        // Calculate spacing for consistent layout
+        // Calculate available space in top section
         const topAreaHeight = topSection + middleSection;
+
+        // Calculate equal spacing between elements
         const equalSpacing = topAreaHeight / 4; // Divide by 4 to get 2 spaces + 2 text areas
 
-        // Position elements
+        // Position elements with equal spacing
         const topTextY = y + padding + equalSpacing * 0.5;
         const firstNameY = y + padding + equalSpacing * 2;
         const lastNameY = y + padding + equalSpacing * 3.5;
-        const roleY = y + padding + topSection + middleSection + padding * 1.5;
+        const roleY = y + padding + topSection + middleSection + padding * 2;
         const bottomY = y + height - (padding * 1.8);
 
         // Top text
@@ -220,16 +221,18 @@ document.addEventListener('DOMContentLoaded', function() {
         doc.setFont(undefined, 'normal');
         doc.text((label.lastname || '').toUpperCase(), x + width / 2, lastNameY, { align: 'center' });
 
-        // Role bar
+        // Role - BLACK BAR
         doc.setFillColor(0, 0, 0);
         doc.rect(x, roleY, width, bottomSection, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(roleFontSize);
         doc.setFont(undefined, 'normal');
 
-        // Calculate exact center for role text
+        // Calculate center of black bar for vertical centering
         const roleCenterY = roleY + (bottomSection / 2);
-        const fontOffset = roleFontSize / 72 * 0.35; // Convert font size to inches and adjust
+
+        // Add font offset for proper baseline positioning
+        const fontOffset = roleFontSize / 72 * 0.35;
         const roleTextY = roleCenterY + fontOffset;
 
         applyFirstItalics(abbreviatedRole, doc, x + width / 2, roleTextY, 'center');
@@ -243,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     },
 
-    // Style B - First Name with Initial
+    // Style B
     'styleB': {
       name: 'Style B - First Name with Initial',
       render: (labels, doc, x, y, width, height, config) => {
@@ -341,7 +344,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Initially hide the generate button
-  const generateButton = document.querySelector('#nameTagForm button[type="submit"]');
   if (generateButton) {
     generateButton.style.display = 'none';
   }
@@ -360,24 +362,12 @@ document.addEventListener('DOMContentLoaded', function() {
       const bottomRightCustom = document.getElementById('bottomRightText').value;
 
       if (csvFile) {
-        // Store the existing abbreviation table content before showing loading
-        let abbreviationContainer = null;
-        if (labelContainer) {
-          abbreviationContainer = labelContainer.querySelector('.role-abbreviation-container');
-          if (abbreviationContainer) {
-            // Clone the abbreviation container to preserve it
-            abbreviationContainer = abbreviationContainer.cloneNode(true);
-          }
-        }
+        // Store the current abbreviations
+        const currentAbbreviations = {...roleAbbreviations};
 
         // Show loading indicator
         if (labelContainer) {
           labelContainer.innerHTML = '<div class="loading">Processing file, please wait...</div>';
-
-          // Re-add the abbreviation container if it existed
-          if (abbreviationContainer) {
-            labelContainer.appendChild(abbreviationContainer);
-          }
         }
 
         const reader = new FileReader();
@@ -395,21 +385,28 @@ document.addEventListener('DOMContentLoaded', function() {
             bottomRightCustom
           );
 
-          // Update success message but preserve abbreviation table
-          if (labelContainer) {
-            // Remove loading message
-            const loadingMessage = labelContainer.querySelector('.loading');
-            if (loadingMessage) {
-              loadingMessage.remove();
-            }
+          // Restore the abbreviations after PDF generation
+          roleAbbreviations = currentAbbreviations;
 
-            // Add success message at the beginning of the container
+          // Show success message
+          if (labelContainer) {
+            const loadingMessage = labelContainer.querySelector('.loading');
+            if (loadingMessage) loadingMessage.remove();
+
+            // Add success message at the beginning
             const successMessage = document.createElement('div');
             successMessage.className = 'success';
             successMessage.textContent = 'PDF generated successfully!';
 
-            // Insert at the beginning
-            labelContainer.insertBefore(successMessage, labelContainer.firstChild);
+            // Create a temporary div to hold the success message
+            const tempDiv = document.createElement('div');
+            tempDiv.appendChild(successMessage);
+
+            // Insert the success message at the beginning
+            labelContainer.innerHTML = tempDiv.innerHTML + labelContainer.innerHTML;
+
+            // Re-create the abbreviation interface
+            displayRoleAbbreviationInterface(parsedLabels);
           }
         };
         reader.readAsText(csvFile);
@@ -419,10 +416,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Handle uploaded files
+  // Function to handle uploaded files
   function handleFiles(files) {
-    const generateButton = document.querySelector('#nameTagForm button[type="submit"]');
-
     if (files.target) {
       files = files.target.files;
     }
@@ -452,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const csvData = reader.result;
       parsedLabels = parseCSV(csvData);
 
-      // Clear any existing abbreviations
+      // Clear any existing abbreviations on new file upload
       roleAbbreviations = {};
 
       // Show file uploaded message
@@ -485,8 +480,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Convert to array for sorting
     let rolesArray = Array.from(uniqueRoles);
 
+    // Check if there's a success message to preserve
+    let successMessage = '';
+    const existingSuccess = labelContainer.querySelector('.success');
+    if (existingSuccess) {
+      successMessage = existingSuccess.outerHTML;
+    }
+
     // Create and append the interface
-    const interfaceHTML = `
+    labelContainer.innerHTML = successMessage + `
       <div class="role-abbreviation-container">
         <h3>Role Abbreviations</h3>
         <p>Long role names may appear in a small font on badges. Use this table to create abbreviations for roles.</p>
@@ -517,11 +519,6 @@ document.addEventListener('DOMContentLoaded', function() {
           </table>
         </div>
       </div>
-    `;
-
-    // Append the interface after showing success message
-    labelContainer.innerHTML = `
-      ${interfaceHTML}
     `;
 
     // Sort and populate the table
@@ -714,7 +711,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const row = Math.floor(positionOnPage / typeConfig.labelsPerRow);
       const col = positionOnPage % typeConfig.labelsPerRow;
 
-      // Calculate exact grid positioning based on row and column
+      // Calculate and force exact grid positioning based on row and column
       const currentX = typeConfig.startX + col * (typeConfig.labelWidth + typeConfig.columnGap);
       const currentY = typeConfig.startY + row * typeConfig.labelHeight;
 
