@@ -167,6 +167,8 @@ function addDarkModeCSS() {
       --placeholder-text: #6c757d; /* For placeholder text */
       --email-button-bg: #0dcaf0; /* For email buttons */
       --email-button-text: white; /* For email button text */
+      --top-bar-bg: rgba(255, 255, 255, 0.95); /* For sticky top bar */
+      --top-bar-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Shadow for the top bar */
     }
 
     /* Dark mode class that will be toggled */
@@ -210,6 +212,8 @@ function addDarkModeCSS() {
       --placeholder-text: #aaaaaa; /* For placeholder text in dark mode */
       --email-button-bg: #0080c7; /* For email buttons in dark mode */
       --email-button-text: white; /* For email button text in dark mode */
+      --top-bar-bg: rgba(18, 18, 18, 0.95); /* For sticky top bar in dark mode */
+      --top-bar-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Shadow for top bar in dark mode */
     }
 
     /* Apply variables to elements */
@@ -217,6 +221,31 @@ function addDarkModeCSS() {
       background-color: var(--background-color);
       color: var(--text-color);
       transition: background-color 0.3s, color 0.3s;
+      /* Add top padding for sticky bar */
+      padding-top: 0; /* Will be dynamically adjusted when the bar becomes sticky */
+    }
+
+    /* Sticky top bar styles */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      width: 100%;
+      z-index: 100;
+      transition: box-shadow 0.3s, background-color 0.3s;
+    }
+
+    .top-bar.sticky {
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: var(--top-bar-bg);
+      box-shadow: var(--top-bar-shadow);
+    }
+
+    /* Adjust margin for home button when it's next to the extension button */
+    .home-button {
+      margin-right: auto;
     }
 
     /* Fix for instruction boxes */
@@ -785,15 +814,76 @@ function addDarkModeCSS() {
   }
 }
 
-function addCommonElements() {
+// Function to create and add the home button
+function addHomeButton() {
+  // Don't add on the home page
+  if (window.location.pathname === '/' || 
+      window.location.pathname === '/index' || 
+      window.location.pathname === '/index.html') {
+    return null;
+  }
 
-  // Chrome extension
+  const homeButton = document.createElement('a');
+  homeButton.href = 'index';
+  homeButton.className = 'btn btn-primary home-button';
+  homeButton.innerHTML = '🏠 See more resources';
+  
+  return homeButton;
+}
+
+// Function to check if the browser is Chromium-based
+function isChromiumBrowser() {
+  // Check for Chrome, Edge, Opera, and other Chromium-based browsers
+  return navigator.userAgent.indexOf("Chrome") !== -1 || 
+         navigator.userAgent.indexOf("Edg") !== -1 || 
+         navigator.userAgent.indexOf("OPR") !== -1 || 
+         navigator.userAgent.indexOf("CriOS") !== -1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Simplified approach - just show the button in Chromium browsers
+
+// Function to check if the browser is Chromium-based
+function isChromiumBrowser() {
+  // Check for Chrome, Edge, Opera, and other Chromium-based browsers
+  return navigator.userAgent.indexOf("Chrome") !== -1 || 
+         navigator.userAgent.indexOf("Edg") !== -1 || 
+         navigator.userAgent.indexOf("OPR") !== -1 || 
+         navigator.userAgent.indexOf("CriOS") !== -1;
+}
+
+// Chrome extension button - simplified to just check browser type
+function addExtensionButton() {
+  // Only add for Chromium browsers
+  if (!isChromiumBrowser()) {
+    return null;
+  }
+
   const buttonStyle = document.createElement('style');
   buttonStyle.textContent = `
     .extension-button {
-      position: fixed;
-      top: 20px;
-      right: 20px;
       background-color: #4285F4;
       color: white;
       padding: 10px 15px;
@@ -803,8 +893,8 @@ function addCommonElements() {
       display: flex;
       align-items: center;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      z-index: 1000;
       transition: background-color 0.3s, transform 0.2s;
+      margin-left: 15px;
     }
 
     .extension-button:hover {
@@ -823,8 +913,6 @@ function addCommonElements() {
 
     @media (max-width: 767px) {
       .extension-button {
-        top: 10px;
-        right: 10px;
         padding: 8px 12px;
         font-size: 14px;
       }
@@ -966,10 +1054,66 @@ function addCommonElements() {
   button.appendChild(svg);
   button.appendChild(buttonText);
 
-  // Add the button to the page
-  document.body.appendChild(button);
+  return button;
+}
 
-  // Footer (checks first for existing footer and omits)
+
+
+
+
+
+
+
+// Create a sticky top bar
+function createTopBar(homeButton, extensionButton) {
+  // Create top bar container
+  const topBar = document.createElement('div');
+  topBar.className = 'top-bar';
+  topBar.id = 'top-bar';
+  
+  // Add the home button if available
+  if (homeButton) {
+    topBar.appendChild(homeButton);
+  }
+  
+  // Add the extension button if available
+  if (extensionButton) {
+    topBar.appendChild(extensionButton);
+  }
+  
+  return topBar;
+}
+
+// Initialize scroll behavior for the top bar
+function initScrollBehavior(topBar) {
+  if (!topBar) return;
+  
+  const topBarHeight = topBar.offsetHeight;
+  const topBarOffsetTop = topBar.offsetTop;
+  
+  // Function to handle scroll
+  function handleScroll() {
+    if (window.pageYOffset > topBarOffsetTop) {
+      if (!topBar.classList.contains('sticky')) {
+        topBar.classList.add('sticky');
+        // Add padding to body to prevent content jump
+        document.body.style.paddingTop = `${topBarHeight}px`;
+      }
+    } else {
+      if (topBar.classList.contains('sticky')) {
+        topBar.classList.remove('sticky');
+        // Remove padding from body
+        document.body.style.paddingTop = '0';
+      }
+    }
+  }
+  
+  // Add scroll event listener
+  window.addEventListener('scroll', handleScroll);
+}
+
+// Footer (checks first for existing footer and omits)
+function addFooter() {
   let existingFooter = document.querySelector('.footer');
 
   if (!existingFooter) {
@@ -1010,6 +1154,36 @@ function addCommonElements() {
 
     document.body.appendChild(footer);
   }
+}
+
+async function addCommonElements() {
+  // Generate buttons first
+  const homeButton = addHomeButton();
+  const extensionButton = await addExtensionButton();
+  
+  // Get existing home button to remove
+  const existingHomeButton = document.querySelector('a[href="index"].btn.btn-primary');
+  if (existingHomeButton) {
+    existingHomeButton.remove();
+  }
+  
+  // Create top bar with buttons
+  if (homeButton || extensionButton) {
+    const topBar = createTopBar(homeButton, extensionButton);
+    
+    // Insert at the beginning of the body
+    if (document.body.firstChild) {
+      document.body.insertBefore(topBar, document.body.firstChild);
+    } else {
+      document.body.appendChild(topBar);
+    }
+    
+    // Initialize scrolling behavior
+    initScrollBehavior(topBar);
+  }
+
+  // Add footer
+  addFooter();
 
   // Add dark mode toggle and CSS
   addDarkModeCSS();
