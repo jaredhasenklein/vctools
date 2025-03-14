@@ -167,11 +167,11 @@ const PROGRAM_CONFIGS = {
         },
         'FTA Assistant': {
             requiredRoles: ['FTA Assistant'],
-            requiredCourses: ['[Placeholder for FTA Assistant]']
+            requiredCourses: ['FTC FIRST Technical Advisor']
         },
         'FTC Scoring Event Admin': {
             requiredRoles: ['FTC Scoring Event Admin'],
-            requiredCourses: ['FTC Scoring Event Administrator', 'FTC Gracious Professionalism', '[Placeholder for additional course]']
+            requiredCourses: ['FTC Scoring Event Administrator', 'FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
         },
         'Judge': {
             requiredRoles: ['Judge'],
@@ -203,7 +203,7 @@ const PROGRAM_CONFIGS = {
         },
         'Wi-Fi Technical Advisor': {
             requiredRoles: ['Wi-Fi Technical Advisor'],
-            requiredCourses: ['[Placeholder for Wi-Fi Technical Advisor]']
+            requiredCourses: ['FTC WiFi Technical Advisor']
         }
     }
 };
