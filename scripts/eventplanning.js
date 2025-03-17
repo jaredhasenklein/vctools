@@ -166,6 +166,9 @@ function processCSVData(csvData) {
       throw new Error(`Missing required columns in CSV file: ${missingColumns.join(', ')}`);
     }
 
+    // Define valid day names
+    const validDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    
     // Extract unique days from the data
     const uniqueDays = new Set();
 
@@ -180,7 +183,9 @@ function processCSVData(csvData) {
 
       // Extract data from columns
       const day = row[dayIndex]?.trim();
-      if (day && day !== '') uniqueDays.add(day);
+      
+      // Only add valid day names to the uniqueDays set
+      if (day && day !== '' && validDays.includes(day)) uniqueDays.add(day);
 
       const startTime = row[startTimeIndex]?.trim();
       const endTime = row[endTimeIndex]?.trim();
@@ -199,8 +204,8 @@ function processCSVData(csvData) {
       const consentStatus = consentIndex !== -1 && row[consentIndex] ?
         row[consentIndex]?.replace(/\|/g, ',').replace(/^"(.*)"$/, '$1').trim() || '' : '';
 
-      // Skip rows without essential data
-      if (!day || !startTime || !endTime || !email) continue;
+      // Skip rows without essential data or with invalid day names
+      if (!day || !validDays.includes(day) || !startTime || !endTime || !email) continue;
 
       parsedData.push({
         day,
