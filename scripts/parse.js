@@ -64,15 +64,15 @@ function loadFile(event) {
   reader.onload = function() {
     try {
       const csvData = reader.result;
-      
+
       // Pre-process the CSV to handle line breaks within quoted fields
       const processedCsv = preprocessCSVWithLineBreaks(csvData);
       const preprocessedData = preprocessCSV(processedCsv);
       allVolunteerData = reformatCSV(preprocessedData);
-      
+
       // Create filter dropdown
       createFilterControls();
-      
+
       // Display data with current filter
       applyCurrentFilter();
     } catch (error) {
@@ -91,19 +91,19 @@ function loadFile(event) {
 // Special function to handle line breaks in quoted fields
 function preprocessCSVWithLineBreaks(csvData) {
   if (!csvData) return '';
-  
+
   // Process the CSV to properly handle quoted fields with line breaks
   let inQuote = false;
   let result = '';
-  
+
   for (let i = 0; i < csvData.length; i++) {
     const char = csvData[i];
-    
+
     // Toggle quote state when we see a quote
     if (char === '"') {
       inQuote = !inQuote;
       result += char;
-    } 
+    }
     // Replace newlines within quotes with a placeholder
     else if ((char === '\n' || char === '\r') && inQuote) {
       result += '[NEWLINE]';
@@ -113,50 +113,50 @@ function preprocessCSVWithLineBreaks(csvData) {
       result += char;
     }
   }
-  
+
   return result;
 }
 
 function createFilterControls() {
   const buttonContainer = document.getElementById('buttonContainer');
-  
+
   // Create filter container
   const filterContainer = document.createElement('div');
   filterContainer.style.display = 'flex';
   filterContainer.style.alignItems = 'center';
   filterContainer.style.gap = '10px';
   filterContainer.style.marginBottom = '15px';
-  
+
   // Create filter label
   const filterLabel = document.createElement('label');
   filterLabel.textContent = 'Filter volunteers: ';
   filterLabel.setAttribute('for', 'volunteerFilter');
-  
+
   // Create filter dropdown
   const filterDropdown = document.createElement('select');
   filterDropdown.id = 'volunteerFilter';
   filterDropdown.className = 'form-select';
   filterDropdown.style.width = 'auto';
-  
+
   // Add options
   const allOption = document.createElement('option');
   allOption.value = 'all';
   allOption.textContent = 'All Volunteers';
-  
+
   const keyOption = document.createElement('option');
   keyOption.value = 'key';
   keyOption.textContent = 'Key Volunteers Only';
-  
+
   filterDropdown.appendChild(allOption);
   filterDropdown.appendChild(keyOption);
-  
+
   // Add event listener
   filterDropdown.addEventListener('change', applyCurrentFilter);
-  
+
   // Add elements to container
   filterContainer.appendChild(filterLabel);
   filterContainer.appendChild(filterDropdown);
-  
+
   // Create download button
   const downloadButton = document.createElement('button');
   downloadButton.textContent = 'Download CSV';
@@ -164,7 +164,7 @@ function createFilterControls() {
     const filteredData = getFilteredData();
     downloadCSV(columns, filteredData);
   };
-  
+
   // Add to DOM
   buttonContainer.appendChild(filterContainer);
   buttonContainer.appendChild(downloadButton);
@@ -172,23 +172,23 @@ function createFilterControls() {
 
 function getFilteredData() {
   const filterValue = document.getElementById('volunteerFilter').value;
-  
+
   if (filterValue === 'all') {
     return allVolunteerData;
   } else if (filterValue === 'key') {
     return allVolunteerData.filter(volunteer => isKeyVolunteer(volunteer));
   }
-  
+
   return allVolunteerData; // Default fallback
 }
 
 function isKeyVolunteer(volunteer) {
   // Check each day for key volunteer roles
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  
+
   for (const day of days) {
     if (!volunteer[day] || !Array.isArray(volunteer[day])) continue;
-    
+
     // Check if any role for this day is a key role
     for (const role of volunteer[day]) {
       if (keyVolunteerRoles.includes(role)) {
@@ -196,7 +196,7 @@ function isKeyVolunteer(volunteer) {
       }
     }
   }
-  
+
   return false;
 }
 
@@ -230,40 +230,60 @@ function safeReplace(str, search, replace) {
   return str.replace(search, replace);
 }
 
+// Helper function to find a column index by name, case-insensitive
+function findColumnIndex(headerRow, columnNames) {
+  // Convert header row to lowercase for case-insensitive comparison
+  const lowerCaseHeaders = headerRow.map(header => header.toLowerCase());
+
+  // If columnNames is a string, convert to array
+  const columnNamesArray = Array.isArray(columnNames) ? columnNames : [columnNames];
+
+  // Try to find any of the column names (case-insensitive)
+  for (const columnName of columnNamesArray) {
+    const index = lowerCaseHeaders.indexOf(columnName.toLowerCase());
+    if (index !== -1) {
+      return index;
+    }
+  }
+
+  // As a fallback, try to find partial matches
+  for (const columnName of columnNamesArray) {
+    const lowerColumnName = columnName.toLowerCase();
+    const index = lowerCaseHeaders.findIndex(header =>
+      header && header.includes(lowerColumnName)
+    );
+    if (index !== -1) {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
 function reformatCSV(csvData) {
   const rows = csvData.trim().split('\n');
   console.log('Total rows:', rows.length);
-  
+
   if (rows.length <= 11) {
     console.error('Not enough rows in CSV file');
     return [];
   }
-  
+
   const headerRow = rows[11].split(',');
   console.log('Header row:', headerRow);
-  
-  const dayIndex = headerRow.indexOf('Day');
-  const emailIndex = headerRow.indexOf('Email');
-  
+
+  // Use case-insensitive column finding
+  const dayIndex = findColumnIndex(headerRow, 'Day');
+  const emailIndex = findColumnIndex(headerRow, 'Email');
+
   // Find role column - try several possible column names
-  let roleIndex = headerRow.indexOf('Roles');
-  if (roleIndex === -1) {
-    roleIndex = headerRow.indexOf('Roles Assigned');
-    if (roleIndex === -1) {
-      roleIndex = headerRow.indexOf('Role');
-      if (roleIndex === -1) {
-        roleIndex = headerRow.findIndex(col => col && col.includes('Role'));
-      }
-    }
-  }
-  
+  const roleIndex = findColumnIndex(headerRow, ['Roles', 'Roles Assigned', 'Role']);
+
   // Find accommodation column index
-  const accommodationIndex = headerRow.findIndex(col => 
-    col && (col.includes('Accommodation') || col.includes('accommodation'))
-  );
-  
+  const accommodationIndex = findColumnIndex(headerRow, ['Accommodation', 'Accommodations', 'Self-Reported Accommodations']);
+
   console.log('Column indices found - Day:', dayIndex, 'Email:', emailIndex, 'Role:', roleIndex, 'Accommodation:', accommodationIndex);
-  
+
   // Validate required columns exist
   if (dayIndex === -1 || emailIndex === -1 || roleIndex === -1) {
     throw new Error(`CSV format is invalid. Missing required columns - Day: ${dayIndex !== -1 ? 'Found' : 'Missing'}, Email: ${emailIndex !== -1 ? 'Found' : 'Missing'}, Roles: ${roleIndex !== -1 ? 'Found' : 'Missing'}`);
@@ -274,20 +294,20 @@ function reformatCSV(csvData) {
   for (let i = 12; i < rows.length; i++) {
     try {
       if (!rows[i] || rows[i].trim() === '') continue;
-      
+
       const row = replaceCommasInQuotes(rows[i], '|').split(',');
-      
+
       // Skip rows with insufficient columns for required fields
       if (row.length <= Math.max(emailIndex, dayIndex, roleIndex)) {
         console.warn(`Row ${i} has insufficient columns (${row.length}), needs at least ${Math.max(emailIndex, dayIndex, roleIndex) + 1}.`);
         continue;
       }
-      
+
       // Use safe methods to get and process values
       const email = safeReplace(safeGetValue(row, emailIndex), /\|/g, ',').replace(/^"(.*)"$/, '$1');
       const day = safeReplace(safeGetValue(row, dayIndex), /\|/g, ',').replace(/^"(.*)"$/, '$1');
       const role = safeReplace(safeGetValue(row, roleIndex), /\|/g, ',').replace(/^"(.*)"$/, '$1');
-      
+
       // Skip rows without a valid email
       if (!email) {
         console.warn(`Row ${i} has no email, skipping`);
@@ -301,32 +321,61 @@ function reformatCSV(csvData) {
         data.push(person);
       }
 
-      // Copy other columns
+      // Copy other columns - use a normalized map for case-insensitive output
+      const normalizedHeaders = {};
+      columns.forEach(col => {
+        // Create a map of lowercase header -> proper case header
+        normalizedHeaders[col.toLowerCase()] = col;
+      });
+
+      // Process each column of the current row
       for (let j = 0; j < headerRow.length; j++) {
         if (j >= row.length) continue; // Skip if row doesn't have this column
-        
+
         const columnName = headerRow[j];
-        if (columnName !== 'Day' && columnName !== 'Start Time' && columnName !== 'End Time' && 
-            columnName !== 'Roles' && columnName !== 'Roles Assigned' && columnName !== 'Role') {
-            
-          let value = safeReplace(safeGetValue(row, j), /\|/g, ',').replace(/^"(.*)"$/, '$1');
-          
-          // Special handling for accommodations field
-          if (j === accommodationIndex && value.includes('[NEWLINE]')) {
-            value = "This user entered an accommodation request which cannot be displayed";
-            console.log(`Replaced accommodation field with placeholder for user ${email}`);
-          } else if (value.includes('[NEWLINE]')) {
-            // Replace any other fields with newlines with cleaned version
-            value = value.replace(/\[NEWLINE\]/g, ' ');
-          }
-          
+        const lowerColumnName = columnName.toLowerCase();
+
+        // Skip day and role columns which we handle separately
+        if (lowerColumnName === 'day' ||
+            lowerColumnName === 'start time' ||
+            lowerColumnName === 'end time' ||
+            lowerColumnName === 'roles' ||
+            lowerColumnName === 'roles assigned' ||
+            lowerColumnName === 'role') {
+          continue;
+        }
+
+        let value = safeReplace(safeGetValue(row, j), /\|/g, ',').replace(/^"(.*)"$/, '$1');
+
+        // Special handling for accommodations field
+        if (j === accommodationIndex && value.includes('[NEWLINE]')) {
+          value = "This user entered an accommodation request which cannot be displayed";
+          console.log(`Replaced accommodation field with placeholder for user ${email}`);
+        } else if (value.includes('[NEWLINE]')) {
+          // Replace any other fields with newlines with cleaned version
+          value = value.replace(/\[NEWLINE\]/g, ' ');
+        }
+
+        // Find the normalized column name if it exists
+        const properColumnName = findMatchingColumnName(columnName, columns);
+        if (properColumnName) {
+          person[properColumnName] = value;
+        } else {
+          // If no matching column in our predefined list, use the original
           person[columnName] = value;
         }
       }
 
       // Add role to appropriate day
       if (day) {
-        person[day] = (person[day] || []).concat(role);
+        // Normalize day names (Mon, Tue, etc.)
+        const normalizedDay = normalizeDayName(day);
+        if (normalizedDay) {
+          person[normalizedDay] = (person[normalizedDay] || []).concat(role);
+        } else {
+          // If we couldn't normalize, use the original
+          person[day] = (person[day] || []).concat(role);
+        }
       }
     } catch (rowError) {
       console.warn(`Error processing row ${i}:`, rowError);
@@ -337,11 +386,56 @@ function reformatCSV(csvData) {
   return data;
 }
 
+// Helper function to find a matching column name in our predefined list (case-insensitive)
+function findMatchingColumnName(columnName, columnsList) {
+  const lowerColumnName = columnName.toLowerCase();
+
+  // Try direct match first
+  for (const col of columnsList) {
+    if (col.toLowerCase() === lowerColumnName) {
+      return col;
+    }
+  }
+
+  // If no direct match, try partial match
+  for (const col of columnsList) {
+    if (col.toLowerCase().includes(lowerColumnName) ||
+        lowerColumnName.includes(col.toLowerCase())) {
+      return col;
+    }
+  }
+
+  return null;
+}
+
+// Helper function to normalize day names
+function normalizeDayName(day) {
+  const days = {
+    'mon': 'Mon',
+    'monday': 'Mon',
+    'tue': 'Tue',
+    'tuesday': 'Tue',
+    'wed': 'Wed',
+    'wednesday': 'Wed',
+    'thu': 'Thu',
+    'thursday': 'Thu',
+    'fri': 'Fri',
+    'friday': 'Fri',
+    'sat': 'Sat',
+    'saturday': 'Sat',
+    'sun': 'Sun',
+    'sunday': 'Sun'
+  };
+
+  const dayLower = day.toLowerCase().trim();
+  return days[dayLower] || null;
+}
+
 function replaceCommasInQuotes(str, replacement) {
   if (!str || typeof str !== 'string') {
     return '';
   }
-  
+
   try {
     const regex = /"((?:[^"\\]|\\.)*)"/g;
     return str.replace(regex, match => match.replace(/,/g, replacement));
@@ -396,14 +490,14 @@ function displayData(reformattedData) {
   });
 
   table.appendChild(tbody);
-  
+
   // Show record count
   // Remove existing count info if present
   const existingCountInfo = document.getElementById('volunteerCountInfo');
   if (existingCountInfo) {
     existingCountInfo.remove();
   }
-  
+
   // Create new count info with total count
   const countInfo = document.createElement('div');
   countInfo.id = 'volunteerCountInfo';
@@ -428,11 +522,11 @@ function downloadCSV(headers, data) {
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    
+
     // Get current filter for filename
     const filterType = document.getElementById('volunteerFilter').value === 'key' ? 'Key' : 'All';
     link.setAttribute('download', `${filterType} Volunteers Reformatted.csv`);
-    
+
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
