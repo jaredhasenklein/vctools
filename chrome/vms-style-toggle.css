@@ -1,0 +1,130 @@
+/* Styles for the toggle switch in VMS */
+
+/* Toggle container styling */
+#vms-style-toggle-container {
+    position: relative;
+  }
+  
+  #vms-style-toggle-container .dropdown-toggle {
+    padding: 15px;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Style the toggle options */
+  #vms-style-toggle-container .dropdown-menu {
+    min-width: 160px;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 9999;
+    display: none;
+    float: left;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+  }
+  
+  #vms-style-toggle-container .dropdown-menu-right {
+    right: 0;
+    left: auto;
+  }
+  
+  #vms-style-toggle-container .dropdown-menu li {
+    display: block;
+  }
+  
+  #vms-style-toggle-container .dropdown-menu li a {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+    color: #333;
+    text-decoration: none;
+  }
+  
+  #vms-style-toggle-container .dropdown-menu li a.active {
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Icon for the selected option */
+  #vms-style-toggle-container .fa-check {
+    margin-right: 8px;
+    color: #28a745;
+  }
+  
+  #vms-style-toggle-container .invisible {
+    visibility: hidden;
+  }
+  
+  /* Fix for missing Font Awesome */
+  #vms-style-toggle-container .fa-caret-down:before {
+    content: "▼";
+    font-size: 12px;
+    margin-left: 5px;
+  }
+  
+  #vms-style-toggle-container .fa-check:before {
+    content: "✓";
+  }
+  
+  /* Floating menu for fallback */
+  .vms-style-floating-menu {
+    position: fixed;
+    top: 0;
+    right: 10px;
+    z-index: 9999;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    background-color: #f8f8f8;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  /* Make custom toggle always visible if injected into body */
+  .vms-style-floating-menu #vms-style-toggle-container .dropdown-toggle {
+    background-color: #f8f8f8;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    color: #333;
+    padding: 8px 12px;
+    min-height: auto;
+  }
+  
+  /* Animation for style changes */
+  body, #page-wrapper, .navbar, .panel, .ibox, input, select, textarea, .table, .btn {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  /* Ensure visibility on any background */
+  #vms-style-toggle-container .dropdown-toggle span {
+    text-shadow: 0 0 1px rgba(0,0,0,0.2);
+  }
+  
+  /* Fix for Bootstrap 3 */
+  #vms-style-toggle-container.open .dropdown-menu {
+    display: block;
+  }
+  
+  /* Fix for initial show in floating menu */
+  .vms-style-floating-menu.initial-show {
+    animation: slideDown 0.5s forwards;
+    transform: translateY(-100%);
+  }
+  
+  @keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+  }

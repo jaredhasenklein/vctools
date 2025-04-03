@@ -1,14 +1,23 @@
 {
   "manifest_version": 3,
   "name": "VC Tools Integration",
-  "version": "1.0",
-  "description": "Adds a button to export VMS reports directly to VC Tools",
-  "permissions": ["storage"],
-  "host_permissions": ["*://*.firstinspires.org/*", "*://volunteer.systems/*"],
+  "version": "1.1",
+  "description": "Adds buttons to export VMS reports directly to VC Tools or Google Sheets and improves VMS styling",
+  "permissions": ["storage", "clipboardWrite"],
+  "host_permissions": [
+    "*://*.firstinspires.org/*", 
+    "*://volunteer.systems/*",
+    "*://docs.google.com/spreadsheets/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
+    {
+      "matches": ["*://*.firstinspires.org/*"],
+      "js": ["vms-style-toggle.js"],
+      "run_at": "document_end"
+    },
     {
       "matches": ["*://my.firstinspires.org/VMS/Reports/ReportViewer.aspx*"],
       "js": ["vms-content.js"],
@@ -22,6 +31,11 @@
     {
       "matches": ["*://volunteer.systems/*"],
       "js": ["vctools-content.js"]
+    },
+    {
+      "matches": ["*://docs.google.com/spreadsheets/*"],
+      "js": ["google-sheets-content.js"],
+      "css": ["google-sheets-style.css"]
     }
   ],
   "icons": {

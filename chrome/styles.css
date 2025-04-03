@@ -1,22 +1,99 @@
+/* Button style resets to override default browser styles */
+.sheets-button, .vc-tools-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin-left: 4px;
+  color: black;
+  border: none !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+  transition: background-color 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+/* Custom button colors - keeps structure the same as native buttons */
 .vc-tools-button {
-  background-color: #007bff;
-  border: none;
+  background-color: #337ab7 !important;
   color: white !important;
-  padding: 8px 15px;
-  text-align: center;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-  border-radius: 5px;
 }
 
 .vc-tools-button:hover {
-  background-color: #0069d9;
+  background-color: #286090 !important; /* Darker blue on hover */
 }
 
-/* Non-clickable stars for now */
+.sheets-button {
+  background-color: #0f9d58 !important;
+  color: white !important;
+}
+
+.sheets-button:hover {
+  background-color: #0b8043 !important; /* Darker green on hover */
+}
+
+/* Non-clickable stars for reports list */
 .vc-tools-star {
-  color: #007bff;
+  color: #337ab7;
   margin-left: 5px;
+}
+
+/* Notification styling */
+.sheets-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: white;
+  color: #333;
+  border-radius: 8px;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+  z-index: 9999;
+  width: 350px;
+  line-height: 1.5;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.notification-header {
+  background-color: #0f9d58;
+  color: white;
+  padding: 12px 15px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.notification-content {
+  padding: 15px;
+}
+
+.notification-content p {
+  margin: 0 0 10px 0;
+}
+
+.notification-content ol {
+  margin: 10px 0;
+  padding-left: 25px;
+}
+
+.notification-content li {
+  margin-bottom: 8px;
+}
+
+/* Loading indicator */
+.sheets-loading {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 5px;
+  z-index: 10000;
+  text-align: center;
+}
+
+/* Success indicator in the file uploader */
+.file-success {
+  color: #4CAF50;
+  font-weight: bold;
 }
