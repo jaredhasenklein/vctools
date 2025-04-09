@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "VC Tools Integration",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Adds buttons to export VMS reports directly to VC Tools or Google Sheets and improves VMS styling",
   "permissions": ["storage", "clipboardWrite"],
   "host_permissions": [
@@ -14,7 +14,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.firstinspires.org/*"],
+      "matches": ["*://my.firstinspires.org/VMS/*"],
       "js": ["vms-style-toggle.js"],
       "run_at": "document_end"
     },
