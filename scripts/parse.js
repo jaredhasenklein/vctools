@@ -291,7 +291,7 @@ function reformatCSV(csvData) {
 
   const data = [];
 
-  for (let i = 12; i < rows.length; i++) {
+  for (let i = 20; i < rows.length; i++) {
     try {
       if (!rows[i] || rows[i].trim() === '') continue;
 
