@@ -626,10 +626,10 @@ const roleY = lastNameY + (lastNameFontSize / 72) * 0.5;
     };
 
     let headers = [];
-    const headerRow = rows[19].split(',').map(header => header.trim().replace(/^"(.*)"$/, '$1'));
+    const headerRow = rows[18].split(',').map(header => header.trim().replace(/^"(.*)"$/, '$1'));
     headers = headerRow.filter(header => header !== '');
 
-    for (let i = 20; i < rows.length; i++) {
+    for (let i = 19; i < rows.length; i++) {
       const row = parseCSVRow(rows[i]);
       const label = {};
 
