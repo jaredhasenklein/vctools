@@ -264,12 +264,12 @@ function reformatCSV(csvData) {
   const rows = csvData.trim().split('\n');
   console.log('Total rows:', rows.length);
 
-  if (rows.length <= 11) {
+  if (rows.length <= 19) {
     console.error('Not enough rows in CSV file');
     return [];
   }
 
-  const headerRow = rows[11].split(',');
+  const headerRow = rows[19].split(',');
   console.log('Header row:', headerRow);
 
   // Use case-insensitive column finding
