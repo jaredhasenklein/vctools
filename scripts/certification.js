@@ -3,47 +3,47 @@ const PROGRAM_CONFIGS = {
     'FRC': {
         'Judge': {
             requiredRoles: ['Judge'],
-            requiredCourses: ['FRC General Judge Training']
+            requiredCourses: ['FIRST Robotics Competition Judge']
         },
         'Judge - Dean\'s List Award': {
             requiredRoles: ['Judge - Dean\'s List Award'],
-            requiredCourses: ['FRC Dean\'s List Judge Training', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['FIRST Robotics Competition Dean\'s List Award Judge', 'FIRST Data Privacy and Protection Training']
         },
         'Judge - FIRST Impact Award': {
             requiredRoles: ['Judge - FIRST Impact Award'],
-            requiredCourses: ['FRC FIRST Impact Award Judge Training', 'FRC General Judge Training']
+            requiredCourses: ['FIRST Robotics Competition Judge', 'FIRST Robotics Competition FIRST Impact Award Judge']
         },
         'Judge Advisor': {
             requiredRoles: ['Judge Advisor'],
-            requiredCourses: ['FRC Judge Advisor Training', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['FIRST Robotics Competition Dean\'s List Award Judge', 'Data Privacy for Event Volunteers', 'FIRST Robotics Competition FIRST Impact Award Judge', 'FIRST Robotics Competition Judge', 'FIRST Robotics Competition Judge Advisor']
         },
         'Head Referee': {
             requiredRoles: ['Head Referee'],
-            requiredCourses: ['FRC Referee Training', 'FRC Head Referee Training']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'TBD HR training name']
         },
         'Referee': {
             requiredRoles: ['Referee'],
-            requiredCourses: ['FRC Referee Training']
+            requiredCourses: ['TBD Referee training name']
         },
         'Lead Robot Inspector': {
             requiredRoles: ['Lead Robot Inspector'],
-            requiredCourses: ['FRC Robot Inspector Test']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'TBD LRI training name']
         },
         'Robot Inspector': {
             requiredRoles: ['Robot Inspector'],
-            requiredCourses: ['FRC Robot Inspector Test']
+            requiredCourses: ['TBD Robot Inspector course name']
         },
         'Lead Queuer': {
             requiredRoles: ['Lead Queuer'],
-            requiredCourses: ['FRC Lead Queuer Training']
+            requiredCourses: ['The Gracious Volunteer', 'The Gracious Volunteer - Event Volunteer', 'TBD LQ training name`]
         },
         'Safety Manager': {
             requiredRoles: ['Safety Manager'],
-            requiredCourses: ['FRC Safety Manager Training']
+            requiredCourses: ['tbd-left off here']
         },
         'Pit Admin Supervisor': {
             requiredRoles: ['Pit Administration Supervisor'],
-            requiredCourses: ['FIRST Data Privacy and Protection Training']
+            requiredCourses: ['tbd']
         },
         'Accommodation Coordinator (optional role)': {
             requiredRoles: ['Accommodation Coordinator'],
@@ -275,7 +275,7 @@ function handleFiles(files) {
 }
 
 function findHeaderRow(rows) {
-    const expectedHeaders = ['Minor', 'Preferred First Name', 'Last Name', 'Email', 'Phone', 'Role', 'Course Name', 'Enrollment Date', 'Completion Date', 'Required?'];
+    const expectedHeaders = ['Minor', 'Preferred First Name', 'Last Name', 'Email', 'Phone', 'Role', 'Assignment Status', 'Course Name', 'Enrollment Date', 'Started Date', 'Completion Date', 'Required?'];
 
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
@@ -418,13 +418,26 @@ function processData(rows) {
     personData = {}; // Reset global person data
 
     // Collect person information
+    // Column indices based on new headers:
+    // 0: Minor, 1: Preferred First Name, 2: Last Name, 3: Email, 4: Phone, 
+    // 5: Role, 6: Assignment Status, 7: Course Name, 8: Enrollment Date, 
+    // 9: Started Date, 10: Completion Date, 11: Required?
     rows.forEach(row => {
         // Skip rows with insufficient columns
-        if (row.length < 10) return;
+        if (row.length < 11) return;
 
         // Extract and trim fields
-        const [minor, firstName, lastName, email, phone, role, courseName, enrollmentDate, completionDate] =
-            row.slice(0, 10).map(field => (field || '').trim());
+        const minor = (row[0] || '').trim();
+        const firstName = (row[1] || '').trim();
+        const lastName = (row[2] || '').trim();
+        const email = (row[3] || '').trim();
+        const phone = (row[4] || '').trim();
+        const role = (row[5] || '').trim();
+        const assignmentStatus = (row[6] || '').trim();
+        const courseName = (row[7] || '').trim();
+        const enrollmentDate = (row[8] || '').trim();
+        const startedDate = (row[9] || '').trim();
+        const completionDate = (row[10] || '').trim();
 
         const fullName = `${firstName} ${lastName}`.trim();
 
@@ -443,8 +456,9 @@ function processData(rows) {
             personData[fullName].roles.push(role);
         }
 
+        // Use Started Date instead of Enrollment Date for status determination
         personData[fullName].courses[courseName] = {
-            enrollmentDate: enrollmentDate,
+            startedDate: startedDate,
             completionDate: completionDate
         };
     });
@@ -502,8 +516,9 @@ function processData(rows) {
 }
 
 function determineCourseStatus(course) {
-    if (course.enrollmentDate && course.completionDate) return '✅';
-    if (course.enrollmentDate) return '⏰';
+    // Use Started Date instead of Enrollment Date
+    if (course.startedDate && course.completionDate) return '✅';
+    if (course.startedDate) return '⏰';
     return '❌';
 }
 
