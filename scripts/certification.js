@@ -189,7 +189,7 @@ const PROGRAM_CONFIGS = {
             requiredRoles: ['Control System Advisor'],
             requiredCourses: ['FIRST Tech Challenge Control System Advisor', 'Welcome to FIRST']
         },
-        'Wi-Fi Technical Advisor':
+        'Wi-Fi Technical Advisor': {
             requiredRoles: ['Wi-Fi Technical Advisor'],
             requiredCourses: ['FIRST Tech Challenge Wi-Fi Technical Advisor', 'Welcome to FIRST']
         }
