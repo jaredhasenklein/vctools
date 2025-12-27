@@ -35,175 +35,163 @@ const PROGRAM_CONFIGS = {
         },
         'Lead Queuer': {
             requiredRoles: ['Lead Queuer'],
-            requiredCourses: ['The Gracious Volunteer', 'The Gracious Volunteer - Event Volunteer', 'TBD LQ training name`]
+            requiredCourses: ['TBD LQ training name']
         },
         'Safety Manager': {
             requiredRoles: ['Safety Manager'],
-            requiredCourses: ['tbd-left off here']
+            requiredCourses: ['FIRST® Robotics Competition Safety Manager',]
         },
         'Pit Admin Supervisor': {
             requiredRoles: ['Pit Administration Supervisor'],
-            requiredCourses: ['tbd']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'TBD Pit Admin training name']
         },
         'Accommodation Coordinator (optional role)': {
             requiredRoles: ['Accommodation Coordinator'],
-            requiredCourses: ['Accommodation Coordinator Training', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['Accommodation Coordinator', 'Data Privacy for Event Volunteers']
         }
     },
     'FLL': {
         'Head Referee': {
             requiredRoles: ['Head Referee'],
-            requiredCourses: ['FIRST LEGO League Challenge Head Referee Training', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['FIRST LEGO League Challenge Head Referee', 'Data Privacy for Event Volunteers']
         },
         'Judge Advisor': {
             requiredRoles: ['Judge Advisor'],
-            requiredCourses: ['FIRST LEGO League Challenge Judge Advisor Training', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['FIRST LEGO League Challenge Judge Advisor', 'Data Privacy for Event Volunteers']
         },
         'Tournament Director': {
             requiredRoles: ['Tournament Director'],
-            requiredCourses: ['FIRST Data Privacy and Protection Training']
+            requiredCourses: ['Data Privacy for Event Volunteers']
         },
         'Volunteer Coordinator': {
             requiredRoles: ['Volunteer Coordinator'],
-            requiredCourses: ['FIRST Data Privacy and Protection Training']
+            requiredCourses: ['Data Privacy for Event Volunteers']
         },
         'Accommodation Coordinator': {
             requiredRoles: ['Accommodation Coordinator'],
-            requiredCourses: ['FIRST Data Privacy and Protection Training']
+            requiredCourses: ['Accommodation Coordinator', 'Data Privacy for Event Volunteers']
         },
         'Judge': {
             requiredRoles: ['Judge'],
-            requiredCourses: ['FIRST LEGO League Challenge Judge Training', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['FIRST LEGO League Challenge Judge', 'Data Privacy for Event Volunteers']
         },
         'Lead Judge': {
             requiredRoles: ['Lead Judge'],
-            requiredCourses: ['FIRST LEGO League Challenge Judge Training', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['FIRST LEGO League Challenge Judge', 'Data Privacy for Event Volunteers']
         },
         'Referee': {
             requiredRoles: ['Referee'],
-            requiredCourses: ['FIRST LEGO League Challenge Referee Training']
+            requiredCourses: ['FIRST LEGO League Challenge Referee']
         },
         'Team Registration': {
             requiredRoles: ['Team Registration'],
-            requiredCourses: ['FIRST Data Privacy and Protection Training']
+            requiredCourses: ['Data Privacy for Event Volunteers']
         },
         'Pit Administrator': {
             requiredRoles: ['Pit Administrator'],
-            requiredCourses: ['FIRST Data Privacy and Protection Training']
+            requiredCourses: ['Data Privacy for Event Volunteers']
         }
     },
     'FTC': {
         'Field Supervisor': {
             requiredRoles: ['Field Supervisor'],
-            requiredCourses: ['FTC Field Supervisor', 'FTC Gracious Professionalism']
+            requiredCourses: ['FIRST Tech Challenge Field Supervisor', 'Welcome to FIRST']
         },
         'FIRST Technical Advisor': {
             requiredRoles: ['FIRST Technical Advisor'],
-            requiredCourses: ['FTC FIRST Technical Advisor', 'FTC Gracious Professionalism']
+            requiredCourses: ['FIRST Tech Challenge FIRST Technical Advisor', 'Welcome to FIRST']
         },
         'Head Referee': {
             requiredRoles: ['Head Referee'],
-            requiredCourses: ['FTC Head Referee', 'FTC Referee', 'FTC Gracious Professionalism']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'FIRST Tech Challenge Head Referee', 'FIRST Tech Challenge Referee']
         },
         'Judge Advisor': {
             requiredRoles: ['Judge Advisor'],
-            requiredCourses: ['FIRST Data Privacy and Protection Training', 'FTC Gracious Professionalism', 'FTC Judge Advisor']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'FIRST Tech Challenge Judge Advisor', 'Welcome to FIRST']
         },
         'Lead Queuer': {
             requiredRoles: ['Lead Queuer'],
-            requiredCourses: ['FTC Queuer', 'FTC Gracious Professionalism']
+            requiredCourses: ['FIRST Tech Challenge Lead Queuer', 'Welcome to FIRST']
         },
         'Queuer': {
             requiredRoles: ['Queuer'],
-            requiredCourses: ['FTC Queuer', 'FTC Gracious Professionalism']
+            requiredCourses: ['Welcome to FIRST']
         },
         'Lead Robot Inspector': {
             requiredRoles: ['Lead Robot Inspector'],
-            requiredCourses: ['FTC Gracious Professionalism', 'FTC Robot Inspector']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'FIRST Tech Challenge Lead Robot Inspector', 'FIRST Tech Challenge Robot Inspector', 'Welcome to FIRST']
         },
         'Lead Scorekeeper': {
             requiredRoles: ['Lead Scorekeeper'],
-            requiredCourses: ['FTC Scorekeeper/Scoring System', 'FTC Gracious Professionalism']
+            requiredCourses: ['Data Privacy for Event Volunteers','FIRST Tech Challenge Scorekeeper (Lead)', 'Welcome to FIRST']
         },
         'Scorekeeper': {
             requiredRoles: ['Scorekeeper'],
-            requiredCourses: ['FTC Scorekeeper/Scoring System', 'FTC Gracious Professionalism']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'Welcome to FIRST']
         },
         'Pit Administrator': {
             requiredRoles: ['Pit Administrator'],
-            requiredCourses: ['FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training', 'FTC Pit Administrator']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'FIRST Tech Challenge Pit Admin Supervisor', 'Welcome to FIRST']
         },
         'Referee': {
             requiredRoles: ['Referee'],
-            requiredCourses: ['FTC Referee', 'FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['FIRST Tech Challenge Referee', 'Welcome to FIRST']
         },
         'Volunteer Coordinator': {
             requiredRoles: ['Volunteer Coordinator'],
-            requiredCourses: ['FTC Volunteer Coordinator', 'FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'FIRST Tech Challenge Volunteer Coordinator' ]
         },
         'Accommodation Coordinator': {
             requiredRoles: ['Accommodation Coordinator'],
-            requiredCourses: ['FIRST Data Privacy and Protection Training']
+            requiredCourses: ['Accommodation Coordinator', 'Data Privacy for Event Volunteers', 'Welcome to FIRST']
         },
         'Dean\'s List Reviewers': {
             requiredRoles: ['Dean\'s List Reviewer'],
-            requiredCourses: ['FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training', 'FTC Dean\'s List Reviewer']
+            requiredCourses: ['FIRST Tech Challenge Dean\'s List Reviewer', 'Data Privacy for Event Volunteers', 'Welcome to FIRST']
         },
         'Emcee': {
-            requiredRoles: ['Emcee'],
-            requiredCourses: ['FTC Emcee and Game Announcer', 'FTC Gracious Professionalism']
+            requiredRoles: ['Emcee', 'Game Announcer'],
+            requiredCourses: ['FIRST Tech Challenge Emcee and Game Announcer', 'Welcome to FIRST']
         },
-        'Game Announcer': {
-            requiredRoles: ['Game Announcer'],
-            requiredCourses: ['FTC Emcee and Game Announcer', 'FTC Gracious Professionalism']
-        },
-        'Field Inspector': {
-            requiredRoles: ['Field Inspector'],
-            requiredCourses: ['FTC Field Inspector', 'FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
-        },
-        'Lead Field Inspector': {
-            requiredRoles: ['Lead Field Inspector'],
-            requiredCourses: ['FTC Field Inspector', 'FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
-        },
-        'FTA Assistant': {
-            requiredRoles: ['FTA Assistant'],
-            requiredCourses: ['FTC FIRST Technical Advisor']
+        'FIRST Technical Advisor Assistant': {
+            requiredRoles: ['FIRST Technical Advisor Assistant'],
+            requiredCourses: ['The Gracious Volunteer', 'The Gracious Volunteer - Event Volunteer']
         },
         'FTC Scoring Event Admin': {
             requiredRoles: ['FTC Scoring Event Admin'],
-            requiredCourses: ['FTC Scoring Event Administrator', 'FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'Welcome to FIRST']
         },
         'Judge': {
             requiredRoles: ['Judge'],
-            requiredCourses: ['FIRST Data Privacy and Protection Training', 'FTC Gracious Professionalism', 'FTC Judge']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'FIRST Tech Challenge Judge', 'Welcome to FIRST']
         },
         'Judge Advisor Assistant': {
             requiredRoles: ['Judge Advisor Assistant'],
-            requiredCourses: ['[Placeholder for Judge Advisor Assistant]']
+            requiredCourses: ['Welcome to FIRST']
         },
         'Judge Match Observer': {
             requiredRoles: ['Judge Match Observer'],
-            requiredCourses: ['[Placeholder for Judge Match Observer]']
+            requiredCourses: ['Welcome to FIRST']
         },
         'Robot Inspector': {
             requiredRoles: ['Robot Inspector'],
-            requiredCourses: ['FTC Robot Inspector', 'FTC Gracious Professionalism']
+            requiredCourses: ['FIRST Tech Challenge Robot Inspector', 'Welcome to FIRST']
         },
         'Team Registration': {
             requiredRoles: ['Team Registration'],
-            requiredCourses: ['FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'Welcome to FIRST']
         },
-        'Volunteer Check In': {
-            requiredRoles: ['Volunteer Check In'],
-            requiredCourses: ['FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+        'Volunteer Check-In': {
+            requiredRoles: ['Volunteer Check-In'],
+            requiredCourses: ['Data Privacy for Event Volunteers', 'Welcome to FIRST']
         },
         'Control System Advisor': {
             requiredRoles: ['Control System Advisor'],
-            requiredCourses: ['FTC Gracious Professionalism', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['FIRST Tech Challenge Control System Advisor', 'Welcome to FIRST']
         },
-        'Wi-Fi Technical Advisor': {
+        'Wi-Fi Technical Advisor':
             requiredRoles: ['Wi-Fi Technical Advisor'],
-            requiredCourses: ['FTC WiFi Technical Advisor']
+            requiredCourses: ['FIRST Tech Challenge Wi-Fi Technical Advisor', 'Welcome to FIRST']
         }
     }
 };
@@ -275,6 +263,7 @@ function handleFiles(files) {
 }
 
 function findHeaderRow(rows) {
+    // New CSV format headers (12 columns)
     const expectedHeaders = ['Minor', 'Preferred First Name', 'Last Name', 'Email', 'Phone', 'Role', 'Assignment Status', 'Course Name', 'Enrollment Date', 'Started Date', 'Completion Date', 'Required?'];
 
     for (let i = 0; i < rows.length; i++) {
@@ -384,8 +373,6 @@ function processCSV(rows) {
         ROLE_CONFIGS = PROGRAM_CONFIGS[selectedProgram];
     }
     
-    // We no longer need to update a program selector
-    
     // Update the version box and show the version tag
     const versionTag = document.getElementById('version-tag');
     const versionBox = document.querySelector('.version-box');
@@ -418,15 +405,25 @@ function processData(rows) {
     personData = {}; // Reset global person data
 
     // Collect person information
-    // Column indices based on new headers:
-    // 0: Minor, 1: Preferred First Name, 2: Last Name, 3: Email, 4: Phone, 
-    // 5: Role, 6: Assignment Status, 7: Course Name, 8: Enrollment Date, 
-    // 9: Started Date, 10: Completion Date, 11: Required?
+    // New CSV column indices (12 columns):
+    // 0: Minor
+    // 1: Preferred First Name
+    // 2: Last Name
+    // 3: Email
+    // 4: Phone
+    // 5: Role
+    // 6: Assignment Status
+    // 7: Course Name
+    // 8: Enrollment Date
+    // 9: Started Date
+    // 10: Completion Date
+    // 11: Required?
+    
     rows.forEach(row => {
-        // Skip rows with insufficient columns
-        if (row.length < 11) return;
+        // Skip rows with insufficient columns (need at least 12 for full data)
+        if (row.length < 12) return;
 
-        // Extract and trim fields
+        // Extract and trim fields using correct indices
         const minor = (row[0] || '').trim();
         const firstName = (row[1] || '').trim();
         const lastName = (row[2] || '').trim();
@@ -438,6 +435,7 @@ function processData(rows) {
         const enrollmentDate = (row[8] || '').trim();
         const startedDate = (row[9] || '').trim();
         const completionDate = (row[10] || '').trim();
+        // const required = (row[11] || '').trim(); // Not currently used
 
         const fullName = `${firstName} ${lastName}`.trim();
 
@@ -451,12 +449,12 @@ function processData(rows) {
             };
         }
 
-        // Track roles and courses
-        if (role) {
+        // Track roles (avoid duplicates)
+        if (role && !personData[fullName].roles.includes(role)) {
             personData[fullName].roles.push(role);
         }
 
-        // Use Started Date instead of Enrollment Date for status determination
+        // Track courses using Started Date and Completion Date
         personData[fullName].courses[courseName] = {
             startedDate: startedDate,
             completionDate: completionDate
@@ -515,8 +513,13 @@ function processData(rows) {
     return roleResults;
 }
 
+/**
+ * Determine course completion status based on Started Date and Completion Date
+ * - ✅ Complete: Has both Started Date AND Completion Date
+ * - ⏰ In Progress: Has Started Date but NO Completion Date
+ * - ❌ Incomplete: No Started Date (regardless of Completion Date)
+ */
 function determineCourseStatus(course) {
-    // Use Started Date instead of Enrollment Date
     if (course.startedDate && course.completionDate) return '✅';
     if (course.startedDate) return '⏰';
     return '❌';
