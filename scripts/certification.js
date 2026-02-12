@@ -449,8 +449,8 @@ function processData(rows) {
             };
         }
 
-        // Track roles (avoid duplicates)
-        if (role && !personData[fullName].roles.includes(role)) {
+        // Track roles (avoid duplicates) - only if Assignment Status is "Assigned"
+        if (role && assignmentStatus.toLowerCase() === 'assigned' && !personData[fullName].roles.includes(role)) {
             personData[fullName].roles.push(role);
         }
 
