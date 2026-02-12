@@ -444,14 +444,20 @@ function processData(rows) {
         if (!personData[fullName]) {
             personData[fullName] = {
                 roles: [],
+                assignedRoles: [], // Track which roles are actually assigned
                 courses: {},
                 email: email
             };
         }
 
-        // Track roles (avoid duplicates) - only if Assignment Status is "Assigned"
-        if (role && assignmentStatus.toLowerCase() === 'assigned' && !personData[fullName].roles.includes(role)) {
+        // Track all roles (for potential future use)
+        if (role && !personData[fullName].roles.includes(role)) {
             personData[fullName].roles.push(role);
+        }
+
+        // Track assigned roles separately - only "Assigned" status counts
+        if (role && assignmentStatus.toLowerCase() === 'assigned' && !personData[fullName].assignedRoles.includes(role)) {
+            personData[fullName].assignedRoles.push(role);
         }
 
         // Track courses using Started Date and Completion Date
@@ -474,9 +480,9 @@ function processData(rows) {
     // Process each person's data
     Object.entries(personData).forEach(([name, personInfo]) => {
         Object.entries(ROLE_CONFIGS).forEach(([roleName, config]) => {
-            // Check if person's role matches required roles
+            // Check if person's ASSIGNED role matches required roles
             const hasRequiredRole = config.requiredRoles.some(requiredRole =>
-                personInfo.roles.includes(requiredRole)
+                personInfo.assignedRoles.includes(requiredRole)
             );
 
             if (!hasRequiredRole) return;
