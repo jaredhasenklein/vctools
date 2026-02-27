@@ -52,12 +52,108 @@
       </table>
     </div>
 
+    <!-- Email Configuration Section -->
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-12">
+            <h3>Email Configuration</h3>
+            <p><i>Fill these fields to populate the email template placeholders. Leave blank to omit.</i></p>
+            <p style="font-size: 14px; margin-top: -10px; color: #666;">
+                💡 <b>Tip:</b> After processing, click the ✉️ icon next to a volunteer's name for a personalized draft. Icons will grey out once clicked to help you track your progress.
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: var(--secondary-bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <div>
+                    <label for="eventInput"><b>Event Name:</b></label>
+                    <input type="text" id="eventInput" class="form-control" placeholder="e.g., FRC Seattle Local">
+                </div>
+                <div>
+                    <label for="coordinatorName"><b>Coordinator Name:</b></label>
+                    <input type="text" id="coordinatorName" class="form-control" placeholder="e.g., John Doe">
+                </div>
+                <div>
+                    <label for="coordinatorEmail"><b>Coordinator Email:</b></label>
+                    <input type="email" id="coordinatorEmail" class="form-control" placeholder="e.g., coordinator@example.com">
+                </div>
+                <div>
+                    <label for="coordinatorPhone"><b>Coordinator Phone:</b></label>
+                    <input type="text" id="coordinatorPhone" class="form-control" placeholder="e.g., 555-0123">
+                </div>
+                <div>
+                    <label for="deadlineDate"><b>Certification Deadline:</b></label>
+                    <input type="date" id="deadlineDate" class="form-control">
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="version-tag" style="display:none;">
         Currently Configured For: <span class="version-box"></span>
 <br><i>Please note that FTC and FLL role mappings are still in beta.</i>
     </div>
 
     <div id="resultsContainer"></div>
+</div>
+
+<!-- Email Options Modal -->
+<div id="emailModal" class="modal-backdrop" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="modal-content" style="background: var(--background-color); padding: 25px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border-color); box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0;">Email Options</h3>
+            <button onclick="document.getElementById('emailModal').style.display='none'" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-color);">&times;</button>
+        </div>
+        
+        <div style="background: rgba(13, 202, 240, 0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(13, 202, 240, 0.3); margin-bottom: 20px; font-size: 13px; line-height: 1.4;">
+            <b>💡 Professional Formatting Tip:</b> Automated links don't support rich formatting (bolding, links). For the best result:
+            <ol style="margin: 5px 0 0 20px; padding: 0;">
+                <li>Click <b>"Copy Formatted (Rich Text)"</b> at the bottom of this popup.</li>
+                <li>Click <b>"Send with Gmail"</b> or <b>"Open Mail App"</b> below.</li>
+                <li>Paste the formatted text directly into your new email.</li>
+            </ol>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <p>Choose how you'd like to send this email:</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a id="modalGmailLink" target="_blank" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 4.5v15c0 .85-.65 1.5-1.5 1.5H21V7.39l-9 6.58-9-6.58V21H1.5C.65 21 0 20.35 0 19.5v-15c0-.42.17-.8.45-1.08.28-.28.66-.42 1.05-.42L12 12.27 22.5 3c.39 0 .77.14 1.05.42.28.28.45.66.45 1.08z"/></svg>
+                    Send with Gmail
+                </a>
+                <a id="modalMailtoLink" class="btn btn-secondary" style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    Open Mail App
+                </a>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+
+        <div style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <label><b>Recipients:</b></label>
+                <button onclick="copyToClipboard('modalRecipients')" class="btn btn-sm btn-outline-secondary" style="font-size: 11px; padding: 2px 6px;">Copy</button>
+            </div>
+            <input type="text" id="modalRecipients" class="form-control" readonly style="background: var(--disabled-bg);">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <label><b>Subject:</b></label>
+                <button onclick="copyToClipboard('modalSubject')" class="btn btn-sm btn-outline-secondary" style="font-size: 11px; padding: 2px 6px;">Copy</button>
+            </div>
+            <input type="text" id="modalSubject" class="form-control" readonly style="background: var(--disabled-bg);">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <label><b>Body:</b></label>
+                <div style="display: flex; gap: 5px;">
+                    <button onclick="copyRichText()" class="btn btn-sm btn-outline-primary" style="font-size: 11px; padding: 2px 6px;">Copy Formatted (Rich Text)</button>
+                    <button onclick="copyToClipboard('modalBody')" class="btn btn-sm btn-outline-secondary" style="font-size: 11px; padding: 2px 6px;">Copy Plain</button>
+                </div>
+            </div>
+            <textarea id="modalBody" class="form-control" rows="8" readonly style="background: var(--disabled-bg); font-size: 13px;"></textarea>
+            <div id="modalBodyHtml" style="display:none;"></div>
+        </div>
+    </div>
 </div>
 
 </body>
