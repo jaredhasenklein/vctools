@@ -259,13 +259,13 @@ function addDarkModeCSS() {
     }
 
     /* Fix for dropzone text */
-    #dropzone {
+    .dropzone {
       background-color: var(--dropzone-bg);
       border-color: var(--dropzone-border);
       color: var(--dropzone-text);
     }
 
-    #dropzone.dragover {
+    .dropzone.dragover {
       background-color: var(--dropzone-hover-bg);
     }
 
