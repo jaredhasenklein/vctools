@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNHZ3NT97K"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Volunteer Email Prep</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <script src="scripts/commonscripts.js"></script>
+  <script src="scripts/emailprep.js"></script>
+  <link rel="stylesheet" href="style/commonstyle.css">
+  <style>
+    .dropzone {
+      border: 2px dashed var(--dropzone-border, #ccc);
+      border-radius: 8px;
+      padding: 18px 14px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--dropzone-bg, #fff);
+      color: var(--dropzone-text, #333);
+      transition: background 0.2s, border-color 0.2s;
+      font-size: 14px;
+    }
+    .dropzone.dragover, .dropzone:hover {
+      background: var(--dropzone-hover-bg, #f0f0f0);
+      border-color: var(--primary-button-bg, #0066cc);
+    }
+    .dropzone.loaded {
+      background: var(--success-bg, #d4edda);
+      color: var(--success-text, #155724);
+      border-color: var(--success-bg, #d4edda);
+    }
+    .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 768px) {
+      .upload-grid { grid-template-columns: 1fr; }
+    }
+    .upload-section label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    .status-badge {
+      display: inline-block;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 6px;
+    }
+    .status-pending { background: var(--warning-bg, #fff3cd); color: var(--warning-text, #856404); }
+    .status-loaded { background: var(--success-bg, #d4edda); color: var(--success-text, #155724); }
+    .action-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+      text-decoration: none;
+    }
+    .btn-action:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-generate {
+      background: var(--primary-button-bg, #0066cc);
+      color: var(--primary-button-text, white);
+    }
+    .btn-generate:hover:not(:disabled) { background: var(--primary-button-hover-bg, #0052a3); }
+    .btn-download {
+      background: #1a7340;
+      color: white;
+    }
+    .btn-download:hover { background: #155c33; }
+    #previewTable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 16px;
+    }
+    #previewTable th {
+      background: var(--table-header-bg, #f2f2f2);
+      border: 1px solid var(--table-border, #ddd);
+      padding: 8px 6px;
+      text-align: left;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+    }
+    #previewTable td {
+      border: 1px solid var(--table-border, #ddd);
+      padding: 6px;
+      vertical-align: top;
+      font-size: 12px;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      max-width: 300px;
+    }
+    #previewTable tr:hover td { background: var(--table-hover-bg, #f5f5f5); }
+    .preview-wrapper {
+      overflow-x: auto;
+      max-height: 600px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color, #ddd);
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    #error {
+      color: var(--error-text, #dc3545);
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .section-header {
+      background: var(--secondary-bg-color, #f8f9fa);
+      border: 1px solid var(--border-color, #ddd);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid var(--input-border, #ced4da);
+      border-radius: 4px;
+      background: var(--input-bg, white);
+      color: var(--input-text, #333);
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    h1 { margin-bottom: 6px; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    #resultsInfo { font-size: 14px; margin-top: 8px; color: var(--success-text, #155724); }
+  </style>
+</head>
+<body class="container-fluid">
+<div class="content-wrapper">
+  <h1>Volunteer Email Prep</h1>
+  <p class="subtitle">Upload the three VMS export files to generate a flattened volunteer status spreadsheet for email outreach.</p>
+
+  <div class="section-header">
+    <h3 style="margin-top:0;">Instructions</h3>
+    <ol style="margin-bottom:0;">
+      <li>Log in to VMS and select your event.</li>
+      <li>Click <b>All Reports</b>.</li>
+      <li>Export the <b>Assigned Volunteers</b>, <b>Training and Certifications</b>, and <b>Consent and Release Status</b> reports.</li>
+      <li>Upload all three files below (order doesn't matter).</li>
+      <li>Click <b>Generate Output</b> to preview, then <b>Download CSV</b>.</li>
+    </ol>
+    <p style="margin-bottom:0; margin-top:10px;"><i>All processing happens locally in your browser. No data is sent to a server.</i></p>
+  </div>
+
+  <div class="upload-grid">
+    <div class="upload-section">
+      <label>1. Assigned Volunteers Export <span id="avStatus" class="status-badge status-pending">Not loaded</span></label>
+      <input type="file" id="avInput" accept=".csv" style="display:none;">
+      <div id="avDropzone" class="dropzone">Click or drag &amp; drop<br><small>Assigned Volunteers CSV</small></div>
+    </div>
+    <div class="upload-section">
+      <label>2. Training &amp; Certifications Export <span id="tcStatus" class="status-badge status-pending">Not loaded</span></label>
+      <input type="file" id="tcInput" accept=".csv" style="display:none;">
+      <div id="tcDropzone" class="dropzone">Click or drag &amp; drop<br><small>Training &amp; Certifications CSV</small></div>
+    </div>
+    <div class="upload-section">
+      <label>3. Consent &amp; Release Status Export <span id="crStatus" class="status-badge status-pending">Not loaded</span></label>
+      <input type="file" id="crInput" accept=".csv" style="display:none;">
+      <div id="crDropzone" class="dropzone">Click or drag &amp; drop<br><small>Consent &amp; Release CSV</small></div>
+    </div>
+  </div>
+
+  <div id="error"></div>
+
+  <div class="action-bar">
+    <button id="generateBtn" class="btn-action btn-generate" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Generate Output
+    </button>
+    <button id="downloadBtn" class="btn-action btn-download" style="display:none;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download CSV
+    </button>
+    <span id="resultsInfo"></span>
+  </div>
+
+  <div id="previewContainer" style="display:none;">
+    <h3 style="margin-top:20px;">Preview</h3>
+    <div class="preview-wrapper">
+      <table id="previewTable">
+        <thead id="previewHead"></thead>
+        <tbody id="previewBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>
