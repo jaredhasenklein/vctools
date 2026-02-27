@@ -5,9 +5,9 @@ const PROGRAM_CONFIGS = {
             requiredRoles: ['Judge'],
             requiredCourses: ['FIRST Robotics Competition Judge']
         },
-        'Judge - Dean\'s List Award': {
-            requiredRoles: ['Judge - Dean\'s List Award'],
-            requiredCourses: ['FIRST Robotics Competition Dean\'s List Award Judge', 'FIRST Data Privacy and Protection Training']
+        'Judge - FIRST Leadership Award': {
+            requiredRoles: ['Judge - FIRST Leadership Award'],
+            requiredCourses: ['FIRST Robotics Competition Leadership Award Judge', 'FIRST Data Privacy and Protection Training']
         },
         'Judge - FIRST Impact Award': {
             requiredRoles: ['Judge - FIRST Impact Award'],
