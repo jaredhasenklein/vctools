@@ -26,13 +26,25 @@
       <li>Click <b>Training and Certifications</b>.</li>
       <li>Click <b>Export</b>.</li>
       <li>Click the button below to select your export.</li>
+      <li>(Optional) Upload your Assigned Volunteers export to filter the results to only include those assigned to this event.</li>
     </ol>
     <i>All data processing happens on your computer and is never sent to a server. No worries about PII here! Emails sent with the tool below will be BCC'd by default.</i>
   </td>
   <td>
-    <input type="file" id="fileInput" accept=".csv" style="display:none;">
-    <div id="dropzone">
-        Click or Drag and Drop CSV File
+    <div style="margin-bottom: 20px;">
+        <p style="margin-bottom: 5px; font-weight: bold;">1. Training and Certifications Export</p>
+        <input type="file" id="fileInput" accept=".csv" style="display:none;">
+        <div id="dropzone" class="dropzone">
+            Click or Drag and Drop Training & Certifications CSV (Required)
+        </div>
+    </div>
+    
+    <div style="margin-bottom: 20px;">
+        <p style="margin-bottom: 5px; font-weight: bold;">2. Assigned Volunteers Export (Optional)</p>
+        <input type="file" id="assignedVolunteersInput" accept=".csv" style="display:none;">
+        <div id="assignedVolunteersDropzone" class="dropzone">
+            Click or Drag and Drop Assigned Volunteers CSV (Optional)
+        </div>
     </div>
     <div id="error"></div>
   </td>

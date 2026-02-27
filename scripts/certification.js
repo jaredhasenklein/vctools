@@ -205,6 +205,8 @@ let ROLE_CONFIGS = PROGRAM_CONFIGS[selectedProgram];
 document.addEventListener('DOMContentLoaded', function() {
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
+    const assignedVolunteersDropzone = document.getElementById('assignedVolunteersDropzone');
+    const assignedVolunteersInput = document.getElementById('assignedVolunteersInput');
     const resultsContainer = document.getElementById('resultsContainer');
     const versionBox = document.querySelector('.version-box');
     
@@ -220,6 +222,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize drag and drop functionality
     setupDragAndDrop(dropzone, fileInput, handleFiles);
+
+    if (assignedVolunteersDropzone && assignedVolunteersInput) {
+        setupDragAndDrop(assignedVolunteersDropzone, assignedVolunteersInput, handleAssignedVolunteersFiles);
+    }
 });
 
 let personData = {}; // Global variable to store person data with emails
@@ -389,6 +395,14 @@ function processCSV(rows) {
     const dataRows = rows.slice(headerRowIndex + 1);
     const processedData = processData(dataRows);
     renderResults(processedData);
+
+    const dropzone = document.getElementById('dropzone');
+    if (dropzone) {
+        dropzone.textContent = `Loaded ${Object.keys(personData).length} volunteers.`;
+        dropzone.style.backgroundColor = 'var(--success-bg)';
+        dropzone.style.color = 'var(--success-text)';
+        dropzone.style.borderColor = 'var(--success-bg)';
+    }
 }
 
 // Helper function to check if a course name contains any of the required course patterns
@@ -467,6 +481,12 @@ function processData(rows) {
         };
     });
 
+    return categorizeData();
+}
+
+let assignedVolunteersFilters = null;
+
+function categorizeData() {
     // Determine role eligibility
     const roleResults = {};
     Object.keys(ROLE_CONFIGS).forEach(role => {
@@ -479,10 +499,24 @@ function processData(rows) {
 
     // Process each person's data
     Object.entries(personData).forEach(([name, personInfo]) => {
+        // If assigned volunteers file was uploaded, filter by it
+        if (assignedVolunteersFilters !== null) {
+            if (!(name in assignedVolunteersFilters)) {
+                return; // Skip this person entirely
+            }
+        }
+
         Object.entries(ROLE_CONFIGS).forEach(([roleName, config]) => {
             // Check if person's ASSIGNED role matches required roles
+            let assignedRolesToCheck = personInfo.assignedRoles;
+            
+            if (assignedVolunteersFilters !== null && assignedVolunteersFilters[name] && assignedVolunteersFilters[name].size > 0) {
+                // Use the exact roles assigned for this event
+                assignedRolesToCheck = Array.from(assignedVolunteersFilters[name]);
+            }
+
             const hasRequiredRole = config.requiredRoles.some(requiredRole =>
-                personInfo.assignedRoles.includes(requiredRole)
+                assignedRolesToCheck.includes(requiredRole)
             );
 
             if (!hasRequiredRole) return;
@@ -517,6 +551,110 @@ function processData(rows) {
     });
 
     return roleResults;
+}
+
+function handleAssignedVolunteersFiles(files) {
+    if (files.target) {
+        files = files.target.files;
+    }
+
+    if (files.length === 0) return;
+
+    const file = files[0];
+
+    if (!validateCSVFile(file)) {
+        return;
+    }
+
+    Papa.parse(file, {
+        complete: function(results) {
+            processAssignedVolunteersCSV(results.data);
+            
+            // Re-render results if main data was already processed
+            if (Object.keys(personData).length > 0) {
+                const processedData = categorizeData();
+                renderResults(processedData);
+            }
+        },
+        error: function(error) {
+            showError('Error parsing Assigned Volunteers file. Details: ' + error);
+        },
+        skipEmptyLines: true,
+        header: false
+    });
+}
+
+function processAssignedVolunteersCSV(rows) {
+    assignedVolunteersFilters = {};
+    
+    // Find header row based on expected columns
+    const expectedHeaders = ['Minor', 'Legal First Name', 'Preferred First Name', 'Last Name', 'Personal Pronouns', 'Email'];
+    
+    let headerRowIndex = -1;
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        if (row.length < 5) continue;
+        
+        const hasEmail = row.some(cell => cell && typeof cell === 'string' && cell.trim().toLowerCase() === 'email');
+        if (hasEmail) {
+            headerRowIndex = i;
+            break;
+        }
+    }
+    
+    if (headerRowIndex === -1) {
+        showError('Invalid Assigned Volunteers CSV format. Could not find header row.');
+        return;
+    }
+    
+    const headerRow = rows[headerRowIndex];
+    let firstNameIndex = -1;
+    let lastNameIndex = -1;
+    let rolesAssignedIndex = -1;
+    
+    headerRow.forEach((header, index) => {
+        if (!header || typeof header !== 'string') return;
+        const normalized = header.trim().toLowerCase();
+        if (normalized === 'preferred first name') firstNameIndex = index;
+        if (normalized === 'last name') lastNameIndex = index;
+        if (normalized === 'roles assigned') rolesAssignedIndex = index;
+    });
+
+    if (firstNameIndex === -1 || lastNameIndex === -1) {
+        showError('Invalid Assigned Volunteers CSV format. Could not find required columns.');
+        return;
+    }
+    
+    const dataRows = rows.slice(headerRowIndex + 1);
+    dataRows.forEach(row => {
+        if (row.length <= Math.max(firstNameIndex, lastNameIndex)) return;
+        
+        const firstName = (row[firstNameIndex] || '').trim();
+        const lastName = (row[lastNameIndex] || '').trim();
+        let roles = [];
+        if (rolesAssignedIndex !== -1 && row[rolesAssignedIndex]) {
+            let rolesStr = row[rolesAssignedIndex];
+            roles = rolesStr.split(',').map(r => r.trim().replace(/^"|"$/g, ''));
+        }
+        
+        const fullName = `${firstName} ${lastName}`.trim();
+        if (fullName) {
+            if (!assignedVolunteersFilters[fullName]) {
+                assignedVolunteersFilters[fullName] = new Set();
+            }
+            roles.forEach(r => {
+                if (r) assignedVolunteersFilters[fullName].add(r);
+            });
+        }
+    });
+
+    const dropzone = document.getElementById('assignedVolunteersDropzone');
+    if (dropzone) {
+        dropzone.textContent = `Loaded ${Object.keys(assignedVolunteersFilters).length} assigned volunteers.`;
+        dropzone.style.backgroundColor = 'var(--success-bg)';
+        dropzone.style.color = 'var(--success-text)';
+        dropzone.style.borderColor = 'var(--success-bg)';
+    }
 }
 
 /**
