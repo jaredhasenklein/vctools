@@ -30,7 +30,7 @@ const PROGRAM_CONFIGS = {
             requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Robot Inspector']
         },
         'Field Supervisor': {
-            requiredRoles: ['Lead Robot Inspector'],
+            requiredRoles: ['Field Supervisor'],
             requiredCourses: ['The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Field Supervisor']
         },
         'Robot Inspector': {
@@ -48,6 +48,10 @@ const PROGRAM_CONFIGS = {
         'Pit Admin Supervisor': {
             requiredRoles: ['Pit Administration Supervisor'],
             requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Pit Administration Supervisor']
+        },
+        'FIRST Technical Advisor Assistant': {
+            requiredRoles: ['FIRST Technical Advisor Assistant'],
+            requiredCourses: ['The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Technical Advisor Assistant Training']
         },
         'Accommodation Coordinator (optional role)': {
             requiredRoles: ['Accommodation Coordinator'],
