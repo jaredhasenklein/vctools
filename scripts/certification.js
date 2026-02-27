@@ -532,16 +532,26 @@ function categorizeData() {
 
             if (!hasRequiredRole) return;
 
-            // Check course status using partial matching
+            // Check course status using partial matching and track missing ones
+            const missingTrainings = [];
             const courseStatus = config.requiredCourses.map(requiredCoursePattern => {
                 // Find any course that matches the pattern
                 const matchingCourse = Object.keys(personInfo.courses).find(actualCourseName => 
                     matchesCoursePattern(requiredCoursePattern, actualCourseName)
                 );
                 
-                return matchingCourse 
+                const status = matchingCourse 
                     ? determineCourseStatus(personInfo.courses[matchingCourse]) 
                     : '❌';
+
+                if (status !== '✅') {
+                    // Use the pattern as the training name if no matching course found, 
+                    // or a descriptive placeholder if it's a TBD training
+                    const displayName = requiredCoursePattern.includes('TBD') ? "Assigned Role Training" : requiredCoursePattern;
+                    missingTrainings.push(displayName);
+                }
+                
+                return status;
             });
 
             // Check if all required courses have a valid status
@@ -549,13 +559,14 @@ function categorizeData() {
             const allCoursesCompleted = courseStatus.every(status => status === '✅');
 
             // Categorize results
+            const personEntry = { name, missingTrainings };
             if (allCoursesValid) {
                 if (allCoursesCompleted) {
-                    roleResults[roleName].complete.push(name);
+                    roleResults[roleName].complete.push(personEntry);
                 } else if (courseStatus.some(status => status === '⏰')) {
-                    roleResults[roleName].inProgress.push(name);
+                    roleResults[roleName].inProgress.push(personEntry);
                 } else {
-                    roleResults[roleName].incomplete.push(name);
+                    roleResults[roleName].incomplete.push(personEntry);
                 }
             }
         });
@@ -728,8 +739,9 @@ function renderResults(processedData) {
     resultsContainer.innerHTML = tableContent;
 }
 
-function getEmailsForCategory(names) {
-    return names.map(name => {
+function getEmailsForCategory(entries) {
+    return entries.map(entry => {
+        const name = entry.name;
         const person = Object.entries(personData).find(([fullName]) => fullName === name);
         if (person) {
             // Split name to get first name
@@ -737,11 +749,12 @@ function getEmailsForCategory(names) {
             return {
                 fullName: name,
                 firstName: firstName,
-                email: person[1].email
+                email: person[1].email,
+                missingTrainings: entry.missingTrainings
             };
         }
         return null;
-    }).filter(p => p);
+    }).filter(e => e !== null);
 }
 
 /**
@@ -778,9 +791,21 @@ function generateEmailData(recipients, isBulk = false, specificFirstName = null)
     const greeting = specificFirstName ? `Hi ${specificFirstName},` : "Hi,";
     const rawSubject = `${currentEventName} Certification Reminder`;
     
+    // Add missing training info if available for individual emails
+    let trainingInfo = "";
+    let trainingInfoHtml = "";
+    
+    if (!isBulk && recipients.length === 1 && recipients[0].missingTrainings && recipients[0].missingTrainings.length > 0) {
+        const list = recipients[0].missingTrainings.map(t => `- ${t}`).join('\n');
+        trainingInfo = `\n\nAccording to our records, you still need to complete one or more of the following trainings:\n${list}`;
+        
+        const listHtml = recipients[0].missingTrainings.map(t => `<li>${t}</li>`).join('');
+        trainingInfoHtml = `<p>According to our records, you still need to complete one or more of the following trainings:</p><ul>${listHtml}</ul>`;
+    }
+    
     const bodyTemplate = `${greeting}
 
-This is a reminder that you must complete your volunteer certifications before coming to our ${currentEventName}. Your certification must be completed by ${formattedDeadline}.
+This is a reminder that you must complete your volunteer certifications before coming to our ${currentEventName}. Your certification must be completed by ${formattedDeadline}.${trainingInfo}
 
 To complete testing:
 - Login to the FIRST Dashboard: https://www.firstinspires.org/Dashboard
@@ -801,7 +826,8 @@ ${coordinatorEmail}
 ${coordinatorPhone}`;
 
     const bodyHtmlTemplate = `${greeting}<br><br>
-<b>This is a reminder that you must complete your volunteer certifications before coming to our ${currentEventName}. Your certification must be completed by ${formattedDeadline}.</b><br><br>
+<b>This is a reminder that you must complete your volunteer certifications before coming to our ${currentEventName}. Your certification must be completed by ${formattedDeadline}.</b><br>
+${trainingInfoHtml}<br>
 <b>To complete testing:</b><br>
 - Login to the <a href="https://www.firstinspires.org/Dashboard"><em>FIRST</em> Dashboard</a><br>
 - Navigate to the Volunteer Registration Tab<br>
