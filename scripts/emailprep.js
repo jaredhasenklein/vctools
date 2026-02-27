@@ -773,6 +773,7 @@ function generate() {
         outputRows.push({
             'Preferred First Name': person.firstName,
             'Last Name': person.lastName,
+            'Email': person.email,
             'Day 0 Role': dayColumns.day0role,
             'Day 0 Schedule': dayColumns.day0schedule,
             'Day 1 Role': dayColumns.day1role,
@@ -836,7 +837,7 @@ function renderPreview(rows) {
 function downloadCSV() {
     if (outputRows.length === 0) return;
     const csv = Papa.unparse(outputRows);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
