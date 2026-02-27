@@ -19,23 +19,23 @@ const PROGRAM_CONFIGS = {
         },
         'Head Referee': {
             requiredRoles: ['Head Referee'],
-            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'TBD HR training name']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Head Referee']
         },
         'Referee': {
             requiredRoles: ['Referee'],
-            requiredCourses: ['TBD Referee training name']
+            requiredCourses: ['FIRST Robotics Competition Referee']
         },
         'Lead Robot Inspector': {
             requiredRoles: ['Lead Robot Inspector'],
-            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'TBD LRI training name']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Robot Inspector']
         },
         'Robot Inspector': {
             requiredRoles: ['Robot Inspector'],
-            requiredCourses: ['TBD Robot Inspector course name']
+            requiredCourses: ['FIRST Robotics Competition Robot Inspector']
         },
         'Lead Queuer': {
             requiredRoles: ['Lead Queuer'],
-            requiredCourses: ['TBD LQ training name']
+            requiredCourses: ['FIRST Robotics Competition Lead Queuer']
         },
         'Safety Manager': {
             requiredRoles: ['Safety Manager'],
@@ -43,7 +43,7 @@ const PROGRAM_CONFIGS = {
         },
         'Pit Admin Supervisor': {
             requiredRoles: ['Pit Administration Supervisor'],
-            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'TBD Pit Admin training name']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Pit Administration Supervisor']
         },
         'Accommodation Coordinator (optional role)': {
             requiredRoles: ['Accommodation Coordinator'],
