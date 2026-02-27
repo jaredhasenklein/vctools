@@ -29,6 +29,10 @@ const PROGRAM_CONFIGS = {
             requiredRoles: ['Lead Robot Inspector'],
             requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Robot Inspector']
         },
+        'Field Supervisor': {
+            requiredRoles: ['Lead Robot Inspector'],
+            requiredCourses: ['The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Field Supervisor']
+        },
         'Robot Inspector': {
             requiredRoles: ['Robot Inspector'],
             requiredCourses: ['FIRST Robotics Competition Robot Inspector']
