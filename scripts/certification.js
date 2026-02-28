@@ -15,7 +15,7 @@ const PROGRAM_CONFIGS = {
         },
         'Judge Advisor': {
             requiredRoles: ['Judge Advisor'],
-            requiredCourses: ['FIRST Robotics Competition Dean\'s List Award Judge', 'Data Privacy for Event Volunteers', 'FIRST Robotics Competition FIRST Impact Award Judge', 'FIRST Robotics Competition Judge', 'FIRST Robotics Competition Judge Advisor']
+            requiredCourses: ['FIRST Robotics Competition Leadership Award Judge', 'Data Privacy for Event Volunteers', 'FIRST Robotics Competition FIRST Impact Award Judge', 'FIRST Robotics Competition Judge', 'FIRST Robotics Competition Judge Advisor']
         },
         'Head Referee': {
             requiredRoles: ['Head Referee'],
@@ -43,7 +43,7 @@ const PROGRAM_CONFIGS = {
         },
         'Safety Manager': {
             requiredRoles: ['Safety Manager'],
-            requiredCourses: ['FIRST® Robotics Competition Safety Manager',]
+            requiredCourses: ['FIRST Robotics Competition Safety Manager',]
         },
         'Pit Admin Supervisor': {
             requiredRoles: ['Pit Administration Supervisor'],
