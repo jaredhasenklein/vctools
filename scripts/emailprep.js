@@ -9,7 +9,7 @@ const PROGRAM_CONFIGS = {
         },
         'Judge - FIRST Leadership Award': {
             requiredRoles: ['Judge - FIRST Leadership Award'],
-            requiredCourses: ['FIRST Robotics Competition Judge', 'FIRST Robotics Competition Leadership Award Judge' 'Data Privacy for Event Volunteers']
+            requiredCourses: ['FIRST Robotics Competition Judge', 'FIRST Robotics Competition Leadership Award Judge', 'Data Privacy for Event Volunteers']
         },
         'Judge - FIRST Impact Award': {
             requiredRoles: ['Judge - FIRST Impact Award'],
