@@ -43,7 +43,7 @@ const PROGRAM_CONFIGS = {
         },
         'Safety Manager': {
             requiredRoles: ['Safety Manager'],
-            requiredCourses: ['FIRST Robotics Competition Safety Manager',]
+            requiredCourses: ['FIRST Robotics Competition Safety Manager']
         },
         'Pit Admin Supervisor': {
             requiredRoles: ['Pit Administration Supervisor'],
