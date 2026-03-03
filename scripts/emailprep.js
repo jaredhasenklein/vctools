@@ -9,7 +9,7 @@ const PROGRAM_CONFIGS = {
         },
         'Judge - FIRST Leadership Award': {
             requiredRoles: ['Judge - FIRST Leadership Award'],
-            requiredCourses: ['FIRST Robotics Competition Leadership Award Judge', 'FIRST Data Privacy and Protection Training']
+            requiredCourses: ['FIRST Robotics Competition Judge', 'FIRST Robotics Competition Leadership Award Judge' 'Data Privacy for Event Volunteers']
         },
         'Judge - FIRST Impact Award': {
             requiredRoles: ['Judge - FIRST Impact Award'],
@@ -17,11 +17,11 @@ const PROGRAM_CONFIGS = {
         },
         'Judge Advisor': {
             requiredRoles: ['Judge Advisor'],
-            requiredCourses: ["FIRST Robotics Competition Dean's List Award Judge", 'Data Privacy for Event Volunteers', 'FIRST Robotics Competition FIRST Impact Award Judge', 'FIRST Robotics Competition Judge', 'FIRST Robotics Competition Judge Advisor']
+            requiredCourses: ['FIRST Robotics Competition Leadership Award Judge', 'Data Privacy for Event Volunteers', 'FIRST Robotics Competition FIRST Impact Award Judge', 'FIRST Robotics Competition Judge', 'FIRST Robotics Competition Judge Advisor']
         },
         'Head Referee': {
             requiredRoles: ['Head Referee'],
-            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer', 'The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Head Referee']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Head Referee']
         },
         'Referee': {
             requiredRoles: ['Referee'],
@@ -29,11 +29,11 @@ const PROGRAM_CONFIGS = {
         },
         'Lead Robot Inspector': {
             requiredRoles: ['Lead Robot Inspector'],
-            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer', 'The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Robot Inspector']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Robot Inspector']
         },
         'Field Supervisor': {
             requiredRoles: ['Field Supervisor'],
-            requiredCourses: ['The Gracious Volunteer', 'The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Field Supervisor']
+            requiredCourses: ['The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Field Supervisor']
         },
         'Robot Inspector': {
             requiredRoles: ['Robot Inspector'],
@@ -45,17 +45,17 @@ const PROGRAM_CONFIGS = {
         },
         'Safety Manager': {
             requiredRoles: ['Safety Manager'],
-            requiredCourses: ['FIRST® Robotics Competition Safety Manager']
+            requiredCourses: ['FIRST Robotics Competition Safety Manager',]
         },
-        'Pit Administration Supervisor': {
+        'Pit Admin Supervisor': {
             requiredRoles: ['Pit Administration Supervisor'],
-            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer', 'The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Pit Administration Supervisor']
+            requiredCourses: ['Data Privacy for Event Volunteers', 'The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Robotics Competition Pit Administration Supervisor']
         },
         'FIRST Technical Advisor Assistant': {
             requiredRoles: ['FIRST Technical Advisor Assistant'],
-            requiredCourses: ['The Gracious Volunteer', 'The Gracious Volunteer - Event Volunteer', 'FIRST Technical Advisor Assistant Training']
+            requiredCourses: ['The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Technical Advisor Assistant Training']
         },
-        'Accommodation Coordinator': {
+        'Accommodation Coordinator (optional role)': {
             requiredRoles: ['Accommodation Coordinator'],
             requiredCourses: ['Accommodation Coordinator', 'Data Privacy for Event Volunteers']
         }
@@ -568,16 +568,16 @@ function formatConsent(raw) {
 function getTrainingStatus(role, tcPerson, program) {
     // Special role overrides
     if (role === 'Control System Advisor') {
-        return '👀 See this webpage for training info: https://www.firstinspires.org/community/volunteers/roles/control-system-advisor';
+        return '⚠️ See this webpage for training info: https://www.firstinspires.org/community/volunteers/roles/control-system-advisor';
     }
     if (role === 'Game Announcer' || role === 'Emcee') {
-        return '👀 See this webpage for training info: https://www.firstinspires.org/resources/library/frc/emcee-ga-training';
+        return '⚠️ See this webpage for training info: https://www.firstinspires.org/resources/library/frc/emcee-ga-training';
     }
     if (role === 'FIRST Technical Advisor') {
         return '✅Trained by HQ';
     }
     if (role === 'Scorekeeper') {
-        return '👀 See this webpage for training info: https://www.firstinspires.org/community/volunteers/roles/scorekeeper';
+        return '⚠️ See this webpage for training info: https://www.firstinspires.org/community/volunteers/roles/scorekeeper';
     }
 
     // Roles that require certification checking
@@ -642,7 +642,7 @@ function getTrainingStatus(role, tcPerson, program) {
 // ============================================================
 function getConflictOfInterest(role) {
     if (COI_ROLES.has(role)) {
-        return '👀If you are affiliated with a team competing at this event, please complete and return this form: https://www.firstinspires.org/hubfs/web/volunteer/conflict-of-interest-and-disclosure-statement.pdf';
+        return '⚠️If you are affiliated with a team competing at this event, please complete and return this form: https://www.firstinspires.org/hubfs/web/volunteer/conflict-of-interest-and-disclosure-statement.pdf';
     }
     return '✅ Not required for your role.';
 }
@@ -767,7 +767,7 @@ function generate() {
         // Conflict of Interest — most restrictive status wins, no role labels
         const coiRequired = Array.from(allRoles).some(role => COI_ROLES.has(role));
         const coiStatus = coiRequired
-            ? '👀If you are affiliated with a team competing at this event, please complete and return this form: https://www.firstinspires.org/hubfs/web/volunteer/conflict-of-interest-and-disclosure-statement.pdf'
+            ? '⚠️If you are affiliated with a team competing at this event, please complete and return this form: https://www.firstinspires.org/hubfs/web/volunteer/conflict-of-interest-and-disclosure-statement.pdf'
             : '✅ Not required for your role.';
 
         outputRows.push({
