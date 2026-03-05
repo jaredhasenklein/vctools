@@ -51,7 +51,7 @@ const PROGRAM_CONFIGS = {
         },
         'FIRST Technical Advisor Assistant': {
             requiredRoles: ['FIRST Technical Advisor Assistant'],
-            requiredCourses: ['The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Technical Advisor Assistant Training']
+            requiredCourses: ['The Gracious Volunteer','The Gracious Volunteer - Event Volunteer', 'FIRST Technical Advisor Assistant']
         },
         'Accommodation Coordinator (optional role)': {
             requiredRoles: ['Accommodation Coordinator'],
