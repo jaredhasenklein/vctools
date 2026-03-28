@@ -713,7 +713,8 @@ function generate() {
 
         // Build day columns
         const dayColumns = {};
-        for (let d = 0; d <= 2; d++) {
+        const numDays = Object.keys(dayMap).length;
+        for (let d = 0; d < numDays; d++) {
             if (byDay[d]) {
                 const info = byDay[d];
                 const rolesStr = Array.from(info.roles).join(', ');
@@ -770,22 +771,21 @@ function generate() {
             ? '⚠️If you are affiliated with a team competing at this event, please complete and return this form: https://www.firstinspires.org/hubfs/web/volunteer/conflict-of-interest-and-disclosure-statement.pdf'
             : '✅ Not required for your role.';
 
-        outputRows.push({
+        const outputRow = {
             'Preferred First Name': person.firstName,
             'Last Name': person.lastName,
             'Email': person.email,
-            'Day 0 Role': dayColumns.day0role,
-            'Day 0 Schedule': dayColumns.day0schedule,
-            'Day 1 Role': dayColumns.day1role,
-            'Day 1 Schedule': dayColumns.day1schedule,
-            'Day 2 Role': dayColumns.day2role,
-            'Day 2 Schedule': dayColumns.day2schedule,
-            'YPP Status': yppStatus,
-            'CA AB 506 Status': caYppStatus,
-            'Consent and Release Status': consentStatus,
-            'Training': trainingStatus,
-            'Conflict of Interest': coiStatus
-        });
+        };
+        for (let d = 0; d < numDays; d++) {
+            outputRow[`Day ${d} Role`] = dayColumns[`day${d}role`];
+            outputRow[`Day ${d} Schedule`] = dayColumns[`day${d}schedule`];
+        }
+        outputRow['YPP Status'] = yppStatus;
+        outputRow['CA AB 506 Status'] = caYppStatus;
+        outputRow['Consent and Release Status'] = consentStatus;
+        outputRow['Training'] = trainingStatus;
+        outputRow['Conflict of Interest'] = coiStatus;
+        outputRows.push(outputRow);
     });
 
     if (outputRows.length === 0) {
