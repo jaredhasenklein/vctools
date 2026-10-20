@@ -27,6 +27,16 @@ Contributions are welcome! Here are a few things to keep in mind:
 - **Privacy:** Personal Identifiable Information (PII) should only be processed client-side (like with JavaScript). This project will not send PII to any servers.
 - **AI and External Tools:** Using AI and other tools is welcome. Just make sure to cite any tools used that aren't already mentioned.
 
+## Development
+
+The site is static files served by GitHub Pages; open any `.html` file through a local server (for example `python3 -m http.server`). Checks and tests need Node 22:
+
+```
+npm ci
+npm run check
+npm test
+```
+
 ## Libraries
 
 VC Tools is made better with the help of:

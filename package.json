@@ -1,0 +1,13 @@
+{
+  "name": "vctools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "check": "node tools/check-syntax.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^5.0.5"
+  }
+}

@@ -180,3 +180,26 @@ input, select {
         display: none;
     }
 }
+/* Badge preview table keeps print colors in both light and dark mode */
+/* Badge table should look the same in both modes */
+table[style*="text-align: center"][style*="margin: 0px auto"] {
+  background-color: white !important;
+  color: black !important;
+}
+
+table[style*="text-align: center"][style*="margin: 0px auto"] td,
+table[style*="text-align: center"][style*="margin: 0px auto"] p,
+table[style*="text-align: center"][style*="margin: 0px auto"] input,
+table[style*="text-align: center"][style*="margin: 0px auto"] select {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* Keep black background row black */
+table[style*="text-align: center"][style*="margin: 0px auto"] td[bgcolor="black"] {
+  background-color: black !important;
+}
+
+table[style*="text-align: center"][style*="margin: 0px auto"] td[bgcolor="black"] p {
+  color: white !important;
+}
