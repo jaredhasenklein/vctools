@@ -517,3 +517,22 @@ hr,
 *[class*="border"] {
   border-color: var(--border-color) !important;
 }
+
+/* Column mapping dialog (lib/vms/mapping.js) */
+.vms-map-dialog {
+  max-width: 560px;
+  width: calc(100% - 32px);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  padding: 24px;
+  background: var(--background-color, #fff);
+  color: var(--text-color, #000);
+}
+.vms-map-dialog::backdrop { background: rgba(0, 0, 0, 0.45); }
+.vms-map-dialog h2 { font-size: 1.25rem; margin-top: 0; }
+.vms-map-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin: 12px 0; }
+.vms-map-row label { font-weight: 600; }
+.vms-map-row select { min-width: 240px; flex: 1 1 240px; max-width: 100%; padding: 4px; }
+.vms-map-required { font-weight: 400; font-size: 0.85em; color: #b00020; }
+.vms-map-error { color: #b00020; min-height: 1.2em; }
+.vms-map-actions { display: flex; justify-content: flex-end; gap: 8px; }

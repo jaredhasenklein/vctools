@@ -21,3 +21,20 @@ All VMS report exports share one shape:
 ## Testing
 - `npm run check` parses every script; `npm test` runs Vitest in jsdom.
 - Never commit real report exports. Test fixtures must be synthetic.
+
+## Reading a report (lib/vms)
+```js
+import { readReportFile, resolveWithUser, toRecords } from './lib/vms/index.js';
+
+const report = await readReportFile(file);          // finds the header row, reads the preamble
+const columns = await resolveWithUser(report, {     // asks the user only about missing fields
+  preferredFirstName: { required: true },
+  email: { required: true },
+  shirtSize: {},                                    // optional: null if skipped
+});
+const people = toRecords(report, columns);          // [{ preferredFirstName, email, shirtSize, _raw }]
+```
+- `report.meta` has `report`, `event`, `program` (FRC/FTC/FLL), `season`, `location`, `eventDates`, `coordinators`.
+- Field keys come from `lib/vms/fields.js`. When FIRST renames a column, add the new header as an alias there.
+- A tool must keep working when an optional field's column is `null`: hide or disable the feature that needs it.
+- Classic (non-module) scripts can use `window.VMS` after the page loads `<script type="module" src="lib/vms/index.js">`.
