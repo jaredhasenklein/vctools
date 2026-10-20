@@ -1,0 +1,22 @@
+Report: Training and Certifications
+Date: 10/20/2026
+
+Event: CA-Testville-Example Kickoff - FRC
+Location: Testville, CA
+Event Dates: January 9, 2027
+Season: 2027 - BIOCOREâ„¢ presented by Haas
+
+Volunteer Coordinator(s)
+Pat Example
+
+WARNING: This file contains personal data (L1 - PII).
+"Your use of this data must comply with the FIRST Privacy Policy and the FIRST Data Protection Policy, including, but not limited to, the following rules:"
+"1.) You must restrict access to this file and not share it for any purpose, or with any person or entity, other than those allowed by FIRST policy."
+2.) You must secure this file properly.
+"3.) You must delete or destroy this raw data file and any copies at the completion of the current FIRST season or sooner; or you must process or convert the file to more secure formats and delete non-essential data fields."
+"4.) If you become aware of a breach of this file or any FIRST personal data, you must notify the IT Helpdesk at helpdesk@firstinspires.org and CC: privacy@firstinspires.org."
+
+Minor,Preferred First Name,Last Name,Email,Phone,Role,Assignment Status,Course Name,Enrollment Date,Started Date,Completion Date,Required?
+No,Alex,Tester,alex@example.com,555-0100,"Judge, Judge Advisor",Assigned,FRC Judge Training,9/1/2026,9/2/2026,9/3/2026,Yes
+No,Jordan,Fixture,jordan@example.com,555-0101,Referee,Assigned,FRC Referee Training,9/1/2026,,,Yes
+
