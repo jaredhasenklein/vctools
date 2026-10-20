@@ -2,6 +2,7 @@
 
 ## Delivery
 - One branch and one pull request per logical change. CI (`.github/workflows/ci.yml`) must pass.
+- Every PR targets `main`. Never stack a PR on another PR's branch: merging the lower one does not move the upper one to `main` unless that branch is deleted, so the upper PR merges into a dead branch and never deploys. When work depends on an unmerged PR, wait for the merge, then branch from the updated `main`.
 - Commit messages: imperative summary line, short body explaining why.
 - Every PR description ends with an "After deploy, check" section: a numbered list of what to try on the live site once it merges, or "Nothing" with the reason.
 
