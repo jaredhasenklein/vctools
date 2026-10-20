@@ -374,10 +374,7 @@ const roleY = lastNameY + (lastNameFontSize / 72) * 0.5;
           labelContainer.innerHTML = '<div class="loading">Processing file, please wait...</div>';
         }
 
-        const reader = new FileReader();
-        reader.onload = () => {
-          const csvData = reader.result;
-          const labels = parseCSV(csvData);
+        loadLabels(csvFile).then((labels) => {
           createPDF(
             labels,
             labelType,
@@ -412,8 +409,7 @@ const roleY = lastNameY + (lastNameFontSize / 72) * 0.5;
             // Re-create the abbreviation interface
             displayRoleAbbreviationInterface(parsedLabels);
           }
-        };
-        reader.readAsText(csvFile);
+        }).catch(showLoadError);
       } else {
         showError('Please select a CSV file.');
       }
@@ -446,10 +442,8 @@ const roleY = lastNameY + (lastNameFontSize / 72) * 0.5;
     clearError();
 
     // Process the file to get roles and display the abbreviation interface
-    const reader = new FileReader();
-    reader.onload = () => {
-      const csvData = reader.result;
-      parsedLabels = parseCSV(csvData);
+    loadLabels(file).then((labels) => {
+      parsedLabels = labels;
 
       // Clear any existing abbreviations on new file upload
       roleAbbreviations = {};
@@ -466,8 +460,7 @@ const roleY = lastNameY + (lastNameFontSize / 72) * 0.5;
       if (generateButton) {
         generateButton.style.display = 'block';
       }
-    };
-    reader.readAsText(file);
+    }).catch(showLoadError);
   }
 
   // Create and display the role abbreviation interface
@@ -613,66 +606,46 @@ const roleY = lastNameY + (lastNameFontSize / 72) * 0.5;
     });
   }
 
-  function parseCSV(csvData) {
-    const labels = [];
-    const rows = csvData.trim().split('\n');
-    const headerMap = {
-      'Minor': 'minor',
-      'Preferred First Name': 'firstname',
-      'Last Name': 'lastname',
-      'Personal Pronouns': 'personalpronouns',
-      'Roles Assigned': 'roles',
-      'Languages Spoken': 'languagesspoken'
-    };
+  // Fields read from the Name Badges or Assigned Volunteers report (see lib/vms/fields.js).
+  const BADGE_NEEDS = {
+    preferredFirstName: { required: true },
+    lastName: { required: true },
+    rolesAssigned: { required: true },
+    minor: {},
+    personalPronouns: {},
+    languagesSpoken: {},
+  };
 
-    let headers = [];
-    const headerRow = rows[18].split(',').map(header => header.trim().replace(/^"(.*)"$/, '$1'));
-    headers = headerRow.filter(header => header !== '');
-
-    for (let i = 19; i < rows.length; i++) {
-      const row = parseCSVRow(rows[i]);
-      const label = {};
-
-      for (let j = 0; j < headers.length; j++) {
-        const headerKey = Object.keys(headerMap).find(key => key.toLowerCase() === headers[j].toLowerCase())
-          ? headerMap[Object.keys(headerMap).find(key => key.toLowerCase() === headers[j].toLowerCase())]
-          : headers[j].toLowerCase().replace(/\s+/g, '');
-
-        const columnIndex = headers.findIndex(header => header.toLowerCase() === headers[j].toLowerCase());
-        const cellValue = row[columnIndex] ? row[columnIndex].trim().replace(/^"?(.*?)"?$/, '$1') : '';
-        label[headerKey] = cellValue;
+  // One label per report row, with the property names the label styles use.
+  async function loadLabels(file) {
+    const { records } = await VMS.loadReport(file, BADGE_NEEDS, { accepts: ['Name Badges', 'Assigned Volunteers'] });
+    // Assigned Volunteers has a row per shift, so one person can appear several times.
+    // Make one label per person, combining their roles in first-seen order.
+    const byPerson = new Map();
+    for (const rec of records) {
+      const key = `${rec.preferredFirstName}|${rec.lastName}`.toLowerCase();
+      const roles = rec.rolesAssigned.split(',').map((r) => r.trim()).filter(Boolean);
+      const label = byPerson.get(key);
+      if (label) {
+        for (const r of roles) if (!label.roleList.includes(r)) label.roleList.push(r);
+        continue;
       }
-
-      labels.push(label);
+      byPerson.set(key, {
+        minor: rec.minor,
+        firstname: rec.preferredFirstName,
+        lastname: rec.lastName,
+        personalpronouns: rec.personalPronouns,
+        languagesspoken: rec.languagesSpoken,
+        roleList: roles,
+      });
     }
-
-    return labels;
+    return [...byPerson.values()].map(({ roleList, ...label }) => ({ ...label, roles: roleList.join(', ') }));
   }
 
-  function parseCSVRow(rowStr) {
-    const row = [];
-    let inQuotes = false;
-    let currentValue = '';
-
-    for (let i = 0; i < rowStr.length; i++) {
-      const char = rowStr[i];
-
-      if (char === '"') {
-        inQuotes = !inQuotes;
-        continue;
-      }
-
-      if (char === ',' && !inQuotes) {
-        row.push(currentValue.trim());
-        currentValue = '';
-        continue;
-      }
-
-      currentValue += char;
-    }
-
-    row.push(currentValue.trim());
-    return row;
+  function showLoadError(error) {
+    if (VMS.isCancelled(error)) return;
+    if (labelContainer) labelContainer.innerHTML = '';
+    showError('Error reading file. Details: ' + error.message);
   }
 
   function createPDF(labels, labelType, labelStyle, topText, bottomLeftType, bottomLeftCustom, bottomRightType, bottomRightCustom) {

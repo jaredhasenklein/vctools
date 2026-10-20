@@ -272,9 +272,9 @@ function capitalize(str) {
 // ============================================================
 // STATE
 // ============================================================
-let avData = null;      // Assigned Volunteers parsed rows
-let tcData = null;      // Training & Certifications parsed rows
-let crData = null;      // Consent & Release parsed rows
+let avData = null;      // Assigned Volunteers: { report, records }
+let tcData = null;      // Training & Certifications: { report, records }
+let crData = null;      // Consent & Release: { report, records }
 let outputRows = [];    // Final computed rows for CSV/preview
 
 // ============================================================
@@ -300,25 +300,18 @@ function loadFile(files, type) {
         showError('Please upload a CSV file.');
         return;
     }
-    Papa.parse(file, {
-        complete: function (result) {
+    VMS.loadReport(file, NEEDS[type], { accepts: ACCEPTS[type] })
+        .then((loaded) => {
             clearError();
-            const rows = result.data;
             const dropzoneId = type === 'av' ? 'avDropzone' : type === 'tc' ? 'tcDropzone' : 'crDropzone';
             const statusId = type === 'av' ? 'avStatus' : type === 'tc' ? 'tcStatus' : 'crStatus';
             const dropzone = document.getElementById(dropzoneId);
             const statusBadge = document.getElementById(statusId);
 
-            if (type === 'av') {
-                avData = rows;
-                dropzone.textContent = `✓ ${file.name}`;
-            } else if (type === 'tc') {
-                tcData = rows;
-                dropzone.textContent = `✓ ${file.name}`;
-            } else {
-                crData = rows;
-                dropzone.textContent = `✓ ${file.name}`;
-            }
+            if (type === 'av') avData = loaded;
+            else if (type === 'tc') tcData = loaded;
+            else crData = loaded;
+            dropzone.textContent = `✓ ${file.name}`;
             dropzone.classList.add('loaded');
             statusBadge.textContent = 'Loaded';
             statusBadge.className = 'status-badge status-loaded';
@@ -327,28 +320,48 @@ function loadFile(files, type) {
             if (avData && tcData) {
                 document.getElementById('generateBtn').disabled = false;
             }
-        },
-        error: function (err) {
-            showError('Error parsing file: ' + err.message);
-        },
-        skipEmptyLines: true,
-        header: false
-    });
+        })
+        .catch((err) => {
+            if (VMS.isCancelled(err)) return;
+            showError('Error reading file: ' + err.message);
+        });
 }
 
-// ============================================================
-// HEADER FINDER
-// ============================================================
-function findHeaderRow(rows, expectedHeaders) {
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const match = expectedHeaders.every((h, idx) =>
-            row[idx] && row[idx].trim().toLowerCase() === h.toLowerCase()
-        );
-        if (match) return i;
-    }
-    return -1;
-}
+// Which VMS report each drop zone takes.
+const ACCEPTS = {
+    av: ['Assigned Volunteers'],
+    tc: ['Training and Certifications'],
+    cr: ['Consent And Release Status'],
+};
+
+// Fields read from each report (see lib/vms/fields.js).
+const NEEDS = {
+    av: {
+        preferredFirstName: { required: true },
+        lastName: { required: true },
+        email: { required: true },
+        rolesAssigned: { required: true },
+        day: {},
+        startTime: {},
+        endTime: {},
+        youthProtectionPolicy: {},
+        caYppStatus: {},
+    },
+    tc: {
+        preferredFirstName: { required: true },
+        lastName: { required: true },
+        role: { required: true },
+        assignmentStatus: {},
+        courseName: { required: true },
+        startedDate: {},
+        completionDate: {},
+    },
+    cr: {
+        preferredFirstName: { required: true },
+        lastName: { required: true },
+        consentReleaseStatus: { required: true },
+    },
+};
 
 // ============================================================
 // TIME FORMATTING
@@ -376,22 +389,8 @@ function compareTimeStrings(a, b) {
 // ============================================================
 // PROGRAM DETECTION (from certification.js logic)
 // ============================================================
-function detectProgram(rows) {
-    for (let i = 0; i < Math.min(rows.length, 10); i++) {
-        const row = rows[i];
-        if (row.length > 0 && typeof row[0] === 'string' && row[0].trim().startsWith('Event:')) {
-            const eventInfo = row[0].trim();
-            const lastDash = eventInfo.lastIndexOf('-');
-            const programPart = lastDash !== -1 ? eventInfo.substring(lastDash + 1).trim() : eventInfo;
-            if (programPart.includes('FTC') || programPart.includes('Tech Challenge')) return 'FTC';
-            if (programPart.includes('FRC') || programPart.includes('Robotics Competition')) return 'FRC';
-            if (programPart.includes('FLL') || programPart.includes('LEGO League')) return 'FLL';
-            if (eventInfo.includes('Tech Challenge') || eventInfo.includes('FTC')) return 'FTC';
-            if (eventInfo.includes('Robotics Competition') || eventInfo.includes('FRC')) return 'FRC';
-            if (eventInfo.includes('LEGO League') || eventInfo.includes('FLL')) return 'FLL';
-        }
-    }
-    return 'FRC';
+function detectProgram(loaded) {
+    return loaded.report.meta.program || 'FRC';
 }
 
 // ============================================================
@@ -414,28 +413,12 @@ function determineCourseStatus(course) {
 // Returns: Map<fullName, { firstName, lastName, email, rows: [] }>
 // Each row: { role, day, startTime, endTime, yppStatus, caYppStatus }
 // ============================================================
-function parseAssignedVolunteers(rows) {
-    const AV_HEADERS = ['Minor', 'Legal First Name', 'Preferred First Name', 'Last Name', 'Personal Pronouns',
-        'Email', 'Phone', 'Roles Assigned', 'Languages Spoken', 'Day', 'Start Time', 'End Time',
-        'FIRST Youth Protection Policy', 'Overall CA YPP Status', 'Overall PA YPP Status'];
-    const headerIdx = findHeaderRow(rows, AV_HEADERS);
-    if (headerIdx === -1) {
-        showError('Could not find header row in Assigned Volunteers file. Please check the file format.');
-        return null;
-    }
-
-    // Build column index map dynamically to be safe
-    const headerRow = rows[headerIdx];
-    const colIdx = {};
-    headerRow.forEach((h, i) => { if (h) colIdx[h.trim()] = i; });
-
+function parseAssignedVolunteers({ records }) {
     const people = {};
-    const dataRows = rows.slice(headerIdx + 1);
 
-    dataRows.forEach(row => {
-        const get = (col) => (row[colIdx[col]] || '').trim();
-        const firstName = toProperName(get('Preferred First Name'));
-        const lastName = toProperName(get('Last Name'));
+    records.forEach(rec => {
+        const firstName = toProperName(rec.preferredFirstName);
+        const lastName = toProperName(rec.lastName);
         if (!firstName && !lastName) return;
         const fullName = `${firstName} ${lastName}`.trim();
 
@@ -443,22 +426,22 @@ function parseAssignedVolunteers(rows) {
             people[fullName] = {
                 firstName,
                 lastName,
-                email: get('Email'),
-                yppStatus: get('FIRST Youth Protection Policy'),
-                caYppStatus: get('Overall CA YPP Status'),
+                email: rec.email,
+                yppStatus: rec.youthProtectionPolicy,
+                caYppStatus: rec.caYppStatus,
                 shifts: []  // { role, day, startTime, endTime }
             };
         }
 
         // Update YPP with whatever is present (should be consistent per person)
-        if (get('FIRST Youth Protection Policy')) people[fullName].yppStatus = get('FIRST Youth Protection Policy');
-        if (get('Overall CA YPP Status')) people[fullName].caYppStatus = get('Overall CA YPP Status');
+        if (rec.youthProtectionPolicy) people[fullName].yppStatus = rec.youthProtectionPolicy;
+        if (rec.caYppStatus) people[fullName].caYppStatus = rec.caYppStatus;
 
         people[fullName].shifts.push({
-            role: get('Roles Assigned'),
-            day: get('Day'),
-            startTime: get('Start Time'),
-            endTime: get('End Time')
+            role: rec.rolesAssigned,
+            day: rec.day,
+            startTime: rec.startTime,
+            endTime: rec.endTime
         });
     });
 
@@ -469,29 +452,19 @@ function parseAssignedVolunteers(rows) {
 // PARSE TRAINING & CERTIFICATIONS CSV
 // Returns: Map<fullName, { courses: { courseName: {startedDate, completionDate} }, assignedRoles: [] }>
 // ============================================================
-function parseTrainingCerts(rows) {
-    const TC_HEADERS = ['Minor', 'Preferred First Name', 'Last Name', 'Email', 'Phone', 'Role',
-        'Assignment Status', 'Course Name', 'Enrollment Date', 'Started Date', 'Completion Date', 'Required?'];
-    const headerIdx = findHeaderRow(rows, TC_HEADERS);
-    if (headerIdx === -1) {
-        showError('Could not find header row in Training & Certifications file. Please check the file format.');
-        return null;
-    }
-
+function parseTrainingCerts({ records }) {
     const data = {};
-    const dataRows = rows.slice(headerIdx + 1);
 
-    dataRows.forEach(row => {
-        if (row.length < 12) return;
-        const firstName = toProperName((row[1] || '').trim());
-        const lastName = toProperName((row[2] || '').trim());
+    records.forEach(rec => {
+        const firstName = toProperName(rec.preferredFirstName);
+        const lastName = toProperName(rec.lastName);
         if (!firstName && !lastName) return;
         const fullName = `${firstName} ${lastName}`.trim();
-        const role = (row[5] || '').trim();
-        const assignmentStatus = (row[6] || '').trim();
-        const courseName = (row[7] || '').trim();
-        const startedDate = (row[9] || '').trim();
-        const completionDate = (row[10] || '').trim();
+        const role = rec.role;
+        const assignmentStatus = rec.assignmentStatus;
+        const courseName = rec.courseName;
+        const startedDate = rec.startedDate;
+        const completionDate = rec.completionDate;
 
         if (!data[fullName]) {
             data[fullName] = { courses: {}, assignedRoles: [] };
@@ -511,29 +484,15 @@ function parseTrainingCerts(rows) {
 // PARSE CONSENT & RELEASE CSV
 // Returns: Map<fullName, { consentStatus }>
 // ============================================================
-function parseConsentRelease(rows) {
-    const CR_HEADERS = ['Minor', 'Preferred First Name', 'Last Name', 'Consent & Release Status',
-        'Date Accepted', 'Email', 'Phone', 'Assignment Status'];
-    const headerIdx = findHeaderRow(rows, CR_HEADERS);
-    if (headerIdx === -1) {
-        // Not a fatal error since this file is optional-ish, just return empty
-        return {};
-    }
-
-    const headerRow = rows[headerIdx];
-    const colIdx = {};
-    headerRow.forEach((h, i) => { if (h) colIdx[h.trim()] = i; });
-
+function parseConsentRelease({ records }) {
     const data = {};
-    const dataRows = rows.slice(headerIdx + 1);
 
-    dataRows.forEach(row => {
-        const get = (col) => (row[colIdx[col]] || '').trim();
-        const firstName = toProperName(get('Preferred First Name'));
-        const lastName = toProperName(get('Last Name'));
+    records.forEach(rec => {
+        const firstName = toProperName(rec.preferredFirstName);
+        const lastName = toProperName(rec.lastName);
         if (!firstName && !lastName) return;
         const fullName = `${firstName} ${lastName}`.trim();
-        data[fullName] = { consentStatus: get('Consent & Release Status') };
+        data[fullName] = { consentStatus: rec.consentReleaseStatus };
     });
 
     return data;
