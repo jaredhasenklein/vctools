@@ -450,7 +450,7 @@ const roleY = lastNameY + (lastNameFontSize / 72) * 0.5;
 
       // Show file uploaded message
       if (dropzone) {
-        dropzone.innerHTML = `<div class="file-success">✓ File "${file.name}" uploaded successfully</div>`;
+        setDropzoneLoaded(dropzone, { fileName: file.name, detail: `${labels.length} badges` });
       }
 
       // Display the role abbreviation interface
@@ -618,7 +618,7 @@ const roleY = lastNameY + (lastNameFontSize / 72) * 0.5;
 
   // One label per report row, with the property names the label styles use.
   async function loadLabels(file) {
-    const { records } = await VMS.loadReport(file, BADGE_NEEDS, { accepts: ['Name Badges', 'Assigned Volunteers'] });
+    const { records } = await VMS.loadReport(file, BADGE_NEEDS, { accepts: VMS.acceptsFor('badge') });
     // Assigned Volunteers has a row per shift, so one person can appear several times.
     // Make one label per person, combining their roles in first-seen order.
     const byPerson = new Map();

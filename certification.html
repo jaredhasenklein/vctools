@@ -33,19 +33,15 @@
   </td>
   <td>
     <div style="margin-bottom: 20px;">
-        <p style="margin-bottom: 5px; font-weight: bold;">1. Training and Certifications Export</p>
-        <input type="file" id="fileInput" accept=".csv" style="display:none;">
-        <div id="dropzone" class="dropzone">
-            Click or Drag and Drop Training & Certifications CSV (Required)
-        </div>
+        <p class="vms-drop-label">1. Training and Certifications</p>
+        <input type="file" id="fileInput" accept=".csv" hidden>
+        <div id="dropzone" class="vms-drop" data-title="Training and Certifications report"></div>
     </div>
     
     <div style="margin-bottom: 20px;">
-        <p style="margin-bottom: 5px; font-weight: bold;">2. Assigned Volunteers Export (Optional)</p>
-        <input type="file" id="assignedVolunteersInput" accept=".csv" style="display:none;">
-        <div id="assignedVolunteersDropzone" class="dropzone">
-            Click or Drag and Drop Assigned Volunteers CSV (Optional)
-        </div>
+        <p class="vms-drop-label">2. Assigned Volunteers</p>
+        <input type="file" id="assignedVolunteersInput" accept=".csv" hidden>
+        <div id="assignedVolunteersDropzone" class="vms-drop" data-title="Assigned Volunteers report" data-optional></div>
     </div>
     <div id="error"></div>
   </td>
