@@ -59,64 +59,87 @@ function loadFile(event) {
     return;
   }
 
-  const reader = new FileReader();
-
-  reader.onload = function() {
-    try {
-      const csvData = reader.result;
-
-      // Pre-process the CSV to handle line breaks within quoted fields
-      const processedCsv = preprocessCSVWithLineBreaks(csvData);
-      const preprocessedData = preprocessCSV(processedCsv);
-      allVolunteerData = reformatCSV(preprocessedData);
+  VMS.readReportFile(file)
+    .then(async (report) => {
+      VMS.checkAccepted(report, ['Assigned Volunteers']);
+      const fields = await VMS.resolveWithUser(report, PARSE_NEEDS);
+      allVolunteerData = pivotByVolunteer(report, fields);
 
       // Create filter dropdown
       createFilterControls();
 
       // Display data with current filter
       applyCurrentFilter();
-    } catch (error) {
+    })
+    .catch((error) => {
+      if (VMS.isCancelled(error)) return;
       console.error('Error processing file:', error);
-      showError(`Error processing file: ${error.message || "Unknown error"}. Please check console for details.`);
+      showError(`Error processing file: ${error.message || 'Unknown error'}. Please check console for details.`);
+    });
+}
+
+// Fields this tool needs from the Assigned Volunteers report (see lib/vms/fields.js).
+// Every other column is carried through to the output as-is.
+const PARSE_NEEDS = {
+  email: { required: true },
+  day: { required: true },
+  rolesAssigned: { required: true },
+  accommodations: {},
+};
+
+// Columns handled separately: the day columns are built from these.
+const SCHEDULE_FIELDS = new Set(['day', 'startTime', 'endTime', 'rolesAssigned', 'role']);
+
+// Output column name for a report header: the matching entry in `columns`
+// (same field in the registry), or the header itself for anything else.
+function outputColumnName(header) {
+  const exact = columns.find((col) => col.toLowerCase() === header.toLowerCase());
+  if (exact) return exact;
+  const field = VMS.fieldForHeader(header);
+  return (field && columns.find((col) => VMS.fieldForHeader(col) === field)) || header;
+}
+
+// One row per volunteer (by email), with each day's roles collected into Mon..Sun.
+function pivotByVolunteer(report, fields) {
+  const byEmail = new Map();
+  const value = (row, idx) => (idx == null ? '' : String(row[idx] ?? '').trim());
+
+  report.rows.forEach((row) => {
+    const email = value(row, fields.email);
+    if (!email) return;
+    const day = value(row, fields.day);
+    const role = value(row, fields.rolesAssigned);
+
+    let person = byEmail.get(email);
+    if (!person) {
+      person = { email };
+      byEmail.set(email, person);
     }
-  };
 
-  reader.onerror = function() {
-    showError('Error reading file. Please try again.');
-  };
+    report.headers.forEach((header, j) => {
+      if (!header || j === fields.day || j === fields.rolesAssigned) return;
+      if (SCHEDULE_FIELDS.has(VMS.fieldForHeader(header))) return;
 
-  reader.readAsText(file, 'UTF-8');
+      let cell = value(row, j);
+      if (/[\r\n]/.test(cell)) {
+        // Multi-line accommodation requests are not shown in the table.
+        cell = j === fields.accommodations
+          ? 'This user entered an accommodation request which cannot be displayed'
+          : cell.replace(/\s*[\r\n]+\s*/g, ' ');
+      }
+      person[outputColumnName(header)] = cell;
+    });
+
+    if (day) {
+      const normalizedDay = normalizeDayName(day) || day;
+      person[normalizedDay] = (person[normalizedDay] || []).concat(role);
+    }
+  });
+
+  return [...byEmail.values()];
 }
 
 // Special function to handle line breaks in quoted fields
-function preprocessCSVWithLineBreaks(csvData) {
-  if (!csvData) return '';
-
-  // Process the CSV to properly handle quoted fields with line breaks
-  let inQuote = false;
-  let result = '';
-
-  for (let i = 0; i < csvData.length; i++) {
-    const char = csvData[i];
-
-    // Toggle quote state when we see a quote
-    if (char === '"') {
-      inQuote = !inQuote;
-      result += char;
-    }
-    // Replace newlines within quotes with a placeholder
-    else if ((char === '\n' || char === '\r') && inQuote) {
-      result += '[NEWLINE]';
-    }
-    // Keep everything else as is
-    else {
-      result += char;
-    }
-  }
-
-  return result;
-}
-
 function createFilterControls() {
   const buttonContainer = document.getElementById('buttonContainer');
 
@@ -205,210 +228,6 @@ function applyCurrentFilter() {
   displayData(filteredData);
 }
 
-function preprocessCSV(csvData) {
-  return csvData.replace(/(".*?")/g, (match) => {
-    // If the quoted string contains a comma, keep the quotes, otherwise remove them
-    return match.includes(',') ? match : match.replace(/"/g, '');
-  });
-}
-
-function safeGetValue(array, index) {
-  // Safely get a value from an array at the given index
-  // Returns empty string if index is out of bounds or value is undefined/null
-  if (!array || index < 0 || index >= array.length) {
-    return '';
-  }
-  return array[index] || '';
-}
-
-function safeReplace(str, search, replace) {
-  // Safely replace all occurrences of search with replace in str
-  // Returns empty string if str is undefined/null/not a string
-  if (!str || typeof str !== 'string') {
-    return '';
-  }
-  return str.replace(search, replace);
-}
-
-// Helper function to find a column index by name, case-insensitive
-function findColumnIndex(headerRow, columnNames) {
-  // Convert header row to lowercase for case-insensitive comparison
-  const lowerCaseHeaders = headerRow.map(header => header.toLowerCase());
-
-  // If columnNames is a string, convert to array
-  const columnNamesArray = Array.isArray(columnNames) ? columnNames : [columnNames];
-
-  // Try to find any of the column names (case-insensitive)
-  for (const columnName of columnNamesArray) {
-    const index = lowerCaseHeaders.indexOf(columnName.toLowerCase());
-    if (index !== -1) {
-      return index;
-    }
-  }
-
-  // As a fallback, try to find partial matches
-  for (const columnName of columnNamesArray) {
-    const lowerColumnName = columnName.toLowerCase();
-    const index = lowerCaseHeaders.findIndex(header =>
-      header && header.includes(lowerColumnName)
-    );
-    if (index !== -1) {
-      return index;
-    }
-  }
-
-  return -1;
-}
-
-function reformatCSV(csvData) {
-  const rows = csvData.trim().split('\n');
-  console.log('Total rows:', rows.length);
-
-  if (rows.length <= 18) {
-    console.error('Not enough rows in CSV file');
-    return [];
-  }
-
-  const headerRow = rows[18].split(',');
-  console.log('Header row:', headerRow);
-
-  // Use case-insensitive column finding
-  const dayIndex = findColumnIndex(headerRow, 'Day');
-  const emailIndex = findColumnIndex(headerRow, 'Email');
-
-  // Find role column - try several possible column names
-  const roleIndex = findColumnIndex(headerRow, ['Roles', 'Roles Assigned', 'Role']);
-
-  // Find accommodation column index
-  const accommodationIndex = findColumnIndex(headerRow, ['Accommodation', 'Accommodations', 'Self-Reported Accommodations']);
-
-  console.log('Column indices found - Day:', dayIndex, 'Email:', emailIndex, 'Role:', roleIndex, 'Accommodation:', accommodationIndex);
-
-  // Validate required columns exist
-  if (dayIndex === -1 || emailIndex === -1 || roleIndex === -1) {
-    throw new Error(`CSV format is invalid. Missing required columns - Day: ${dayIndex !== -1 ? 'Found' : 'Missing'}, Email: ${emailIndex !== -1 ? 'Found' : 'Missing'}, Roles: ${roleIndex !== -1 ? 'Found' : 'Missing'}`);
-  }
-
-  const data = [];
-
-  for (let i = 19; i < rows.length; i++) {
-    try {
-      if (!rows[i] || rows[i].trim() === '') continue;
-
-      const row = replaceCommasInQuotes(rows[i], '|').split(',');
-
-      // Skip rows with insufficient columns for required fields
-      if (row.length <= Math.max(emailIndex, dayIndex, roleIndex)) {
-        console.warn(`Row ${i} has insufficient columns (${row.length}), needs at least ${Math.max(emailIndex, dayIndex, roleIndex) + 1}.`);
-        continue;
-      }
-
-      // Use safe methods to get and process values
-      const email = safeReplace(safeGetValue(row, emailIndex), /\|/g, ',').replace(/^"(.*)"$/, '$1');
-      const day = safeReplace(safeGetValue(row, dayIndex), /\|/g, ',').replace(/^"(.*)"$/, '$1');
-      const role = safeReplace(safeGetValue(row, roleIndex), /\|/g, ',').replace(/^"(.*)"$/, '$1');
-
-      // Skip rows without a valid email
-      if (!email) {
-        console.warn(`Row ${i} has no email, skipping`);
-        continue;
-      }
-
-      // Find or create person entry
-      let person = data.find(p => p.email === email);
-      if (!person) {
-        person = { email };
-        data.push(person);
-      }
-
-      // Copy other columns - use a normalized map for case-insensitive output
-      const normalizedHeaders = {};
-      columns.forEach(col => {
-        // Create a map of lowercase header -> proper case header
-        normalizedHeaders[col.toLowerCase()] = col;
-      });
-
-      // Process each column of the current row
-      for (let j = 0; j < headerRow.length; j++) {
-        if (j >= row.length) continue; // Skip if row doesn't have this column
-
-        const columnName = headerRow[j];
-        const lowerColumnName = columnName.toLowerCase();
-
-        // Skip day and role columns which we handle separately
-        if (lowerColumnName === 'day' ||
-            lowerColumnName === 'start time' ||
-            lowerColumnName === 'end time' ||
-            lowerColumnName === 'roles' ||
-            lowerColumnName === 'roles assigned' ||
-            lowerColumnName === 'role') {
-          continue;
-        }
-
-        let value = safeReplace(safeGetValue(row, j), /\|/g, ',').replace(/^"(.*)"$/, '$1');
-
-        // Special handling for accommodations field
-        if (j === accommodationIndex && value.includes('[NEWLINE]')) {
-          value = "This user entered an accommodation request which cannot be displayed";
-          console.log(`Replaced accommodation field with placeholder for user ${email}`);
-        } else if (value.includes('[NEWLINE]')) {
-          // Replace any other fields with newlines with cleaned version
-          value = value.replace(/\[NEWLINE\]/g, ' ');
-        }
-
-        // Find the normalized column name if it exists
-        const properColumnName = findMatchingColumnName(columnName, columns);
-        if (properColumnName) {
-          person[properColumnName] = value;
-        } else {
-          // If no matching column in our predefined list, use the original
-          person[columnName] = value;
-        }
-      }
-
-      // Add role to appropriate day
-      if (day) {
-        // Normalize day names (Mon, Tue, etc.)
-        const normalizedDay = normalizeDayName(day);
-        if (normalizedDay) {
-          person[normalizedDay] = (person[normalizedDay] || []).concat(role);
-        } else {
-          // If we couldn't normalize, use the original
-          person[day] = (person[day] || []).concat(role);
-        }
-      }
-    } catch (rowError) {
-      console.warn(`Error processing row ${i}:`, rowError);
-      // Continue with next row
-    }
-  }
-
-  return data;
-}
-
-// Helper function to find a matching column name in our predefined list (case-insensitive)
-function findMatchingColumnName(columnName, columnsList) {
-  const lowerColumnName = columnName.toLowerCase();
-
-  // Try direct match first
-  for (const col of columnsList) {
-    if (col.toLowerCase() === lowerColumnName) {
-      return col;
-    }
-  }
-
-  // If no direct match, try partial match
-  for (const col of columnsList) {
-    if (col.toLowerCase().includes(lowerColumnName) ||
-        lowerColumnName.includes(col.toLowerCase())) {
-      return col;
-    }
-  }
-
-  return null;
-}
-
-// Helper function to normalize day names
 function normalizeDayName(day) {
   const days = {
     'mon': 'Mon',
@@ -429,20 +248,6 @@ function normalizeDayName(day) {
 
   const dayLower = day.toLowerCase().trim();
   return days[dayLower] || null;
-}
-
-function replaceCommasInQuotes(str, replacement) {
-  if (!str || typeof str !== 'string') {
-    return '';
-  }
-
-  try {
-    const regex = /"((?:[^"\\]|\\.)*)"/g;
-    return str.replace(regex, match => match.replace(/,/g, replacement));
-  } catch (e) {
-    console.error('Error in replaceCommasInQuotes:', e, 'for string:', str);
-    return str; // Return original string if there's an error
-  }
 }
 
 function displayData(reformattedData) {

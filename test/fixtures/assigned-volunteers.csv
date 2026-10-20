@@ -1,0 +1,23 @@
+Report: Assigned Volunteers
+Date: 10/20/2026
+
+Event: CA-Testville-Example Kickoff - FRC
+Location: Testville, CA
+Event Dates: January 9, 2027
+Season: 2027 - BIOCOREâ„¢ presented by Haas
+
+Volunteer Coordinator(s)
+Pat Example
+
+WARNING: This file contains personal data (L1 - PII).
+"Your use of this data must comply with the FIRST Privacy Policy and the FIRST Data Protection Policy, including, but not limited to, the following rules:"
+"1.) You must restrict access to this file and not share it for any purpose, or with any person or entity, other than those allowed by FIRST policy."
+2.) You must secure this file properly.
+"3.) You must delete or destroy this raw data file and any copies at the completion of the current FIRST season or sooner; or you must process or convert the file to more secure formats and delete non-essential data fields."
+"4.) If you become aware of a breach of this file or any FIRST personal data, you must notify the IT Helpdesk at helpdesk@firstinspires.org and CC: privacy@firstinspires.org."
+
+Minor,Legal First Name,Preferred First Name,Last Name,Personal Pronouns,Email,Phone,Roles Assigned,Languages Spoken,Day,Start Time,End Time,FIRST Youth Protection Policy,Overall CA YPP Status,Overall PA YPP Status
+No,Alexandra,Alex,tester,she/her,alex@example.com,555-0100,Judge,"English, Spanish",Sat,8:00 AM,5:00 PM,Meets Youth Protection Policy Requirements,Meets Youth Protection Policy Requirements,
+No,Alexandra,Alex,tester,she/her,alex@example.com,555-0100,Judge Advisor,"English, Spanish",Sun,9:00 AM,3:00 PM,Meets Youth Protection Policy Requirements,Meets Youth Protection Policy Requirements,
+No,Jordan,Jordan,mcdonald,Not Specified,jordan@example.com,555-0101,Referee,English,Sat,7:30 AM,6:00 PM,Incomplete,Incomplete,
+Yes,Riley,Riley,Sample,they/them,riley@example.com,555-0102,"Field Reset, Queuer",Not Specified,Sat,8:00 AM,12:00 PM,Meets Youth Protection Policy Requirements,,
