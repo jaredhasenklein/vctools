@@ -262,108 +262,50 @@ function handleFiles(files) {
         return;
     }
 
-    Papa.parse(file, {
-        complete: function(results) {
-            processCSV(results.data);
-        },
-        error: function(error) {
-            showError('Error parsing file. Please make sure this is a Training and Certifications report from VMS. Details: ' + error);
+    VMS.loadReport(file, TC_NEEDS, { accepts: ['Training and Certifications'] })
+        .then(({ report, records }) => processCSV(report, records))
+        .catch((error) => {
+            if (VMS.isCancelled(error)) return;
+            showError('Error reading file. Please make sure this is a Training and Certifications report from VMS. Details: ' + error.message);
             // Hide version tag on error
             if (document.getElementById('version-tag')) {
                 document.getElementById('version-tag').style.display = 'none';
             }
-        },
-        skipEmptyLines: true,
-        header: false
-    });
+        });
 }
 
-function findHeaderRow(rows) {
-    // New CSV format headers (12 columns)
-    const expectedHeaders = ['Minor', 'Preferred First Name', 'Last Name', 'Email', 'Phone', 'Role', 'Assignment Status', 'Course Name', 'Enrollment Date', 'Started Date', 'Completion Date', 'Required?'];
+// Fields read from the Training and Certifications report (see lib/vms/fields.js).
+const TC_NEEDS = {
+    preferredFirstName: { required: true },
+    lastName: { required: true },
+    email: { required: true },
+    role: { required: true },
+    assignmentStatus: {},
+    courseName: { required: true },
+    enrollmentDate: {},
+    startedDate: {},
+    completionDate: {},
+};
 
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        if (row.length < expectedHeaders.length) continue;
+// Fields read from the optional Assigned Volunteers report.
+const AV_NEEDS = {
+    preferredFirstName: { required: true },
+    lastName: { required: true },
+    rolesAssigned: {},
+};
 
-        const headersMatch = expectedHeaders.every((header, index) =>
-            row[index] && row[index].trim().toLowerCase() === header.toLowerCase()
-        );
-
-        if (headersMatch) {
-            return i;
+// Program from the report's Event line; FRC when the event name doesn't say.
+function applyEventInfo(meta) {
+    if (meta.event) {
+        eventName = meta.event;
+        const eventInput = document.getElementById('eventInput');
+        if (eventInput) {
+            eventInput.value = eventName;
         }
     }
-
-    return -1;
+    return meta.program || 'FRC';
 }
 
-// Function to detect program from CSV data
-function detectProgramFromCSV(rows) {
-    // Look for event information in row 4 (index 3) if available
-    if (rows.length > 3) {
-        for (let i = 0; i < 10; i++) { // Check first 10 rows to find event info
-            if (i >= rows.length) break;
-            
-            const row = rows[i];
-            // Check if this row contains event information
-            if (row.length > 0 && typeof row[0] === 'string' && row[0].trim().startsWith('Event:')) {
-                const eventInfo = row[0].trim();
-                console.log("Found event info:", eventInfo);
-                
-                // Store the full event name for email templates
-                eventName = eventInfo.replace('Event:', '').trim();
-                
-                // Update the Event Name input field if it exists
-                const eventInput = document.getElementById('eventInput');
-                if (eventInput) {
-                    eventInput.value = eventName;
-                }
-                
-                // Extract program code at the end after the last dash
-                const lastDashIndex = eventInfo.lastIndexOf('-');
-                if (lastDashIndex !== -1) {
-                    const programPart = eventInfo.substring(lastDashIndex + 1).trim();
-                    console.log("Program part:", programPart);
-                    
-                    // Check for FTC
-                    if (programPart.includes('FTC') || programPart.includes('Tech Challenge')) {
-                        console.log("Detected FTC");
-                        return 'FTC';
-                    }
-                    // Check for FRC 
-                    else if (programPart.includes('FRC') || programPart.includes('Robotics Competition')) {
-                        console.log("Detected FRC");
-                        return 'FRC';
-                    }
-                    // Check for FLL
-                    else if (programPart.includes('FLL') || programPart.includes('LEGO League')) {
-                        console.log("Detected FLL");
-                        return 'FLL';
-                    }
-                }
-                
-                // If no dash or couldn't detect from last part, check the entire event name
-                if (eventInfo.includes('Tech Challenge') || eventInfo.includes('FTC')) {
-                    console.log("Detected FTC from full event name");
-                    return 'FTC';
-                } else if (eventInfo.includes('Robotics Competition') || eventInfo.includes('FRC')) {
-                    console.log("Detected FRC from full event name");
-                    return 'FRC';
-                } else if (eventInfo.includes('LEGO League') || eventInfo.includes('FLL')) {
-                    console.log("Detected FLL from full event name");
-                    return 'FLL';
-                }
-            }
-        }
-    }
-    
-    // Default to FRC if we can't detect
-    console.log("Could not detect program, defaulting to FRC");
-    return 'FRC';
-}
-
-// Get a display name for a program code
 function getDisplayNameForProgram(programCode) {
     const displayNames = {
         'FRC': 'FRC',
@@ -374,20 +316,12 @@ function getDisplayNameForProgram(programCode) {
     return displayNames[programCode] || programCode;
 }
 
-function processCSV(rows) {
+function processCSV(report, records) {
     clearError();
 
-    // Find header row
-    const headerRowIndex = findHeaderRow(rows);
+    // Detect program from the report's Event line
+    const detectedProgram = applyEventInfo(report.meta);
 
-    if (headerRowIndex === -1) {
-        showError('Invalid CSV format. Could not find matching header row.');
-        return;
-    }
-    
-    // Detect program from the CSV
-    const detectedProgram = detectProgramFromCSV(rows);
-    
     // Update the selected program and configurations
     selectedProgram = detectedProgram;
     
@@ -410,9 +344,7 @@ function processCSV(rows) {
         versionTag.style.display = 'block';
     }
 
-    // Process data rows (starting from the row after headers)
-    const dataRows = rows.slice(headerRowIndex + 1);
-    const processedData = processData(dataRows);
+    const processedData = processData(records);
     renderResults(processedData);
 
     const dropzone = document.getElementById('dropzone');
@@ -434,41 +366,19 @@ function matchesCoursePattern(coursePattern, actualCourseName) {
     return actualCourseName.toLowerCase().includes(coursePattern.toLowerCase());
 }
 
-function processData(rows) {
+function processData(records) {
     personData = {}; // Reset global person data
 
-    // Collect person information
-    // New CSV column indices (12 columns):
-    // 0: Minor
-    // 1: Preferred First Name
-    // 2: Last Name
-    // 3: Email
-    // 4: Phone
-    // 5: Role
-    // 6: Assignment Status
-    // 7: Course Name
-    // 8: Enrollment Date
-    // 9: Started Date
-    // 10: Completion Date
-    // 11: Required?
-    
-    rows.forEach(row => {
-        // Skip rows with insufficient columns (need at least 12 for full data)
-        if (row.length < 12) return;
-
-        // Extract and trim fields using correct indices
-        const minor = (row[0] || '').trim();
-        const firstName = (row[1] || '').trim();
-        const lastName = (row[2] || '').trim();
-        const email = (row[3] || '').trim();
-        const phone = (row[4] || '').trim();
-        const role = (row[5] || '').trim();
-        const assignmentStatus = (row[6] || '').trim();
-        const courseName = (row[7] || '').trim();
-        const enrollmentDate = (row[8] || '').trim();
-        const startedDate = (row[9] || '').trim();
-        const completionDate = (row[10] || '').trim();
-        // const required = (row[11] || '').trim(); // Not currently used
+    records.forEach(rec => {
+        const firstName = rec.preferredFirstName;
+        const lastName = rec.lastName;
+        const email = rec.email;
+        const role = rec.role;
+        const assignmentStatus = rec.assignmentStatus;
+        const courseName = rec.courseName;
+        const enrollmentDate = rec.enrollmentDate;
+        const startedDate = rec.startedDate;
+        const completionDate = rec.completionDate;
 
         const fullName = `${firstName} ${lastName}`.trim();
 
@@ -596,78 +506,30 @@ function handleAssignedVolunteersFiles(files) {
         return;
     }
 
-    Papa.parse(file, {
-        complete: function(results) {
-            processAssignedVolunteersCSV(results.data);
-            
+    VMS.loadReport(file, AV_NEEDS, { accepts: ['Assigned Volunteers'] })
+        .then(({ records }) => {
+            processAssignedVolunteersCSV(records);
+
             // Re-render results if main data was already processed
             if (Object.keys(personData).length > 0) {
                 const processedData = categorizeData();
                 renderResults(processedData);
             }
-        },
-        error: function(error) {
-            showError('Error parsing Assigned Volunteers file. Details: ' + error);
-        },
-        skipEmptyLines: true,
-        header: false
-    });
+        })
+        .catch((error) => {
+            if (VMS.isCancelled(error)) return;
+            showError('Error reading Assigned Volunteers file. Details: ' + error.message);
+        });
 }
 
-function processAssignedVolunteersCSV(rows) {
+function processAssignedVolunteersCSV(records) {
     assignedVolunteersFilters = {};
-    
-    // Find header row based on expected columns
-    const expectedHeaders = ['Minor', 'Legal First Name', 'Preferred First Name', 'Last Name', 'Personal Pronouns', 'Email'];
-    
-    let headerRowIndex = -1;
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        if (row.length < 5) continue;
-        
-        const hasEmail = row.some(cell => cell && typeof cell === 'string' && cell.trim().toLowerCase() === 'email');
-        if (hasEmail) {
-            headerRowIndex = i;
-            break;
-        }
-    }
-    
-    if (headerRowIndex === -1) {
-        showError('Invalid Assigned Volunteers CSV format. Could not find header row.');
-        return;
-    }
-    
-    const headerRow = rows[headerRowIndex];
-    let firstNameIndex = -1;
-    let lastNameIndex = -1;
-    let rolesAssignedIndex = -1;
-    
-    headerRow.forEach((header, index) => {
-        if (!header || typeof header !== 'string') return;
-        const normalized = header.trim().toLowerCase();
-        if (normalized === 'preferred first name') firstNameIndex = index;
-        if (normalized === 'last name') lastNameIndex = index;
-        if (normalized === 'roles assigned') rolesAssignedIndex = index;
-    });
 
-    if (firstNameIndex === -1 || lastNameIndex === -1) {
-        showError('Invalid Assigned Volunteers CSV format. Could not find required columns.');
-        return;
-    }
-    
-    const dataRows = rows.slice(headerRowIndex + 1);
-    dataRows.forEach(row => {
-        if (row.length <= Math.max(firstNameIndex, lastNameIndex)) return;
-        
-        const firstName = (row[firstNameIndex] || '').trim();
-        const lastName = (row[lastNameIndex] || '').trim();
-        let roles = [];
-        if (rolesAssignedIndex !== -1 && row[rolesAssignedIndex]) {
-            let rolesStr = row[rolesAssignedIndex];
-            roles = rolesStr.split(',').map(r => r.trim().replace(/^"|"$/g, ''));
-        }
-        
-        const fullName = `${firstName} ${lastName}`.trim();
+    records.forEach(rec => {
+        // Roles Assigned is one comma-separated cell, e.g. "Judge, Judge Advisor"
+        const roles = rec.rolesAssigned ? rec.rolesAssigned.split(',').map(r => r.trim()) : [];
+
+        const fullName = `${rec.preferredFirstName} ${rec.lastName}`.trim();
         if (fullName) {
             if (!assignedVolunteersFilters[fullName]) {
                 assignedVolunteersFilters[fullName] = new Set();

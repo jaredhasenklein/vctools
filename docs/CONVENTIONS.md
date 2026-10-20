@@ -2,7 +2,9 @@
 
 ## Delivery
 - One branch and one pull request per logical change. CI (`.github/workflows/ci.yml`) must pass.
+- Every PR targets `main`. Never stack a PR on another PR's branch: merging the lower one does not move the upper one to `main` unless that branch is deleted, so the upper PR merges into a dead branch and never deploys. When work depends on an unmerged PR, wait for the merge, then branch from the updated `main`.
 - Commit messages: imperative summary line, short body explaining why.
+- Every PR description ends with an "After deploy, check" section: a numbered list of what to try on the live site once it merges, or "Nothing" with the reason.
 
 ## Code
 - Plain JavaScript, no framework. New shared code goes in ES modules; page scripts may stay classic scripts until they are ported.
@@ -21,3 +23,26 @@ All VMS report exports share one shape:
 ## Testing
 - `npm run check` parses every script; `npm test` runs Vitest in jsdom.
 - Never commit real report exports. Test fixtures must be synthetic.
+
+## Reading a report (lib/vms)
+```js
+import { loadReport, isCancelled } from './lib/vms/index.js';
+
+const { report, records } = await loadReport(file, {
+  preferredFirstName: { required: true },
+  email: { required: true },
+  shirtSize: {},                                    // optional: '' when absent or skipped
+}, { accepts: ['Assigned Volunteers'] });           // reports this tool is built for
+// records: [{ preferredFirstName, email, shirtSize, _raw }]
+```
+- `report.meta` has `report`, `event`, `program` (FRC/FTC/FLL), `season`, `location`, `eventDates`, `coordinators`.
+- Field keys come from `lib/vms/fields.js`. When FIRST renames a column, add the new header as an alias there.
+- A tool must keep working when an optional field's column is `null`: hide or disable the feature that needs it.
+- Classic (non-module) scripts can use `window.VMS` after the page loads `<script type="module" src="lib/vms/index.js">`.
+- Required fields that are missing always prompt. Optional fields prompt only when the report also has new, unrecognized columns (a likely rename); otherwise they are left blank.
+- Catch errors and skip the message when `VMS.isCancelled(err)` (the user closed the mapping dialog).
+
+## One row per what?
+Reports differ in what a row is: one per person (Name Badges), per shift (Assigned Volunteers, Attendance & Event Planning), or per course (Training and Certifications).
+- Every tool passes `accepts` with the reports it was built for. A different report is refused with a message naming the right one, before any mapping dialog.
+- A tool that produces one output per person (badges, emails, rosters) must group rows by person itself when it accepts a per-shift or per-course report.

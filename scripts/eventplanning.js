@@ -72,100 +72,31 @@ function loadFile(event) {
     return;
   }
 
-  const reader = new FileReader();
-
-  reader.onload = function() {
-    const csvData = reader.result;
-    processCSVData(csvData);
-  };
-
-  reader.readAsText(file);
+  VMS.loadReport(file, EVENT_PLANNING_NEEDS, { accepts: ['Attendance & Event Planning'] })
+    .then(({ records }) => processRecords(records))
+    .catch((error) => {
+      if (VMS.isCancelled(error)) return;
+      showError('Error processing CSV: ' + error.message);
+      console.error('Error processing CSV:', error);
+    });
 }
 
-// Find column index with case-insensitive and partial matching
-function findColumnIndex(headers, possibleNames) {
-  if (!Array.isArray(possibleNames)) {
-    possibleNames = [possibleNames];
-  }
+// Fields read from the Attendance & Event Planning report (see lib/vms/fields.js).
+const EVENT_PLANNING_NEEDS = {
+  day: { required: true },
+  startTime: { required: true },
+  endTime: { required: true },
+  rolesAssigned: { required: true },
+  email: { required: true },
+  dietaryRestrictions: {},
+  yearsOfService: {},
+  shirtSize: {},
+  consentReleaseStatus: {},
+};
 
-  for (let i = 0; i < headers.length; i++) {
-    const header = headers[i].trim().toLowerCase();
-
-    for (const name of possibleNames) {
-      if (header === name.toLowerCase() || header.includes(name.toLowerCase())) {
-        return i;
-      }
-    }
-  }
-
-  return -1;
-}
-
-// Process the CSV data
-function processCSVData(csvData) {
+// Process report records (one per assigned shift)
+function processRecords(records) {
   try {
-    // Preprocess CSV data to handle quotation marks and commas
-    const preprocessedData = preprocessCSV(csvData);
-
-    // Process the rows
-    const rows = preprocessedData.trim().split('\n');
-
-    // Find the header row
-    let headerRowIndex = -1;
-    let headerRow = [];
-    for (let i = 0; i < Math.min(rows.length, 20); i++) {
-      const potentialHeader = rows[i].split(',').map(h => h.trim());
-      if (
-        potentialHeader.some(h => /day/i.test(h)) &&
-        potentialHeader.some(h => /start.*time/i.test(h)) &&
-        potentialHeader.some(h => /end.*time/i.test(h))
-      ) {
-        headerRowIndex = i;
-        headerRow = potentialHeader;
-        break;
-      }
-    }
-    if (headerRowIndex === -1) {
-      for (let i = 0; i < Math.min(rows.length, 20); i++) {
-        const potentialHeader = rows[i].split(',').map(h => h.trim());
-                if (
-          potentialHeader.some(h => /email/i.test(h)) &&
-          potentialHeader.some(h => /name/i.test(h))
-        ) {
-          headerRowIndex = i;
-          headerRow = potentialHeader;
-          break;
-        }
-      }
-    }
-
-    if (headerRowIndex === -1) {
-      throw new Error('Could not find header row in CSV file');
-    }
-
-    // Find required columns with flexible matching
-    const dayIndex = findColumnIndex(headerRow, ['Day', 'Days']);
-    const startTimeIndex = findColumnIndex(headerRow, ['Start Time', 'Start', 'Start_Time']);
-    const endTimeIndex = findColumnIndex(headerRow, ['End Time', 'End', 'End_Time']);
-    const rolesIndex = findColumnIndex(headerRow, ['Roles', 'Role', 'Position']);
-    const emailIndex = findColumnIndex(headerRow, ['Email']);
-    const dietaryIndex = findColumnIndex(headerRow, ['Dietary', 'Dietary Restrictions', 'Allergies', 'Dietary Restrictions/Allergies']);
-    const yearsOfServiceIndex = findColumnIndex(headerRow, ['Years of Service', 'Years', 'Service Years']);
-    const shirtSizeIndex = findColumnIndex(headerRow, ['Shirt Size', 'Shirt']);
-    const consentIndex = findColumnIndex(headerRow, ['Consent', 'Consent & Release', 'Release']);
-
-    // Check if essential columns exist, with more specific error messages
-    const missingColumns = [];
-    if (dayIndex === -1) missingColumns.push('Day');
-    if (startTimeIndex === -1) missingColumns.push('Start Time');
-    if (endTimeIndex === -1) missingColumns.push('End Time');
-    if (rolesIndex === -1) missingColumns.push('Roles');
-    if (emailIndex === -1) missingColumns.push('Email');
-
-    if (missingColumns.length > 0) {
-      throw new Error(`Missing required columns in CSV file: ${missingColumns.join(', ')}`);
-    }
-
     // Define valid day names
     const validDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     
@@ -174,35 +105,20 @@ function processCSVData(csvData) {
 
     // Process data rows
     parsedData = [];
-    for (let i = headerRowIndex + 1; i < rows.length; i++) {
-      if (!rows[i].trim() || rows[i].includes('Start Time,End Time')) continue;
+    for (const rec of records) {
+      const day = rec.day;
 
-      const row = replaceCommasInQuotes(rows[i], '|').split(',');
-
-      if (row.length <= 1) continue; // Skip truly empty rows
-
-      // Extract data from columns
-      const day = row[dayIndex]?.trim();
-      
       // Only add valid day names to the uniqueDays set
-      if (day && day !== '' && validDays.includes(day)) uniqueDays.add(day);
+      if (day && validDays.includes(day)) uniqueDays.add(day);
 
-      const startTime = row[startTimeIndex]?.trim();
-      const endTime = row[endTimeIndex]?.trim();
-      const roles = row[rolesIndex]?.replace(/\|/g, ',').replace(/^"(.*)"$/, '$1').trim() || '';
-      const email = row[emailIndex]?.replace(/\|/g, ',').replace(/^"(.*)"$/, '$1').trim() || '';
-
-      const dietary = dietaryIndex !== -1 && row[dietaryIndex] ?
-        row[dietaryIndex]?.replace(/\|/g, ',').replace(/^"(.*)"$/, '$1').trim() || '' : '';
-
-      const yearsOfService = yearsOfServiceIndex !== -1 && row[yearsOfServiceIndex] ?
-        row[yearsOfServiceIndex]?.replace(/\|/g, ',').replace(/^"(.*)"$/, '$1').trim() || '' : '';
-
-      const shirtSize = shirtSizeIndex !== -1 && row[shirtSizeIndex] ?
-        row[shirtSizeIndex]?.replace(/\|/g, ',').replace(/^"(.*)"$/, '$1').trim() || '' : '';
-
-      const consentStatus = consentIndex !== -1 && row[consentIndex] ?
-        row[consentIndex]?.replace(/\|/g, ',').replace(/^"(.*)"$/, '$1').trim() || '' : '';
+      const startTime = rec.startTime;
+      const endTime = rec.endTime;
+      const roles = rec.rolesAssigned;
+      const email = rec.email;
+      const dietary = rec.dietaryRestrictions;
+      const yearsOfService = rec.yearsOfService;
+      const shirtSize = rec.shirtSize;
+      const consentStatus = rec.consentReleaseStatus;
 
       // Skip rows without essential data or with invalid day names
       if (!day || !validDays.includes(day) || !startTime || !endTime || !email) continue;
@@ -247,19 +163,6 @@ function processCSVData(csvData) {
   }
 }
 
-// Preprocess CSV data
-function preprocessCSV(csvData) {
-  return csvData.replace(/(".*?")/g, (match) => {
-    // If the quoted string contains a comma, keep the quotes, otherwise remove them
-    return match.includes(',') ? match : match.replace(/"/g, '');
-  });
-}
-
-// Replace commas in quoted strings
-function replaceCommasInQuotes(str, replacement) {
-  const regex = /"((?:[^"\\]|\\.)*)"/g;
-  return str.replace(regex, match => match.replace(/,/g, replacement));
-}
 
 // Normalize time format to 24-hour format
 function normalizeTime(timeStr) {
