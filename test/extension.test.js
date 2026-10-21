@@ -17,8 +17,8 @@ describe('vctools-content', () => {
     globalThis.chrome = {
       runtime: {},
       storage: { local: {
-        get: (keys, cb) => cb({ ...store }),
-        remove: (keys) => keys.forEach((k) => delete store[k]),
+        get: async () => ({ ...store }),
+        remove: async (keys) => keys.forEach((k) => delete store[k]),
       } },
     };
     globalThis.DataTransfer = class { constructor() { this.files = []; this.items = { add: (f) => this.files.push(f) }; } };
@@ -36,24 +36,30 @@ describe('vctools-content', () => {
     window.eval(readFileSync('browser_extension/vctools-content.js', 'utf8'));
     return seen;
   }
+  const settle = () => new Promise((r) => setTimeout(r, 0));
 
   it('hands a UTF-8 report to the matching page once', async () => {
     store = { csvData: 'Season: BIOCORE™, Zoë', csvFileName: 'name_badges.csv', targetTool: 'badge.html' };
     const seen = load('/badge', '<input type="file" accept=".csv">');
+    await settle();
     expect(seen).toHaveLength(1);
     expect(seen[0].name).toBe('name_badges.csv');
     expect(await seen[0].text()).toBe('Season: BIOCORE™, Zoë');
     expect(store).toEqual({});
   });
 
-  it('sends unknown reports to the home page', () => {
+  it('sends unknown reports to the home page', async () => {
     store = { csvData: 'x', csvFileName: 'judges.csv', targetTool: 'index' };
-    expect(load('/', '<input type="file" accept=".csv">')).toHaveLength(1);
+    const seen = load('/', '<input type="file" accept=".csv">');
+    await settle();
+    expect(seen).toHaveLength(1);
   });
 
-  it('leaves the report alone on a different page', () => {
+  it('leaves the report alone on a different page', async () => {
     store = { csvData: 'x', csvFileName: 'a.csv', targetTool: 'parse' };
-    expect(load('/badge.html', '<input type="file" accept=".csv">')).toHaveLength(0);
+    const seen = load('/badge.html', '<input type="file" accept=".csv">');
+    await settle();
+    expect(seen).toHaveLength(0);
     expect(store.csvData).toBe('x');
   });
 });
@@ -98,5 +104,28 @@ describe('vms-content buttons', () => {
     vmsPage(19);
     window.addCustomButtons();
     expect(document.querySelectorAll('[data-vctools-button]')).toHaveLength(2);
+  });
+});
+
+describe('manifest', () => {
+  const m = JSON.parse(readFileSync('browser_extension/manifest.json', 'utf8'));
+  it('is Manifest V3 with only the permissions the code uses', () => {
+    expect(m.manifest_version).toBe(3);
+    expect(m.permissions.sort()).toEqual(['clipboardWrite', 'storage']);
+    expect(m.host_permissions).toBeUndefined();
+    expect(m.description.length).toBeLessThanOrEqual(132);
+  });
+  it('runs only on the sites it needs, over https', () => {
+    const matches = m.content_scripts.flatMap((c) => c.matches);
+    for (const u of matches) expect(u).toMatch(/^https:\/\/(my\.firstinspires\.org\/VMS\/|volunteer\.systems\/|docs\.google\.com\/spreadsheets\/)/);
+  });
+  it('references files that exist, with icons at their stated sizes', async () => {
+    const { existsSync } = await import('node:fs');
+    const files = m.content_scripts.flatMap((c) => [...(c.js ?? []), ...(c.css ?? [])]);
+    for (const f of files) expect(existsSync(`browser_extension/${f}`), f).toBe(true);
+    for (const [size, f] of Object.entries(m.icons)) {
+      const png = readFileSync(`browser_extension/${f}`);
+      expect([png.readUInt32BE(16), png.readUInt32BE(20)], f).toEqual([Number(size), Number(size)]);
+    }
   });
 });

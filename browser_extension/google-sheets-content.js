@@ -2,14 +2,15 @@
 // This script shows a notification in the Google Sheets tab ONLY when navigated from VMS
 
 // Function to show guidance in Google Sheets
-function showGuidance() {
+async function showGuidance() {
     // Check if we already added the guidance
     if (document.querySelector('.vc-sheets-guidance')) {
       return;
     }
     
     // First check if we should show guidance by checking if we were directed here by our extension
-    chrome.storage.local.get(['showGoogleSheetsGuidance'], function(data) {
+    const data = await chrome.storage.local.get(['showGoogleSheetsGuidance']);
+    {
       // Only show guidance if the flag is set
       if (data.showGoogleSheetsGuidance) {
         // Create guidance element - as a banner at the top
@@ -58,7 +59,7 @@ function showGuidance() {
         // unless specifically set by the extension again
         chrome.storage.local.remove(['showGoogleSheetsGuidance']);
       }
-    });
+    }
   }
   
   // Function to attempt to highlight cell A1
