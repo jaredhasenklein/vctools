@@ -64,10 +64,15 @@ Every file upload uses the shared drop zone in `scripts/commonscripts.js`:
 - `beta: true` marks a less-tested tool. Also put `<span class="beta-tag">Beta</span>` in its home tile and page heading.
 - Examples shown on a page are HTML, not screenshots, so they follow the theme. Use invented names in examples.
 
+## Role training table
+- `scripts/roleconfig.js` (`PROGRAM_CONFIGS`) lists the required training for each role, per program. Certification and Email Prep both load it; update it once per season.
+
 ## Badge templates
 - `lib/badges/template.js` lays out a badge from a template (text blocks with `{variables}`). `drawBadge()` draws through a surface: jsPDF for the PDF, canvas for the editor preview. Keep both on that one function so the preview matches the printout.
 - Built-in templates are in `BUILT_IN_TEMPLATES`. User templates live in localStorage and export as `.json`; `normalizeTemplate()` cleans anything loaded or imported.
 - To add a variable, add it to `VARIABLES` and fill it in `badgeVariables()`. To offer it as a one-click item in the editor, add it to `BLOCK_PRESETS`.
+- Items can wrap (`wrap`, `maxLines`); text shrinks until it fits the box in that many lines.
+- Role combining and the "Insert Common Abbreviations" rules live in `lib/badges/roles.js`.
 - The editor UI says "design" and "item" (not template/block) and shows variables by their friendly labels.
 
 ## Browser extension

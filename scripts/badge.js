@@ -2,6 +2,7 @@
 // scripts/badge-editor.js. Reads Name Badges or Assigned Volunteers reports.
 import { drawBadge, sharedSizes, badgeVariables } from '../lib/badges/template.js';
 import { allTemplates } from '../lib/badges/store.js';
+import { formatRole, suggestAbbreviation } from '../lib/badges/roles.js';
 import { createEditor, canvasSurface } from './badge-editor.js';
 
 const $ = (id) => document.getElementById(id);
@@ -30,13 +31,6 @@ let previewIndex = 0;
 let roleAbbreviations = {}; // Formatted role -> replacement
 
 // ---------- Roles ----------
-
-/** "Judge, Field Assembly" -> "JUDGE". Field Assembly is dropped unless it's the only role. */
-function formatRole(roles) {
-  const list = roles.map((r) => r.trim()).filter(Boolean);
-  const kept = list.filter((r) => r.toLowerCase() !== 'field assembly');
-  return (kept.length ? kept : list).map((r) => r.toUpperCase()).join(' / ');
-}
 
 function roleText(person) {
   const role = formatRole(person.roles);
@@ -140,7 +134,7 @@ function createPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF(type.pageOrientation, 'in', [type.pageWidth, type.pageHeight]);
   const varsList = people.map(varsFor);
-  const sizes = sharedSizes(template, varsList, pdfSurface(doc, 0, 0).measure, type.labelWidth);
+  const sizes = sharedSizes(template, varsList, pdfSurface(doc, 0, 0).measure, type.labelWidth, type.labelHeight);
 
   varsList.forEach((vars, i) => {
     const onPage = i % type.labelsPerPage;
@@ -209,16 +203,6 @@ function handleFiles(files) {
 
 // ---------- Role abbreviations ----------
 
-const COMMON_ABBREVIATIONS = {
-  MANAGER: 'MGR.',
-  ADVISOR: 'ADVSR.',
-  ATTENDANT: '',
-  SUPERVISOR: 'SUP.',
-  ASSISTANT: 'ASST.',
-  " - DEAN'S LIST AWARD": '',
-  ' - FIRST IMPACT AWARD': '',
-};
-
 function el(tag, props = {}, ...children) {
   const node = Object.assign(document.createElement(tag), props);
   node.append(...children);
@@ -253,11 +237,8 @@ function renderAbbreviations() {
   const insert = el('button', { type: 'button', className: 'btn btn-secondary', id: 'insertCommonAbbreviations', textContent: 'Insert Common Abbreviations' });
   insert.addEventListener('click', () => {
     for (const role of roles) {
-      let short = role;
-      for (const [word, replacement] of Object.entries(COMMON_ABBREVIATIONS)) {
-        short = short.replace(new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'), replacement);
-      }
-      if (short !== role) roleAbbreviations[role] = short.trim();
+      const short = suggestAbbreviation(role);
+      if (short !== role) roleAbbreviations[role] = short;
     }
     fill();
     renderPreview();

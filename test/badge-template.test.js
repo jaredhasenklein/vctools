@@ -112,3 +112,39 @@ describe('presets and blank badges', async () => {
     expect(normalizeTemplate(a).blocks).toEqual([]);
   });
 });
+
+describe('wrapping', async () => {
+  const { wrapLines } = await import('../lib/badges/template.js');
+  const long = 'Pit Administration Supervisor and Queuer';
+
+  it('breaks at spaces to fit the width', () => {
+    const lines = wrapLines(measure, long, 12, {}, 1.5);
+    expect(lines.length).toBeGreaterThan(1);
+    for (const l of lines) expect(measure(l, 12)).toBeLessThanOrEqual(1.5);
+    expect(lines.join(' ')).toBe(long);
+  });
+
+  it('wrapped text keeps a bigger size than one shrunk line', () => {
+    const one = normalizeTemplate({ blocks: [{ text: long, x: 0, y: 0, w: 0.5, h: 0.5, size: 24, minSize: 4 }] });
+    const two = normalizeTemplate({ blocks: [{ text: long, x: 0, y: 0, w: 0.5, h: 0.5, size: 24, minSize: 4, wrap: true, maxLines: 2 }] });
+    const [a] = sharedSizes(one, [{}], measure, 4, 2);
+    const [b] = sharedSizes(two, [{}], measure, 4, 2);
+    expect(b).toBeGreaterThan(a);
+  });
+
+  it('draws each line inside the box, centered as a group', () => {
+    const calls = [];
+    const t = normalizeTemplate({ blocks: [{ text: long, x: 0, y: 0.25, w: 0.5, h: 0.5, size: 24, minSize: 4, wrap: true, maxLines: 3 }] });
+    drawBadge({ measure, text: (...a) => calls.push(a), rect() {} }, t, {}, { labelW: 4, labelH: 2 });
+    const baselines = [...new Set(calls.map((c) => c[2]))];
+    expect(baselines.length).toBeGreaterThan(1);
+    expect(baselines.length).toBeLessThanOrEqual(3);
+    for (const b of baselines) expect(b).toBeGreaterThan(0.5);
+    expect(baselines.at(-1)).toBeLessThan(1.5);
+  });
+
+  it('cleans maxLines', () => {
+    expect(normalizeTemplate({ blocks: [{ maxLines: 99 }] }).blocks[0].maxLines).toBe(6);
+    expect(normalizeTemplate({ blocks: [{}] }).blocks[0]).toMatchObject({ wrap: false, maxLines: 2 });
+  });
+});

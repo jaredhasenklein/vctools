@@ -5,6 +5,7 @@ Browser tools for *FIRST* Volunteer Coordinators, live at https://volunteer.syst
 ## Non-negotiables
 - Volunteer data (PII) is processed in the browser only. Never add code that sends report contents, file names, or row data to any server, analytics included.
 - Every change ships as a branch + pull request. Never push to `main`.
+- Never post comments, reviews, or replies on other people's PRs or issues on Jared's behalf. Draft the text in the conversation for him to post.
 - The site must keep running as plain static files from the repo root. No build step is required to serve it.
 
 ## Layout

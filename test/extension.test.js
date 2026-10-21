@@ -57,3 +57,38 @@ describe('vctools-content', () => {
     expect(store.csvData).toBe('x');
   });
 });
+
+describe('vms-content csvToHtml', () => {
+  it('keeps a comma-separated team list and line breaks in one cell', () => {
+    window.eval(readFileSync('browser_extension/vms-content.js', 'utf8'));
+    const csv = 'Name,Team Affiliation\n"Tester, Alex","Team ABC, Team 123DEF, Team 7"\nRiley,"Line one\nline <two>"\n';
+    expect(window.csvToHtml(csv)).toBe(
+      '<table><tr><td>Name</td><td>Team Affiliation</td></tr>'
+      + '<tr><td>Tester, Alex</td><td>Team ABC, Team 123DEF, Team 7</td></tr>'
+      + '<tr><td>Riley</td><td>Line one<br>line &lt;two&gt;</td></tr></table>');
+  });
+});
+
+describe('vms-content buttons', () => {
+  function vmsPage(reportId, extra = '') {
+    window.history.replaceState({}, '', `/VMS/Reports/ReportViewer.aspx?ReportID=${reportId}`);
+    document.body.innerHTML = `<form id="Form1"><span><input type="submit" id="MainContent_btnExport" value="Export">${extra}</span></form>`;
+    window.eval(readFileSync('browser_extension/vms-content.js', 'utf8'));
+    return [...document.querySelectorAll('[data-vctools-button]')].map((b) => b.value);
+  }
+
+  it('adds both buttons on reports without a dedicated tool (Judges, Shirt Sizes)', () => {
+    expect(vmsPage(33)).toEqual(['✨ Open in VC Tools', '📊 Open in Google Sheets']);
+  });
+
+  it('still adds them when the older store version already added its own', () => {
+    const old = '<input type="button" class="sheets-button" value="📊 Open in Google Sheets">';
+    expect(vmsPage(23, old)).toHaveLength(2);
+  });
+
+  it('adds them only once', () => {
+    vmsPage(19);
+    window.addCustomButtons();
+    expect(document.querySelectorAll('[data-vctools-button]')).toHaveLength(2);
+  });
+});
