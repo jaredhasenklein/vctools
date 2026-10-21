@@ -40,8 +40,8 @@ Firefox 128 or newer is required.
 | `google-sheets-content.js` | Google Sheets | Shows "click A1 and paste" after a Sheets export |
 
 ## Publishing a Chrome Web Store update
-1. Bump `version` in `manifest.json`.
-2. Zip the **contents** of this folder (not the folder itself), leaving out `README.md`.
-3. Upload the zip in the Chrome Web Store Developer Dashboard.
+1. Bump `version` in `manifest.json` and add a row to Version History in `CHROMEWEBSTORE.md`. If permissions changed, update its Permissions Justification and `privacy.html`.
+2. Get the zip: every CI run on GitHub builds it. Open the PR's **Checks → CI → Summary** and download the **chrome-web-store-upload** artifact (unzip it once; inside is the zip to upload). Or run `bash tools/package-extension.sh` from the repo root and use `dist/vc-tools-integration-v<version>.zip`.
+3. Upload it in the Chrome Web Store Developer Dashboard. Copy listing text, permission justifications, and privacy answers from `CHROMEWEBSTORE.md`.
 
-Don't commit the zip; GitHub keeps the history.
+`README.md` and `CHROMEWEBSTORE.md` are left out of the zip. Don't commit zips; GitHub keeps the history.

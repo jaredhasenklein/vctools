@@ -7,11 +7,6 @@
     "storage",
     "clipboardWrite"
   ],
-  "host_permissions": [
-    "*://*.firstinspires.org/*",
-    "*://volunteer.systems/*",
-    "*://docs.google.com/spreadsheets/*"
-  ],
   "browser_specific_settings": {
     "gecko": {
       "id": "vctools-integration@volunteer.systems",
@@ -21,7 +16,7 @@
   "content_scripts": [
     {
       "matches": [
-        "*://my.firstinspires.org/VMS/*"
+        "https://my.firstinspires.org/VMS/*"
       ],
       "js": [
         "vms-style-toggle.js"
@@ -30,7 +25,7 @@
     },
     {
       "matches": [
-        "*://my.firstinspires.org/VMS/Reports/ReportViewer.aspx*"
+        "https://my.firstinspires.org/VMS/Reports/ReportViewer.aspx*"
       ],
       "js": [
         "vms-content.js"
@@ -41,7 +36,7 @@
     },
     {
       "matches": [
-        "*://my.firstinspires.org/VMS/Events/EventDetails.aspx*"
+        "https://my.firstinspires.org/VMS/Events/EventDetails.aspx*"
       ],
       "js": [
         "reports-content.js"
@@ -52,7 +47,7 @@
     },
     {
       "matches": [
-        "*://volunteer.systems/*"
+        "https://volunteer.systems/*"
       ],
       "js": [
         "vctools-content.js"
@@ -60,7 +55,7 @@
     },
     {
       "matches": [
-        "*://docs.google.com/spreadsheets/*"
+        "https://docs.google.com/spreadsheets/*"
       ],
       "js": [
         "google-sheets-content.js"

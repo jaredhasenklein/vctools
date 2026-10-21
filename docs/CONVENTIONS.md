@@ -86,4 +86,5 @@ Every file upload uses the shared drop zone in `scripts/commonscripts.js`:
 ## Browser extension
 - Lives in `browser_extension/` (see its README). It hands reports to the site through `chrome.storage.local` (`csvData`, `csvFileName`, `targetTool`); `vctools-content.js` puts the file in the page's first CSV file input and fires `change`, so pages need no extension-specific code.
 - Reports without a dedicated tool go to the home page (`targetTool: 'index'`).
-- Bump `version` in `manifest.json` for every store upload.
+- Bump `version` in `manifest.json` for every store upload, and keep `browser_extension/CHROMEWEBSTORE.md` (listing, permission justifications, privacy answers, version history) and `privacy.html` in step with the manifest.
+- Follow Manifest V3 and the Chrome team's extension guidance (`npx modern-web-guidance`, skill `chrome-extensions`): only the permissions the code uses, no `host_permissions` unless a feature needs cross-origin access, async/await for `chrome.*` calls, icons at their stated sizes, no remote code. `test/extension.test.js` checks the manifest.

@@ -46,10 +46,11 @@
           <h3>3. Browser Extension Permissions</h3>
           <p>If you choose to use the optional VC Tools browser extension, it requires the following permissions:</p>
           <ul>
-            <li><strong>Storage Permission:</strong> Used to temporarily store CSV data between VMS and VC Tools. This storage is local to your browser and is cleared after the data is transferred.</li>
-            <li><strong>Tabs Permission:</strong> Used to allow the extension to open the corresponding VC Tools page when you click the "Open in VC Tools" button.</li>
-            <li><strong>Host Permissions:</strong> Required to add buttons to VMS pages (my.firstinspires.org) and to automatically import data into VC Tools (volunteer.systems).</li>
+            <li><strong>Storage:</strong> When you click "Open in VC Tools", the report is held in your browser's local extension storage just long enough for the VC Tools page to read it, then deleted.</li>
+            <li><strong>Clipboard (write only):</strong> When you click "Open in Google Sheets", the report is copied to your clipboard so you can paste it into the new sheet. The extension never reads your clipboard.</li>
+            <li><strong>Site access:</strong> The extension runs only on VMS pages (my.firstinspires.org/VMS) to add its buttons and optional styling, on volunteer.systems to hand over a report you sent, and on Google Sheets to show the "paste in A1" tip.</li>
           </ul>
+          <p>When you use "Open in Google Sheets", the report reaches Google only if you paste it into a sheet in your own Google account; the extension itself sends nothing to Google.</p>
           <p>These permissions are requested only to facilitate the direct transfer of data between VMS and the web tools.</p>
         </div>
 

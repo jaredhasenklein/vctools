@@ -15,3 +15,10 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm test
+      - name: Build the extension zip
+        run: bash tools/package-extension.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chrome-web-store-upload
+          path: dist/*.zip
+          if-no-files-found: error
