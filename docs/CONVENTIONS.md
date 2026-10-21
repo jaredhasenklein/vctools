@@ -47,6 +47,13 @@ Reports differ in what a row is: one per person (Name Badges), per shift (Assign
 - Every tool passes `accepts` with the reports it was built for. A different report is refused with a message naming the right one, before any mapping dialog.
 - A tool that produces one output per person (badges, emails, rosters) must group rows by person itself when it accepts a per-shift or per-course report.
 
+## Page layout
+- `scripts/commonscripts.js` adds the site header (VC Tools home link, extension link, light/dark switch) and footer to every page. Don't add home buttons or footers in page HTML.
+- Tool pages open with the same pattern (see any tool page):
+  - `.tool-head`: `<h1>` plus a one-sentence `.tool-lede`. The `<h1>` matches the tool's home page card.
+  - `.tool-start`: upload box(es), `#error`, and a `.privacy-note` on the left; `<details class="tool-howto" open>` with short numbered steps on the right. On narrow screens they stack, upload first.
+- Home page: hero with the "drop any report" box, then `.tool-grid` cards. Keep it fitting on a 1280x720 screen without scrolling.
+
 ## Upload boxes
 Every file upload uses the shared drop zone in `scripts/commonscripts.js`:
 ```html

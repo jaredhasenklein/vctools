@@ -16,39 +16,31 @@
 </head>
 <body class="container-fluid">
 <div class="content-wrapper">
+    <div class="tool-head">
     <h1>Certification Status Checker</h1>
-   <div class="table-responsive">
-      <table class="table">
-  <tr>
-  <td>
-    <p><b><u>Instructions:</u></b>
-    <ol>
-      <li>Log in to VMS and select your event.</li>
-      <li>Click <b>All Reports</b>.</li>
-      <li>Click <b>Training and Certifications</b>.</li>
-      <li>Click <b>Export</b>.</li>
-      <li>Click the button below to select your export.</li>
-      <li>(Optional) Upload your Assigned Volunteers export to filter the results to only include those assigned to this event.</li>
-    </ol>
-    <i>All data processing happens on your computer and is never sent to a server. No worries about PII here! Emails sent with the tool below will be BCC'd by default.</i>
-  </td>
-  <td>
-    <div style="margin-bottom: 20px;">
-        <p class="vms-drop-label">1. Training and Certifications</p>
-        <input type="file" id="fileInput" accept=".csv" hidden>
-        <div id="dropzone" class="vms-drop" data-title="Training and Certifications report"></div>
+    <p class="tool-lede">See which volunteers have finished the training their roles require, and send reminder emails.</p>
+  </div>
+  <div class="tool-start">
+    <div class="tool-start__main">
+      <p class="vms-drop-label">1. Training and Certifications</p>
+      <input type="file" id="fileInput" accept=".csv" hidden>
+      <div id="dropzone" class="vms-drop" data-title="Training and Certifications report"></div>
+      <p class="vms-drop-label">2. Assigned Volunteers (to show only people assigned to this event)</p>
+      <input type="file" id="assignedVolunteersInput" accept=".csv" hidden>
+      <div id="assignedVolunteersDropzone" class="vms-drop" data-title="Assigned Volunteers report" data-optional></div>
+      <div id="error" role="alert"></div>
+      <p class="privacy-note">🔒 Your files stay on this computer. Reminder emails are BCC'd by default.</p>
     </div>
-    
-    <div style="margin-bottom: 20px;">
-        <p class="vms-drop-label">2. Assigned Volunteers</p>
-        <input type="file" id="assignedVolunteersInput" accept=".csv" hidden>
-        <div id="assignedVolunteersDropzone" class="vms-drop" data-title="Assigned Volunteers report" data-optional></div>
-    </div>
-    <div id="error"></div>
-  </td>
-  </tr>
-      </table>
-    </div>
+    <details class="tool-howto" open>
+      <summary>How to use</summary>
+      <ol>
+        <li>In VMS, open your event and click <b>All Reports</b>.</li>
+<li>Export <b>Training and Certifications</b> and drop it in box 1.</li>
+        <li>Optionally, export <b>Assigned Volunteers</b> and drop it in box 2.</li>
+        <li>Fill in the email details below, then click ✉️ next to a volunteer for a ready-to-send reminder.</li>
+      </ol>
+    </details>
+  </div>
 
     <!-- Email Configuration Section -->
     <div class="row" style="margin-bottom: 20px;">

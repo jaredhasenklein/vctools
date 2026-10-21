@@ -14,17 +14,27 @@
   <script type="module" src="scripts/viewer.js"></script>
 </head>
 <body class="container-fluid">
-  <h1>Report Viewer</h1>
-  <p class="viewer-intro">Open any VMS report as a table you can search, sort, trim to the columns you need, then download or print.</p>
-  <ol class="viewer-steps">
-    <li>In VMS, open your event, click <b>All Reports</b>, pick any report, and click <b>Export</b>.</li>
-    <li>Drop the file below.</li>
-  </ol>
-  <p class="viewer-note"><i>All processing happens on your computer and is never sent to a server. Downloads and printouts still contain volunteer PII, so handle them like the VMS export.</i></p>
-
-  <input type="file" id="fileInput" accept=".csv" hidden>
-  <div id="dropzone" class="vms-drop" data-title="Any VMS report"></div>
-  <div id="error" role="alert"></div>
+  <div class="tool-head">
+    <h1>Report Viewer</h1>
+    <p class="tool-lede">Open any VMS report as a table you can search, sort, and trim to the columns you need, then download or print.</p>
+  </div>
+  <div class="tool-start">
+    <div class="tool-start__main">
+      <input type="file" id="fileInput" accept=".csv" hidden>
+      <div id="dropzone" class="vms-drop" data-title="Any VMS report"></div>
+      <div id="error" role="alert"></div>
+      <p class="privacy-note">🔒 Your file stays on this computer. Anything you download or print still contains volunteer PII.</p>
+    </div>
+    <details class="tool-howto" open>
+      <summary>How to use</summary>
+      <ol>
+        <li>In VMS, open your event and click <b>All Reports</b>.</li>
+<li>Pick any report, click <b>Export</b>, and drop the file in the box.</li>
+        <li>Search, click a column name to sort, or use <b>Columns</b> to hide what you don't need.</li>
+        <li>Click <b>Download CSV</b> or <b>Print</b>.</li>
+      </ol>
+    </details>
+  </div>
 
   <section id="viewer" class="viewer" hidden>
     <dl id="reportMeta" class="viewer-meta"></dl>

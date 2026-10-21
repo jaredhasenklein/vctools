@@ -14,47 +14,30 @@
   <script src="scripts/commonscripts.js"></script>
   <script type="module" src="scripts/badge.js"></script>
 </head>
-<body>
-  <h1>Name Badge Generator</h1>
- <div class="table-responsive">
-    <table class="table">
-<tr>
-<td><p><b><u>Instructions:</u></b>
-<ol><li>Log in to VMS and select your event.</li>
-<li>Click <b>All Reports</b>, then <b>Name Badges</b> (or <b>Assigned Volunteers</b>), then <b>Export</b>.</li>
-<li>Drop the file in the box below.</li>
-<li>Pick your label stock (<b>Avery 5163</b> sheets or <b>Dymo 2x4</b> thermal labels) and a template.</li>
-<li>Optionally, fill in the event name and bottom corners. The preview shows each volunteer's badge.</li>
-<li>Optionally, click <b>Edit this design</b> or <b>Start a blank badge</b> to make your own: add names, roles, or your own text, then drag things where you want them.</li>
-<li>Optionally, shorten long role names in the abbreviations table.</li>
-<li>Click <b>Generate Labels</b> to download the PDF.</ol></p></td>
-<td class="tool-example-cell">
-<figure class="tool-example" aria-label="Example badges">
-  <div class="badge-sample">
-    <div class="badge-sample__top">2027 Agrestic Regional</div>
-    <div class="badge-sample__first">AVERY</div>
-    <div class="badge-sample__last">QUINTANA</div>
-    <div class="badge-sample__role">HEAD REFEREE</div>
-    <div class="badge-sample__bottom"><span>she/her</span><span>Event Staff</span></div>
+<body class="container-fluid">
+  <div class="tool-head">
+    <h1>Name Badge Generator</h1>
+    <p class="tool-lede">Print a badge for every assigned volunteer on Avery 5163 sheets or Dymo 2x4 labels.</p>
   </div>
-  <div class="badge-sample badge-sample--plain">
-    <div class="badge-sample__top">2026 Festival of Champions</div>
-    <div class="badge-sample__first">MORGAN T.</div>
-    <div class="badge-sample__role badge-sample__role--plain">JUDGE ADVISOR</div>
-    <div class="badge-sample__bottom"><span></span><span><i>FIRST</i> Alumni</span></div>
-  </div>
-  <figcaption>Two of the label styles. Top and bottom text are yours to set.</figcaption>
-</figure>
-</td></tr>
-    </table>
-<i>All data processing happens on your computer and is never sent to a server. No worries about PII here! Just remember that the file you download from here may contain PII, just like the export from VMS.</i>
-<br><br>
+  <div class="tool-start">
+    <div class="tool-start__main">
+      <input type="file" id="fileInput" accept=".csv" hidden>
+      <div id="dropzone" class="vms-drop" data-title="Name Badges or Assigned Volunteers report"></div>
+      <div id="error" role="alert"></div>
+      <p class="privacy-note">🔒 Your file stays on this computer. Anything you download or print still contains volunteer PII.</p>
+    </div>
+    <details class="tool-howto" open>
+      <summary>How to use</summary>
+      <ol>
+        <li>In VMS, open your event and click <b>All Reports</b>.</li>
+<li>Export <b>Name Badges</b> (or <b>Assigned Volunteers</b>) and drop it in the box.</li>
+        <li>Pick your label stock and a design. The preview shows each volunteer's badge.</li>
+        <li>Optionally fill in the event name and bottom corners, shorten long roles, or click <b>Edit this design</b> / <b>Start a blank badge</b> to make your own.</li>
+        <li>Click <b>Generate Labels</b> to download the PDF.</li>
+      </ol>
+    </details>
   </div>
   <form id="nameTagForm" class="badge-form" novalidate>
-    <input type="file" id="fileInput" accept=".csv" hidden>
-    <div id="dropzone" class="vms-drop" data-title="Name Badges or Assigned Volunteers report"></div>
-    <div id="error" role="alert"></div>
-
     <div class="badge-layout">
       <div class="badge-options">
         <label class="badge-field">Label stock
@@ -73,7 +56,7 @@
 
         <fieldset class="badge-text">
           <legend>Badge text</legend>
-          <label class="badge-field">Event name <small>(the <code>{event}</code> block)</small>
+          <label class="badge-field">Event name
             <input type="text" id="topText" class="form-control" placeholder="2027 FIRST Agrestic Regional">
           </label>
           <div class="badge-corners">
@@ -167,11 +150,6 @@
             </div>
             <div class="badge-row">
               <label class="badge-check"><input type="checkbox" id="propWrap"> Wrap onto more lines</label>
-              <label class="badge-check" id="propLinesLabel">up to
-                <select id="propLines" class="form-select form-select-sm badge-lines">
-                  <option value="2">2 lines</option><option value="3">3 lines</option><option value="4">4 lines</option><option value="5">5 lines</option><option value="6">6 lines</option>
-                </select>
-              </label>
             </div>
             <div class="badge-row">
               <label class="badge-color">Text color <input type="color" id="propColor"></label>

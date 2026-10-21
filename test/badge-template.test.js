@@ -126,7 +126,7 @@ describe('wrapping', async () => {
 
   it('wrapped text keeps a bigger size than one shrunk line', () => {
     const one = normalizeTemplate({ blocks: [{ text: long, x: 0, y: 0, w: 0.5, h: 0.5, size: 24, minSize: 4 }] });
-    const two = normalizeTemplate({ blocks: [{ text: long, x: 0, y: 0, w: 0.5, h: 0.5, size: 24, minSize: 4, wrap: true, maxLines: 2 }] });
+    const two = normalizeTemplate({ blocks: [{ text: long, x: 0, y: 0, w: 0.5, h: 0.5, size: 24, minSize: 4, wrap: true }] });
     const [a] = sharedSizes(one, [{}], measure, 4, 2);
     const [b] = sharedSizes(two, [{}], measure, 4, 2);
     expect(b).toBeGreaterThan(a);
@@ -134,17 +134,17 @@ describe('wrapping', async () => {
 
   it('draws each line inside the box, centered as a group', () => {
     const calls = [];
-    const t = normalizeTemplate({ blocks: [{ text: long, x: 0, y: 0.25, w: 0.5, h: 0.5, size: 24, minSize: 4, wrap: true, maxLines: 3 }] });
+    const t = normalizeTemplate({ blocks: [{ text: long, x: 0, y: 0.25, w: 0.5, h: 0.5, size: 24, minSize: 4, wrap: true }] });
     drawBadge({ measure, text: (...a) => calls.push(a), rect() {} }, t, {}, { labelW: 4, labelH: 2 });
     const baselines = [...new Set(calls.map((c) => c[2]))];
     expect(baselines.length).toBeGreaterThan(1);
-    expect(baselines.length).toBeLessThanOrEqual(3);
     for (const b of baselines) expect(b).toBeGreaterThan(0.5);
     expect(baselines.at(-1)).toBeLessThan(1.5);
   });
 
-  it('cleans maxLines', () => {
-    expect(normalizeTemplate({ blocks: [{ maxLines: 99 }] }).blocks[0].maxLines).toBe(6);
-    expect(normalizeTemplate({ blocks: [{}] }).blocks[0]).toMatchObject({ wrap: false, maxLines: 2 });
+  it('wraps onto as many lines as the box height allows, and drops old maxLines settings', () => {
+    const t = normalizeTemplate({ blocks: [{ text: long, w: 0.25, h: 0.9, size: 20, minSize: 20, wrap: true, maxLines: 2 }] });
+    expect(t.blocks[0].maxLines).toBeUndefined();
+    expect(wrapLines(measure, long, 20, t.blocks[0], 1).length).toBeGreaterThan(2);
   });
 });
