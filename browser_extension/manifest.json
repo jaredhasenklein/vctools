@@ -5,12 +5,15 @@
   "description": "Adds buttons to export VMS reports directly to VC Tools or Google Sheets and improves VMS styling",
   "permissions": ["storage", "clipboardWrite"],
   "host_permissions": [
-    "*://*.firstinspires.org/*", 
+    "*://*.firstinspires.org/*",
     "*://volunteer.systems/*",
     "*://docs.google.com/spreadsheets/*"
   ],
-  "background": {
-    "service_worker": "background.js"
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "vctools-integration@volunteer.systems",
+      "strict_min_version": "128.0"
+    }
   },
   "content_scripts": [
     {

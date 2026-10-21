@@ -63,13 +63,19 @@ function addCustomButtons() {
       
       // Get the CSV data and open in VC Tools
       exportAndProcessCSV(function(csvData, fileName) {
-        // Store the CSV data in extension storage
+        console.log('[VCTools] exportAndProcessCSV callback fired', { fileName, targetTool: reportMapping[reportId], csvDataLength: csvData?.length });
+        const csvText = atob(csvData.split(',')[1]);
+        console.log('[VCTools] decoded csvText length:', csvText.length);
         chrome.storage.local.set({
-          csvData: csvData,
+          csvData: csvText,
           csvFileName: fileName,
           targetTool: reportMapping[reportId]
         }, function() {
-          // Now open the VC Tools page
+          if (chrome.runtime.lastError) {
+            console.error('[VCTools] storage.set failed:', chrome.runtime.lastError.message);
+            return;
+          }
+          console.log('[VCTools] storage.set succeeded, opening tab');
           window.open(`https://volunteer.systems/${reportMapping[reportId]}`, '_blank');
         });
       });
