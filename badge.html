@@ -166,6 +166,14 @@
               </div>
             </div>
             <div class="badge-row">
+              <label class="badge-check"><input type="checkbox" id="propWrap"> Wrap onto more lines</label>
+              <label class="badge-check" id="propLinesLabel">up to
+                <select id="propLines" class="form-select form-select-sm badge-lines">
+                  <option value="2">2 lines</option><option value="3">3 lines</option><option value="4">4 lines</option><option value="5">5 lines</option><option value="6">6 lines</option>
+                </select>
+              </label>
+            </div>
+            <div class="badge-row">
               <label class="badge-color">Text color <input type="color" id="propColor"></label>
               <label class="badge-color"><input type="checkbox" id="propHasFill"> Background bar <input type="color" id="propFill" aria-label="Background color"></label>
             </div>
@@ -179,7 +187,7 @@
               <label class="badge-field">Width (in)<input type="number" id="propW" step="any" min="0.05" class="form-control"></label>
               <label class="badge-field">Height (in)<input type="number" id="propH" step="any" min="0.05" class="form-control"></label>
             </div>
-            <p class="badge-help">Long text shrinks to fit the width, down to the smallest size.</p>
+            <p class="badge-help">Long text shrinks to fit the box (or wraps, if turned on), down to the smallest size.</p>
             <div class="badge-grid">
               <label class="badge-field">Smallest size (pt)<input type="number" id="propMin" step="0.5" min="4" max="96" class="form-control"></label>
             </div>

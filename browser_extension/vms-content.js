@@ -23,8 +23,8 @@ async function exportReport() {
   return { text, fileName: `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.csv` };
 }
 
-/** CSV -> tab-separated text for pasting into a spreadsheet. Handles quoted commas, quotes, and line breaks. */
-function csvToTsv(csv) {
+/** CSV text -> rows of cells. Handles quoted commas, "" quotes, and line breaks inside quotes. */
+function parseCsv(csv) {
   const rows = [];
   let row = [];
   let cell = '';
@@ -43,8 +43,40 @@ function csvToTsv(csv) {
     } else cell += ch;
   }
   if (cell || row.length) { row.push(cell); rows.push(row); }
-  // Tabs and line breaks inside a cell would split it when pasted, so flatten them.
-  return rows.map((r) => r.map((c) => c.replace(/[\t\r\n]+/g, ' ')).join('\t')).join('\n');
+  return rows;
+}
+
+/** Tab-separated text (plain-text fallback). Tabs and line breaks inside a cell are flattened. */
+function csvToTsv(csv) {
+  return parseCsv(csv).map((r) => r.map((c) => c.replace(/[\t\r\n]+/g, ' ')).join('\t')).join('\n');
+}
+
+/**
+ * HTML table. Google Sheets pastes this cell for cell, so commas, quotes, and line
+ * breaks inside a value stay in one cell.
+ */
+function csvToHtml(csv) {
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const body = parseCsv(csv)
+    .map((r) => `<tr>${r.map((c) => `<td>${esc(c).replace(/\r?\n/g, '<br>')}</td>`).join('')}</tr>`)
+    .join('');
+  return `<table>${body}</table>`;
+}
+
+/** Copy the report as a table (for Sheets) with plain text as a fallback. */
+async function copyReport(csv) {
+  if (navigator.clipboard?.write && window.ClipboardItem) {
+    try {
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html': new Blob([csvToHtml(csv)], { type: 'text/html' }),
+        'text/plain': new Blob([csvToTsv(csv)], { type: 'text/plain' }),
+      })]);
+      return;
+    } catch {
+      // Some browsers refuse rich clipboard writes; fall back to plain text.
+    }
+  }
+  await copyToClipboard(csvToTsv(csv));
 }
 
 function copyToClipboard(text) {
@@ -63,6 +95,7 @@ function makeButton(label, className, exportButton) {
   button.type = 'button';
   button.value = label;
   button.className = className;
+  button.dataset.vctoolsButton = '1';
   button.setAttribute('style', exportButton.getAttribute('style') || '');
   return button;
 }
@@ -82,7 +115,8 @@ function showSheetsNotice() {
 function addCustomButtons() {
   const reportId = window.location.href.match(/ReportID=(\d+)/)?.[1];
   const exportButton = document.getElementById('MainContent_btnExport');
-  if (!reportId || !exportButton || document.querySelector('.sheets-button')) return;
+  // Own marker, so an older copy of the extension running alongside can't block these buttons.
+  if (!reportId || !exportButton || exportButton.parentNode.querySelector('[data-vctools-button]')) return;
 
   const sheetsButton = makeButton('📊 Open in Google Sheets', 'sheets-button', exportButton);
   const toolsButton = makeButton('✨ Open in VC Tools', 'vc-tools-button', exportButton);
@@ -107,7 +141,7 @@ function addCustomButtons() {
     document.body.appendChild(loading);
     try {
       const { text } = await exportReport();
-      await copyToClipboard(csvToTsv(text));
+      await copyReport(text);
       await chrome.storage.local.set({ showGoogleSheetsGuidance: true });
       window.open('https://docs.google.com/spreadsheets/u/0/create', '_blank');
       showSheetsNotice();

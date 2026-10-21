@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { describe, it, expect, beforeAll } from 'vitest';
 
 beforeAll(() => {
+  window.eval(readFileSync('scripts/roleconfig.js', 'utf8'));
   window.eval(readFileSync('scripts/emailprep.js', 'utf8'));
 });
 

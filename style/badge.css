@@ -224,3 +224,6 @@ body.dark-mode .badge-warning { color: #ff8a80; }
 .badge-advanced[open] { display: grid; gap: 8px; }
 .badge-help { font-size: 0.85rem; opacity: 0.75; margin: 0; font-weight: 400; }
 .badge-editor__actions .badge-help { margin-right: auto; }
+
+.badge-lines { width: auto; display: inline-block; margin: 0; padding-top: 2px; padding-bottom: 2px; }
+#propLinesLabel[hidden] { display: none; }
