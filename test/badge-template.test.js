@@ -95,3 +95,20 @@ describe('store', () => {
     expect(loadSaved()).toEqual([]);
   });
 });
+
+describe('presets and blank badges', async () => {
+  const { BLOCK_PRESETS, blankTemplate } = await import('../lib/badges/template.js');
+  it('every preset is a valid, on-label block', () => {
+    for (const p of BLOCK_PRESETS) {
+      expect(p.block.x + p.block.w).toBeLessThanOrEqual(1);
+      expect(p.block.y + p.block.h).toBeLessThanOrEqual(1);
+      expect(unknownVariables(p.block.text)).toEqual([]);
+    }
+  });
+  it('a blank template has no items and a unique id', () => {
+    const a = blankTemplate();
+    expect(a.blocks).toEqual([]);
+    expect(blankTemplate().id).not.toBe(a.id);
+    expect(normalizeTemplate(a).blocks).toEqual([]);
+  });
+});

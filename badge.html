@@ -25,7 +25,7 @@
 <li>Drop the file in the box below.</li>
 <li>Pick your label stock (<b>Avery 5163</b> sheets or <b>Dymo 2x4</b> thermal labels) and a template.</li>
 <li>Optionally, fill in the event name and bottom corners. The preview shows each volunteer's badge.</li>
-<li>Optionally, click <b>Customize</b> to change the layout: move and resize text, change sizes and colors, and add your own text.</li>
+<li>Optionally, click <b>Edit this design</b> or <b>Start a blank badge</b> to make your own: add names, roles, or your own text, then drag things where you want them.</li>
 <li>Optionally, shorten long role names in the abbreviations table.</li>
 <li>Click <b>Generate Labels</b> to download the PDF.</ol></p></td>
 <td class="tool-example-cell">
@@ -64,7 +64,10 @@
           <label for="labelStyle">Template</label>
           <div class="badge-row">
             <select id="labelStyle" class="form-select"></select>
-            <button type="button" id="customizeTemplate" class="btn btn-outline-primary">Customize</button>
+          </div>
+          <div class="badge-row">
+            <button type="button" id="customizeTemplate" class="btn btn-outline-primary">Edit this design</button>
+            <button type="button" id="newBlankTemplate" class="btn btn-outline-secondary">Start a blank badge</button>
           </div>
         </div>
 
@@ -110,59 +113,86 @@
 
     <section id="templateEditor" class="badge-editor" hidden aria-labelledby="editorTitle">
       <div class="badge-editor__head">
-        <h2 id="editorTitle">Customize template</h2>
-        <label class="badge-field badge-editor__name">Template name
+        <h2 id="editorTitle">Design your badge</h2>
+        <label class="badge-field badge-editor__name">Design name
           <input type="text" id="templateName" class="form-control" maxlength="60">
         </label>
-        <p class="badge-editor__hint">Click a block on the badge to select it, drag to move, and drag its corner to resize. Changes save in this browser as you go.</p>
       </div>
+      <ol class="badge-editor__steps">
+        <li><b>Add</b> what you want on the badge.</li>
+        <li><b>Drag</b> things on the preview to move them; drag the blue corner to resize.</li>
+        <li><b>Click</b> anything to change how it looks.</li>
+      </ol>
 
       <div class="badge-editor__body">
-        <div class="badge-editor__blocks">
-          <h3>Blocks</h3>
+        <div class="badge-editor__side">
+          <h3>Add to badge</h3>
+          <div id="presetButtons" class="badge-presets"></div>
+
+          <h3>On this badge</h3>
+          <p id="emptyItems" class="badge-empty">Nothing yet. Add something above.</p>
           <ul id="blockList" class="badge-block-list"></ul>
-          <div class="badge-row">
-            <button type="button" id="addBlock" class="btn btn-sm btn-outline-primary">Add text</button>
-            <button type="button" id="removeBlock" class="btn btn-sm btn-outline-danger">Remove</button>
-          </div>
         </div>
 
         <div id="blockProps" class="badge-editor__props">
-          <label class="badge-field">Text
+          <div class="badge-props__head">
+            <h3 id="propTitle">Selected</h3>
+            <button type="button" id="removeBlock" class="btn btn-sm btn-outline-danger">Remove from badge</button>
+          </div>
+
+          <label class="badge-field">What it says
             <input type="text" id="propText" class="form-control" autocomplete="off">
           </label>
-          <div class="badge-vars" id="variableChips" aria-label="Insert a variable"></div>
-          <p id="propWarning" class="badge-warning" role="alert"></p>
-          <div class="badge-grid">
-            <label class="badge-field">Left (in)<input type="number" id="propX" step="any" min="0" class="form-control"></label>
-            <label class="badge-field">Top (in)<input type="number" id="propY" step="any" min="0" class="form-control"></label>
-            <label class="badge-field">Width (in)<input type="number" id="propW" step="any" min="0.05" class="form-control"></label>
-            <label class="badge-field">Height (in)<input type="number" id="propH" step="any" min="0.05" class="form-control"></label>
-            <label class="badge-field">Size (pt)<input type="number" id="propSize" step="0.5" min="4" max="96" class="form-control"></label>
-            <label class="badge-field">Smallest (pt)<input type="number" id="propMin" step="0.5" min="4" max="96" class="form-control"></label>
-          </div>
-          <div class="badge-row badge-toggles">
-            <label><input type="checkbox" id="propBold"> Bold</label>
-            <label><input type="checkbox" id="propItalic"> Italic</label>
-            <label><input type="checkbox" id="propUpper"> ALL CAPS</label>
-            <label title="Use one size that fits everyone's text, so badges match"><input type="checkbox" id="propSame"> Same size on every badge</label>
-          </div>
           <div class="badge-row">
-            <div class="badge-seg" role="group" aria-label="Alignment">
-              <button type="button" data-align="left" class="btn btn-sm btn-outline-secondary">Left</button>
-              <button type="button" data-align="center" class="btn btn-sm btn-outline-secondary">Center</button>
-              <button type="button" data-align="right" class="btn btn-sm btn-outline-secondary">Right</button>
-            </div>
-            <label class="badge-color">Text <input type="color" id="propColor"></label>
-            <label class="badge-color"><input type="checkbox" id="propHasFill"> Background <input type="color" id="propFill"></label>
+            <label class="visually-hidden" for="insertField">Insert volunteer info</label>
+            <select id="insertField" class="form-select badge-insert"></select>
           </div>
+          <p id="propWarning" class="badge-warning" role="alert"></p>
+
+          <div class="badge-look">
+            <label class="badge-field badge-size">Size
+              <span class="badge-row"><input type="range" id="propSizeRange" min="6" max="72" step="1"><input type="number" id="propSize" step="0.5" min="4" max="96" class="form-control" aria-label="Size in points"></span>
+            </label>
+            <div class="badge-row">
+              <div class="badge-seg" role="group" aria-label="Style">
+                <button type="button" id="propBold" class="btn btn-sm btn-outline-secondary" aria-pressed="false"><b>B</b><span class="visually-hidden"> Bold</span></button>
+                <button type="button" id="propItalic" class="btn btn-sm btn-outline-secondary" aria-pressed="false"><i>I</i><span class="visually-hidden"> Italic</span></button>
+                <button type="button" id="propUpper" class="btn btn-sm btn-outline-secondary" aria-pressed="false" title="All capitals">AA<span class="visually-hidden"> All caps</span></button>
+              </div>
+              <div class="badge-seg" role="group" aria-label="Alignment">
+                <button type="button" data-align="left" class="btn btn-sm btn-outline-secondary">Left</button>
+                <button type="button" data-align="center" class="btn btn-sm btn-outline-secondary">Center</button>
+                <button type="button" data-align="right" class="btn btn-sm btn-outline-secondary">Right</button>
+              </div>
+            </div>
+            <div class="badge-row">
+              <label class="badge-color">Text color <input type="color" id="propColor"></label>
+              <label class="badge-color"><input type="checkbox" id="propHasFill"> Background bar <input type="color" id="propFill" aria-label="Background color"></label>
+            </div>
+          </div>
+
+          <details class="badge-advanced">
+            <summary>Exact position and text fitting</summary>
+            <div class="badge-grid">
+              <label class="badge-field">From left (in)<input type="number" id="propX" step="any" min="0" class="form-control"></label>
+              <label class="badge-field">From top (in)<input type="number" id="propY" step="any" min="0" class="form-control"></label>
+              <label class="badge-field">Width (in)<input type="number" id="propW" step="any" min="0.05" class="form-control"></label>
+              <label class="badge-field">Height (in)<input type="number" id="propH" step="any" min="0.05" class="form-control"></label>
+            </div>
+            <p class="badge-help">Long text shrinks to fit the width, down to the smallest size.</p>
+            <div class="badge-grid">
+              <label class="badge-field">Smallest size (pt)<input type="number" id="propMin" step="0.5" min="4" max="96" class="form-control"></label>
+            </div>
+            <label class="badge-check"><input type="checkbox" id="propSame"> Same size on every badge <span class="badge-help">(names line up across the sheet)</span></label>
+          </details>
         </div>
       </div>
 
       <div class="badge-row badge-editor__actions">
-        <button type="button" id="exportTemplate" class="btn btn-outline-secondary">Export template</button>
-        <label class="btn btn-outline-secondary mb-0">Import template<input type="file" id="importTemplate" accept=".json,application/json" hidden></label>
-        <button type="button" id="deleteTemplate" class="btn btn-outline-danger">Delete template</button>
+        <span class="badge-help">Saved in this browser automatically.</span>
+        <button type="button" id="exportTemplate" class="btn btn-outline-secondary">Save to file</button>
+        <label class="btn btn-outline-secondary mb-0">Open a file<input type="file" id="importTemplate" accept=".json,application/json" hidden></label>
+        <button type="button" id="deleteTemplate" class="btn btn-outline-danger">Delete design</button>
         <button type="button" id="closeEditor" class="btn btn-primary">Done</button>
       </div>
     </section>

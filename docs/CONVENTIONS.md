@@ -67,4 +67,10 @@ Every file upload uses the shared drop zone in `scripts/commonscripts.js`:
 ## Badge templates
 - `lib/badges/template.js` lays out a badge from a template (text blocks with `{variables}`). `drawBadge()` draws through a surface: jsPDF for the PDF, canvas for the editor preview. Keep both on that one function so the preview matches the printout.
 - Built-in templates are in `BUILT_IN_TEMPLATES`. User templates live in localStorage and export as `.json`; `normalizeTemplate()` cleans anything loaded or imported.
-- To add a variable, add it to `VARIABLES` and fill it in `badgeVariables()`.
+- To add a variable, add it to `VARIABLES` and fill it in `badgeVariables()`. To offer it as a one-click item in the editor, add it to `BLOCK_PRESETS`.
+- The editor UI says "design" and "item" (not template/block) and shows variables by their friendly labels.
+
+## Browser extension
+- Lives in `browser_extension/` (see its README). It hands reports to the site through `chrome.storage.local` (`csvData`, `csvFileName`, `targetTool`); `vctools-content.js` puts the file in the page's first CSV file input and fires `change`, so pages need no extension-specific code.
+- Reports without a dedicated tool go to the home page (`targetTool: 'index'`).
+- Bump `version` in `manifest.json` for every store upload.

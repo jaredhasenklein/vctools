@@ -565,7 +565,9 @@ body.dark-mode .vms-drop.is-loaded .vms-drop__icon { color: #66bb6a; }
 /* Tool examples shown beside the instructions (badge.html, parse.html) */
 table td.tool-example-cell { width: 42%; vertical-align: middle; }
 @media (max-width: 900px) {
-  table td.tool-example-cell { display: block; width: 100%; }
+  /* Stack the instructions and the example instead of squeezing them side by side. */
+  table:has(td.tool-example-cell), table:has(td.tool-example-cell) tbody, table:has(td.tool-example-cell) tr { display: block; width: 100%; }
+  table:has(td.tool-example-cell) td { display: block; width: 100%; }
 }
 .tool-example { margin: 0; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
 .tool-example figcaption { flex-basis: 100%; text-align: center; font-size: 0.8rem; opacity: 0.7; }
