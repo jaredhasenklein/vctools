@@ -166,7 +166,7 @@ table[style*="text-align: center"][style*="margin: 0px auto"] td[bgcolor="black"
 }
 
 /* ---------- Badge page layout ---------- */
-.badge-form { align-items: stretch; max-width: 1100px; margin: 0 auto 20px; }
+.badge-form { align-items: stretch; max-width: 1100px; margin: 0 0 20px; }
 .badge-layout { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; margin-top: 8px; }
 .badge-options { flex: 1 1 320px; display: grid; gap: 12px; }
 .badge-preview { flex: 0 1 480px; display: grid; justify-items: center; gap: 8px; }
@@ -182,7 +182,7 @@ table[style*="text-align: center"][style*="margin: 0px auto"] td[bgcolor="black"
 .badge-canvas.is-editing { cursor: move; border-style: solid; border-color: #0066cc; }
 .badge-canvas:focus-visible { outline: 3px solid #0066cc; outline-offset: 2px; }
 .badge-preview__nav { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
-.badge-generate { align-self: center; margin-top: 20px; }
+.badge-generate { align-self: flex-start; margin-top: 20px; }
 
 /* ---------- Template editor ---------- */
 .badge-editor { margin-top: 20px; border: 1px solid var(--border-color, #ddd); border-radius: 10px; padding: 16px; background: var(--secondary-bg-color, #f8f9fa); }
@@ -225,5 +225,3 @@ body.dark-mode .badge-warning { color: #ff8a80; }
 .badge-help { font-size: 0.85rem; opacity: 0.75; margin: 0; font-weight: 400; }
 .badge-editor__actions .badge-help { margin-right: auto; }
 
-.badge-lines { width: auto; display: inline-block; margin: 0; padding-top: 2px; padding-bottom: 2px; }
-#propLinesLabel[hidden] { display: none; }

@@ -11,20 +11,25 @@
 
 </head>
 <body class="container-fluid">
-  <h1>VMS Parser</h1>
-
- <div class="table-responsive">
-    <table class="table">
-<tr>
-<td><p><b><u>Instructions:</u></b>
-<ol><li>Log in to VMS and select your event.</li>
-<li>Click <b>All Reports</b>.</li>
-<li>Click <b>Assigned Volunteers</b>.</li>
-<li>Click <b>Export</b>.</li>
-<li>Click the button below to select your export.</li>
-<li>If you are happy with the preview, click <b>Download CSV</b>.</li></ol></p></td>
-<td class="tool-example-cell">
-<figure class="tool-example" aria-label="Example of what this tool does">
+  <div class="tool-head">
+    <h1>Volunteer List Parser</h1>
+    <p class="tool-lede">Turn the Assigned Volunteers report into one row per volunteer, with each day's roles side by side.</p>
+  </div>
+  <div class="tool-start">
+    <div class="tool-start__main">
+      <input type="file" id="csvFile" accept=".csv" hidden>
+      <div id="dropzone" class="vms-drop" data-title="Assigned Volunteers report"></div>
+      <div id="error" role="alert"></div>
+      <p class="privacy-note">🔒 Your file stays on this computer. Anything you download or print still contains volunteer PII.</p>
+    </div>
+    <details class="tool-howto" open>
+      <summary>How to use</summary>
+      <ol>
+        <li>In VMS, open your event and click <b>All Reports</b>.</li>
+<li>Export <b>Assigned Volunteers</b> and drop it in the box.</li>
+        <li>Check the preview, filter to key volunteers if you like, then click <b>Download CSV</b>.</li>
+      </ol>
+      <figure class="tool-example" aria-label="Example of what this tool does">
   <div class="parse-sample">
     <div>
       <div class="parse-sample__label">VMS export: one row per shift</div>
@@ -53,15 +58,8 @@
     </div>
   </div>
 </figure>
-</td></tr>
-    </table>
-<i>All data processing happens on your computer and is never sent to a server. No worries about PII here! Just remember that the file you download from here contains PII, just like the export from VMS.</i>
-<br><br>
+    </details>
   </div>
-
-  <input type="file" id="csvFile" accept=".csv" hidden>
-  <div id="dropzone" class="vms-drop" data-title="Assigned Volunteers report"></div>
-  <div id="error"></div>
   <div id="buttonContainer"></div>
   <div class="table-responsive">
 

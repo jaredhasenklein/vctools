@@ -130,21 +130,18 @@
 </head>
 <body class="container-fluid">
 <div class="content-wrapper">
-  <h1>Volunteer Email Prep <span class="beta-tag">Beta</span></h1>
-  <p class="subtitle">Upload the three VMS export files to generate a flattened volunteer status spreadsheet for email outreach.</p>
-
-  <div class="section-header">
-    <h3 style="margin-top:0;">Instructions</h3>
-    <ol style="margin-bottom:0;">
-      <li>Log in to VMS and select your event.</li>
-      <li>Click <b>All Reports</b>.</li>
-      <li>Export the <b>Assigned Volunteers</b>, <b>Training and Certifications</b>, and <b>Consent and Release Status</b> reports.</li>
-      <li>Upload all three files below (order doesn't matter).</li>
+  <div class="tool-head">
+    <h1>Volunteer Email Prep <span class="beta-tag">Beta</span></h1>
+    <p class="tool-lede">Combine three VMS reports into one spreadsheet for mail-merge reminder emails.</p>
+  </div>
+  <details class="tool-howto tool-howto--wide" open>
+    <summary>How to use</summary>
+    <ol>
+      <li>In VMS, open your event and click <b>All Reports</b>.</li>
+      <li>Export <b>Assigned Volunteers</b>, <b>Training and Certifications</b>, and <b>Consent and Release Status</b>, and drop each in its box below (any order).</li>
       <li>Click <b>Generate Output</b> to preview, then <b>Download CSV</b>.</li>
     </ol>
-    <p style="margin-bottom:0; margin-top:10px;"><i>All processing happens locally in your browser. No data is sent to a server.</i></p>
-  </div>
-
+  </details>
   <div class="upload-grid">
     <div class="upload-section">
       <label>1. Assigned Volunteers Export <span id="avStatus" class="status-badge status-pending">Not loaded</span></label>
@@ -163,6 +160,7 @@
     </div>
   </div>
 
+  <p class="privacy-note">🔒 Your files stay on this computer. Anything you download or print still contains volunteer PII.</p>
   <div id="error"></div>
 
   <div class="action-bar">

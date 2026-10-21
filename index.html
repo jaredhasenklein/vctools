@@ -14,91 +14,59 @@
 
 </head>
 <body>
-  <div class="container">
-    <div class="text-center my-5">
-      <h1>VC Tools</h1>
-    </div>
-
-    <section class="home-start" aria-labelledby="homeStartTitle">
-      <h2 id="homeStartTitle">Start with a VMS export</h2>
-      <p>Drop any report exported from VMS and we'll show you which tools can use it. The file stays in your browser.</p>
-      <input type="file" id="homeInput" accept=".csv" hidden>
-      <div id="homeDropzone" class="vms-drop" data-title="Any VMS report"></div>
-      <div id="error"></div>
-      <div id="homeResult" class="home-result" aria-live="polite"></div>
+  <main class="home container-fluid">
+    <section class="home-hero" aria-labelledby="homeStartTitle">
+      <div>
+        <h1>Tools for <i>FIRST</i> Volunteer Coordinators</h1>
+        <p>Turn VMS reports into badges, rosters, meal counts, and training checks. Free, and your files never leave your computer.</p>
+      </div>
+      <div class="home-start">
+        <h2 id="homeStartTitle" class="visually-hidden">Start with a VMS export</h2>
+        <input type="file" id="homeInput" accept=".csv" hidden>
+        <div id="homeDropzone" class="vms-drop" data-title="Drop any VMS report to see what you can do with it"></div>
+        <div id="error"></div>
+        <div id="homeResult" class="home-result" aria-live="polite"></div>
+      </div>
     </section>
 
-    <div class="row">
-      <!-- Tool 1 -->
-      <div class="col-md-6 col-sm-12 mb-4">
-        <a href="badge" class="text-decoration-none text-dark">
-          <div class="tile">
-            <h2>Name Badge Generator</h2>
-            <p>Generate name badges from a VMS export in a few quick clicks.</p>
-          </div>
-        </a>
-      </div>
-
-      <!-- Tool 2 -->
-      <div class="col-md-6 col-sm-12 mb-4">
-        <a href="parse" class="text-decoration-none text-dark">
-          <div class="tile">
-            <h2>Volunteer List Parser</h2>
-            <p>Convert the Assigned Volunteers Report from VMS into something helpful and easy to read.</p>
-          </div>
-        </a>
-      </div>
-
-      <!-- Tool 3 -->
-      <div class="col-md-6 col-sm-12 mb-4">
-        <a href="certification" class="text-decoration-none text-dark">
-          <div class="tile">
-            <h2>Certification Status Checker</h2>
-            <p>Check which volunteers have completed their required certifications (currently only works with FRC for the current season).</p>
-          </div>
-        </a>
-      </div>
-
-      <!-- Tool 4 (New) -->
-      <div class="col-md-6 col-sm-12 mb-4">
-        <a href="eventplanning" class="text-decoration-none text-dark">
-          <div class="tile">
-            <h2>Event Planning Reporter</h2>
-            <p>View totals for meals, including dietary restrictions, and other helpful event numbers & stats.</p>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-md-6 col-sm-12 mb-4">
-        <a href="viewer" class="text-decoration-none text-dark">
-          <div class="tile">
-            <h2>Report Viewer</h2>
-            <p>Open any VMS report as a table you can search, sort, trim to the columns you need, and download or print.</p>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-md-6 col-sm-12 mb-4">
-        <a href="emailprep" class="text-decoration-none text-dark">
-          <div class="tile">
-            <h2>Volunteer Email Prep <span class="beta-tag">Beta</span></h2>
-            <p>Combine Assigned Volunteers, Training, and Consent &amp; Release into one spreadsheet for mail-merge reminder emails.</p>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-md-6 col-sm-12 mb-4">
-        <a href="fllschedule" class="text-decoration-none text-dark">
-          <div class="tile">
-            <h2>FLL Schedule Generator <span class="beta-tag">Beta</span></h2>
-            <p>Build judging and robot game schedules for a <i>FIRST</i> LEGO League Challenge event and download them as a spreadsheet.</p>
-          </div>
-        </a>
-      </div>
+    <h2 class="visually-hidden">All tools</h2>
+    <div class="tool-grid">
+      <a class="tool-card" href="badge">
+        <span class="tool-card__icon" aria-hidden="true">🏷️</span>
+        <h2>Name Badge Generator</h2>
+        <p>Print badges on Avery sheets or Dymo labels, with your own design.</p>
+      </a>
+      <a class="tool-card" href="parse">
+        <span class="tool-card__icon" aria-hidden="true">📋</span>
+        <h2>Volunteer List Parser</h2>
+        <p>One row per volunteer with each day's roles side by side.</p>
+      </a>
+      <a class="tool-card" href="certification">
+        <span class="tool-card__icon" aria-hidden="true">🎓</span>
+        <h2>Certification Status Checker</h2>
+        <p>Who has finished their role's training, with reminder emails. FRC only for now.</p>
+      </a>
+      <a class="tool-card" href="eventplanning">
+        <span class="tool-card__icon" aria-hidden="true">🍽️</span>
+        <h2>Event Planning Reporter</h2>
+        <p>Meals by dietary need, shirt sizes, years of service, consent.</p>
+      </a>
+      <a class="tool-card" href="viewer">
+        <span class="tool-card__icon" aria-hidden="true">🔎</span>
+        <h2>Report Viewer</h2>
+        <p>Any report as a table to search, sort, trim, download, or print.</p>
+      </a>
+      <a class="tool-card" href="emailprep">
+        <span class="tool-card__icon" aria-hidden="true">✉️</span>
+        <h2>Volunteer Email Prep <span class="beta-tag">Beta</span></h2>
+        <p>Three reports combined into one sheet for mail-merge reminders.</p>
+      </a>
+      <a class="tool-card" href="fllschedule">
+        <span class="tool-card__icon" aria-hidden="true">🗓️</span>
+        <h2>FLL Schedule Generator <span class="beta-tag">Beta</span></h2>
+        <p>Judging and robot game schedules for an FLL Challenge event.</p>
+      </a>
     </div>
-  </div>
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </main>
 </body>
 </html>

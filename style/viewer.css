@@ -34,7 +34,7 @@ table.viewer-table tbody tr:hover td { background: var(--table-hover-bg, #f5f5f5
 
 @page { size: landscape; margin: 0.4in; }
 @media print {
-  #top-bar, .theme-toggle, .footer, .vms-drop, .viewer-intro, .viewer-steps, .viewer-controls, .viewer-note, #error { display: none !important; }
+  #top-bar, .site-footer, .tool-start, .tool-lede, .viewer-controls, #error { display: none !important; }
   .viewer-table-wrap { overflow: visible; max-height: none; border: 0; }
   table.viewer-table th { position: static; }
   table.viewer-table th button::after { content: none; }

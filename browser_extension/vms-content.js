@@ -115,8 +115,12 @@ function showSheetsNotice() {
 function addCustomButtons() {
   const reportId = window.location.href.match(/ReportID=(\d+)/)?.[1];
   const exportButton = document.getElementById('MainContent_btnExport');
-  // Own marker, so an older copy of the extension running alongside can't block these buttons.
-  if (!reportId || !exportButton || exportButton.parentNode.querySelector('[data-vctools-button]')) return;
+  if (!reportId || !exportButton) return;
+  // If the older store version (1.2) is also installed, it adds look-alike buttons without our
+  // marker. Remove those so there is one of each. Ours keep the old class names, which makes
+  // 1.2 skip adding its own when it runs after us.
+  for (const old of document.querySelectorAll('.sheets-button:not([data-vctools-button]), .vc-tools-button:not([data-vctools-button])')) old.remove();
+  if (exportButton.parentNode.querySelector('[data-vctools-button]')) return;
 
   const sheetsButton = makeButton('📊 Open in Google Sheets', 'sheets-button', exportButton);
   const toolsButton = makeButton('✨ Open in VC Tools', 'vc-tools-button', exportButton);

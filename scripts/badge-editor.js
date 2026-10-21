@@ -99,7 +99,7 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
     size: $('propSize'), minSize: $('propMin'), bold: $('propBold'), italic: $('propItalic'),
     upper: $('propUpper'), sameSize: $('propSame'), color: $('propColor'), fill: $('propFill'), hasFill: $('propHasFill'),
     sizeRange: $('propSizeRange'),
-    wrap: $('propWrap'), maxLines: $('propLines'),
+    wrap: $('propWrap'),
   };
   const TOGGLES = ['bold', 'italic', 'upper']; // Buttons with aria-pressed
 
@@ -136,8 +136,6 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
     fields.minSize.value = b.minSize;
     fields.sameSize.checked = b.sameSize;
     fields.wrap.checked = b.wrap;
-    fields.maxLines.value = String(Math.max(2, b.maxLines));
-    $('propLinesLabel').hidden = !b.wrap;
     for (const k of TOGGLES) {
       fields[k].setAttribute('aria-pressed', String(b[k]));
       fields[k].classList.toggle('active', b[k]);
@@ -227,9 +225,8 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
     const b = block();
     // Wrapped text needs room for a second line; grow a one-line-high box if it has space below.
     const grow = fields.wrap.checked && b.h < 0.2 ? { h: Math.min(1 - b.y, b.h * 2) } : {};
-    update({ wrap: fields.wrap.checked, maxLines: Math.max(2, b.maxLines), ...grow });
+    update({ wrap: fields.wrap.checked, ...grow });
   });
-  fields.maxLines.addEventListener('change', () => update({ maxLines: Number(fields.maxLines.value) }));
   fields.color.addEventListener('input', () => update({ color: fields.color.value }));
   fields.hasFill.addEventListener('change', () => update({ fill: fields.hasFill.checked ? fields.fill.value : '' }));
   fields.fill.addEventListener('input', () => update({ fill: fields.fill.value }));

@@ -81,9 +81,17 @@ describe('vms-content buttons', () => {
     expect(vmsPage(33)).toEqual(['✨ Open in VC Tools', '📊 Open in Google Sheets']);
   });
 
-  it('still adds them when the older store version already added its own', () => {
-    const old = '<input type="button" class="sheets-button" value="📊 Open in Google Sheets">';
+  it('replaces buttons from the older store version, leaving one of each', () => {
+    const old = '<input type="button" class="vc-tools-button" value="✨ Open in VC Tools"><input type="button" class="sheets-button" value="📊 Open in Google Sheets">';
     expect(vmsPage(23, old)).toHaveLength(2);
+    expect(document.querySelectorAll('input[type=button]')).toHaveLength(2);
+  });
+
+  it('removes older buttons that appear after ours on the retry', () => {
+    vmsPage(33);
+    document.querySelector('#MainContent_btnExport').insertAdjacentHTML('afterend', '<input type="button" class="sheets-button" value="old">');
+    window.addCustomButtons();
+    expect(document.querySelectorAll('.sheets-button')).toHaveLength(1);
   });
 
   it('adds them only once', () => {

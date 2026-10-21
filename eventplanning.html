@@ -10,21 +10,27 @@
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body class="container-fluid">
+    <div class="tool-head">
     <h1>Event Planning Reporter</h1>
-
-   <div class="table-responsive">
-      <table class="table">
-  <tr>
-  <td style="width:15%;"><p><b><u>Instructions:</u></b>
-  <ol><li>Log in to VMS and select your event.</li>
-  <li>Click <b>All Reports</b>.</li>
-  <li>Click <b>Attendance & Event Planning</b>.</li>
-  <li>Click <b>Export</b>.</li>
-  <li>Click or drag your file to the box on the right to select your export.</li>
-  <li>Configure meal times if needed (defaults: breakfast 7:30am, lunch 12:00pm, dinner 6:00pm).</li>
-  <li>View the generated stats reports.</li></ol></p></td>
-  <td><input type="file" id="csvFile" accept=".csv" hidden>
-    <div id="dropzone" class="vms-drop" data-title="Attendance &amp; Event Planning report"></div>
+    <p class="tool-lede">Meal counts by dietary need, shirt sizes, years of service, and consent status for your event.</p>
+  </div>
+  <div class="tool-start">
+    <div class="tool-start__main">
+      <input type="file" id="csvFile" accept=".csv" hidden>
+      <div id="dropzone" class="vms-drop" data-title="Attendance &amp; Event Planning report"></div>
+      <div id="error" role="alert"></div>
+      <p class="privacy-note">🔒 Your file stays on this computer. Anything you download or print still contains volunteer PII.</p>
+    </div>
+    <details class="tool-howto" open>
+      <summary>How to use</summary>
+      <ol>
+        <li>In VMS, open your event and click <b>All Reports</b>.</li>
+<li>Export <b>Attendance &amp; Event Planning</b> and drop it in the box.</li>
+        <li>Adjust meal times if needed (defaults: breakfast 7:30am, lunch 12:00pm, dinner 6:00pm).</li>
+        <li>Review the reports, or click <b>Export All Data to Excel</b>.</li>
+      </ol>
+    </details>
+  </div>
     <!-- Meal Times Configuration -->
     <div id="mealTimesConfig" style="display: none;" class="mt-4">
       <div class="config-box">
@@ -42,14 +48,6 @@
         </div>
       </div>
     </div>
-    <div id="error"></div></td>
-  </tr>
-      </table>
-  <i>All data processing happens on your computer and is never sent to a server. No worries about PII here! Just remember that the data displayed contains PII, just like the export from VMS.</i>
-  <br><br>
-    </div>
-
-
 
     <!-- Reports -->
     <div id="reportsContainer" style="display: none;" class="mt-4">
