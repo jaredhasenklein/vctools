@@ -139,6 +139,9 @@ function processCSV(report, records, loadedFileName) {
     if (versionTag) {
         versionTag.style.display = 'block';
     }
+    const isBeta = BETA_PROGRAMS.has(selectedProgram);
+    document.getElementById('programBeta').hidden = !isBeta;
+    document.getElementById('programBetaNote').hidden = !isBeta;
 
     const processedData = processData(records);
     renderResults(processedData);

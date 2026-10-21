@@ -1,3 +1,6 @@
+// Programs whose role lists are still being filled in. Tools label them Beta.
+const BETA_PROGRAMS = new Set(['FTC', 'FLL']);
+
 // Required training for each role, per program. Shared by the Certification Status
 // Checker and Volunteer Email Prep, so a season update happens in one place.
 //
