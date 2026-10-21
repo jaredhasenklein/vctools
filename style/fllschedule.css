@@ -16,8 +16,10 @@
         input {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color, #ddd);
             border-radius: 4px;
+            background: var(--input-bg, #fff);
+            color: var(--input-text, #333);
         }
         button {
             background: #0066cc;
@@ -36,23 +38,6 @@
             margin-top: 5px;
             font-size: 14px;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        .modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 5px;
-            width: 80%;
-            max-width: 500px;
-        }
         .modal-buttons {
             margin-top: 20px;
             text-align: right;
@@ -60,3 +45,16 @@
         .modal-buttons button {
             margin-left: 10px;
         }
+
+.fll-dialog {
+  max-width: 420px;
+  width: calc(100% - 32px);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  padding: 20px;
+  background: var(--background-color, #fff);
+  color: var(--text-color, #000);
+}
+.fll-dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+#error { color: #cc0000; margin: 8px 0; }
+body.dark-mode #error, body.dark-mode .error { color: #ff8a80; }

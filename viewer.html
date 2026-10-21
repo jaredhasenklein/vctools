@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNHZ3NT97K"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VMS Report Viewer</title>
+  <link rel="stylesheet" href="style/commonstyle.css">
+  <link rel="stylesheet" href="style/viewer.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <script src="scripts/commonscripts.js"></script>
+  <script type="module" src="lib/vms/index.js"></script>
+  <script type="module" src="scripts/viewer.js"></script>
+</head>
+<body class="container-fluid">
+  <h1>Report Viewer</h1>
+  <p class="viewer-intro">Open any VMS report as a table you can search, sort, trim to the columns you need, then download or print.</p>
+  <ol class="viewer-steps">
+    <li>In VMS, open your event, click <b>All Reports</b>, pick any report, and click <b>Export</b>.</li>
+    <li>Drop the file below.</li>
+  </ol>
+  <p class="viewer-note"><i>All processing happens on your computer and is never sent to a server. Downloads and printouts still contain volunteer PII, so handle them like the VMS export.</i></p>
+
+  <input type="file" id="fileInput" accept=".csv" hidden>
+  <div id="dropzone" class="vms-drop" data-title="Any VMS report"></div>
+  <div id="error" role="alert"></div>
+
+  <section id="viewer" class="viewer" hidden>
+    <dl id="reportMeta" class="viewer-meta"></dl>
+
+    <div class="viewer-controls">
+      <label class="viewer-search">
+        <span class="visually-hidden">Search</span>
+        <input type="search" id="search" placeholder="Search all visible columns" autocomplete="off">
+      </label>
+      <details class="viewer-columns">
+        <summary>Columns</summary>
+        <div class="viewer-columns__actions">
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="showAll">Show all</button>
+          <label><input type="checkbox" id="hideEmpty" checked> Hide empty columns</label>
+        </div>
+        <div id="columnList" class="viewer-columns__list"></div>
+      </details>
+      <button type="button" class="btn btn-primary" id="downloadCsv">Download CSV</button>
+      <button type="button" class="btn btn-outline-secondary" id="printTable">Print</button>
+      <span id="rowCount" class="viewer-count" aria-live="polite"></span>
+    </div>
+
+    <div class="viewer-table-wrap">
+      <table id="reportTable" class="viewer-table">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</body>
+</html>

@@ -602,3 +602,26 @@ table.sample-table th, table.sample-table td { width: auto; padding: 2px 6px; bo
 .home-result__tools { display: flex; flex-wrap: wrap; gap: 8px; }
 .home-result__error { color: #b00020; }
 body.dark-mode .home-result__error { color: #ff8a80; }
+
+/* Badge samples are print previews: always black on white, in both themes. */
+/* !important matches the dark theme's own `.dark-mode table td i { ... !important }` rule. */
+body.dark-mode .badge-sample,
+body.dark-mode .badge-sample div,
+body.dark-mode .badge-sample span,
+body.dark-mode table td .badge-sample i { color: #000 !important; }
+body.dark-mode .badge-sample .badge-sample__role:not(.badge-sample__role--plain) { color: #fff !important; }
+
+/* "Beta" label for less-tested tools */
+.beta-tag {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #fff3cd;
+  color: #664d03;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+body.dark-mode .beta-tag { background: #5c4a00; color: #ffe08a; }
