@@ -47,6 +47,7 @@ $('schedulerForm').addEventListener('submit', (event) => {
       start: parseClock($('startTime').value),
       lunchStart: parseClock($('lunchStart').value),
       lunchEnd: parseClock($('lunchEnd').value),
+      judgingDuringLunch: !$('pauseJudging').checked,
     });
   } catch (err) {
     showError(err.message);

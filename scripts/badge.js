@@ -1,719 +1,312 @@
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('nameTagForm');
-  const labelContainer = document.getElementById('labelContainer');
-  const dropzone = document.getElementById('dropzone');
-  const fileInput = document.getElementById('fileInput');
-  const labelTypeSelect = document.getElementById('labelType');
-  const labelStyleSelect = document.getElementById('labelStyle');
-  const generateButton = document.querySelector('#nameTagForm button[type="submit"]');
+// Name Badge Generator page. Layout lives in lib/badges/template.js; the editor in
+// scripts/badge-editor.js. Reads Name Badges or Assigned Volunteers reports.
+import { drawBadge, sharedSizes, badgeVariables } from '../lib/badges/template.js';
+import { allTemplates } from '../lib/badges/store.js';
+import { createEditor, canvasSurface } from './badge-editor.js';
 
-  // Role abbreviations storage
-  let roleAbbreviations = {};
-  let parsedLabels = [];
+const $ = (id) => document.getElementById(id);
 
-  // Set up drag and drop functionality
-  if (dropzone && fileInput) {
-    setupDragAndDrop(dropzone, fileInput, handleFiles);
-  } else {
-    console.error('Required elements not found: dropzone or fileInput');
-  }
+// Label stock. Positions in inches on the printed page.
+const LABEL_TYPES = {
+  avery5163: {
+    name: 'Avery 5163 (sheet of 10)', pageOrientation: 'p', pageWidth: 8.5, pageHeight: 11,
+    labelWidth: 4, labelHeight: 2, startX: 0.16, startY: 0.5, columnGap: 0.19, labelsPerRow: 2, labelsPerPage: 10,
+  },
+  dymo2x4: {
+    name: 'Dymo 2x4 (thermal roll)', pageOrientation: 'l', pageWidth: 4, pageHeight: 2,
+    labelWidth: 4, labelHeight: 2, startX: 0, startY: 0.05, columnGap: 0, labelsPerRow: 1, labelsPerPage: 1,
+  },
+};
 
-  // Define label types and their properties
-  const labelTypes = {
-    'avery5163': {
-      name: 'Avery 5163',
-      pageOrientation: 'p',
-      pageWidth: 8.5,
-      pageHeight: 11,
-      labelWidth: 4,
-      labelHeight: 2,
-      startX: 0.16,
-      startY: 0.5,
-      columnGap: 0.19,
-      rowGap: 0,
-      labelsPerRow: 2,
-      labelsPerPage: 10
-    },
-    'dymo2x4': {
-      name: 'Dymo 2x4',
-      pageOrientation: 'l',
-      pageWidth: 4,
-      pageHeight: 2,
-      labelWidth: 4,
-      labelHeight: 2,
-      startX: 0,
-      startY: 0.05,
-      columnGap: 0,
-      rowGap: 0,
-      labelsPerRow: 1,
-      labelsPerPage: 1
-    }
-  };
+// Shown in the preview before a file is loaded. Invented people.
+const SAMPLE_PEOPLE = [
+  { firstName: 'Avery', lastName: 'Quintana', roles: ['Head Referee'], pronouns: 'she/her', languages: 'English, Spanish' },
+  { firstName: 'Morgan', lastName: 'Tran', roles: ['Judge Advisor'], pronouns: 'he/him', languages: 'English' },
+  { firstName: 'Maximiliana', lastName: 'Okonkwo-Lindqvist', roles: ['Pit Administration Supervisor', 'Queuer'], pronouns: 'they/them', languages: 'English, Swedish' },
+];
 
-  // Helper functions
-  function formatNameWithInitial(firstName, lastName) {
-    const firstNameStr = (firstName || '').trim();
-    const lastNameStr = (lastName || '').trim();
-    const lastInitial = lastNameStr ? lastNameStr[0] + '.' : '';
-    return `${firstNameStr}${lastInitial ? ' ' + lastInitial : ''}`;
-  }
+let people = [];            // From the loaded report
+let previewIndex = 0;
+let roleAbbreviations = {}; // Formatted role -> replacement
 
-  function formatRole(role) {
-    if (!role) return '';
+// ---------- Roles ----------
 
-    // Convert to uppercase and split by commas
-    const roles = role.toLowerCase().split(',').map(r => r.trim());
+/** "Judge, Field Assembly" -> "JUDGE". Field Assembly is dropped unless it's the only role. */
+function formatRole(roles) {
+  const list = roles.map((r) => r.trim()).filter(Boolean);
+  const kept = list.filter((r) => r.toLowerCase() !== 'field assembly');
+  return (kept.length ? kept : list).map((r) => r.toUpperCase()).join(' / ');
+}
 
-    // If there's only one role and it's "field assembly", keep it
-    if (roles.length === 1 && roles[0] === 'field assembly') {
-      return role.toUpperCase();
-    }
+function roleText(person) {
+  const role = formatRole(person.roles);
+  return roleAbbreviations[role]?.trim() || role;
+}
 
-    // Filter out "field assembly" and join with " / "
-    const filteredRoles = roles.filter(r => r !== 'field assembly');
-    return filteredRoles.map(r => r.toUpperCase()).join(' / ');
-  }
+// ---------- Form values ----------
 
-  // Apply abbreviations to roles
-  function applyRoleAbbreviation(role) {
-    if (!role || Object.keys(roleAbbreviations).length === 0) return role;
+function corner(side, person) {
+  const type = $(`bottom${side}Type`).value;
+  if (type === 'custom') return $(`bottom${side}Text`).value;
+  if (type === 'pronouns') return person.pronouns;
+  if (type === 'languages') return person.languages;
+  return '';
+}
 
-    // Check if the exact role has an abbreviation
-    if (roleAbbreviations[role] && roleAbbreviations[role].trim() !== '') {
-      return roleAbbreviations[role];
-    }
-
-    return role;
-  }
-
-  function applyFirstItalics(text, doc, x, y, alignment) {
-    // Ensure text is not null, undefined, or empty
-    if (!text || text.trim() === '') return;
-
-    // Check if coordinates are valid numbers
-    if (typeof x !== 'number' || typeof y !== 'number' || isNaN(x) || isNaN(y)) {
-      console.error('Invalid coordinates:', x, y);
-      return; // Skip rendering rather than crashing
-    }
-
-    // Split text where "FIRST" appears
-    const parts = text.split(/(FIRST)/g);
-    let currentX = x;
-    const originalFont = doc.getFont();
-    const originalFontSize = doc.getFontSize();
-
-    // Calculate total width for alignment
-    let totalWidth = 0;
-    parts.forEach(part => {
-      if (part) {
-        totalWidth += doc.getTextWidth(part);
-      }
-    });
-
-    // Adjust starting position based on alignment
-    if (alignment === 'center') {
-      currentX = x - (totalWidth / 2);
-    } else if (alignment === 'right') {
-      currentX = x - totalWidth;
-    }
-
-    // Draw each part
-    parts.forEach(part => {
-      if (!part) return; // Skip empty parts
-
-      if (part === 'FIRST') {
-        doc.setFont(undefined, 'italic');
-        doc.text(part, currentX, y);
-        currentX += doc.getTextWidth(part);
-        doc.setFont(undefined, originalFont.style); // Reset font style after FIRST
-      } else {
-        doc.setFont(undefined, 'normal'); // Ensure non-FIRST parts are normal
-        doc.text(part, currentX, y);
-        currentX += doc.getTextWidth(part);
-      }
-    });
-
-    // Reset font to original state
-    doc.setFont(undefined, originalFont.style);
-  }
-
-  function calculateMaxFontSize(texts, doc, maxWidth, defaultSize, isBold = false) {
-    if (!texts || texts.length === 0) return defaultSize;
-
-    let fontSize = defaultSize;
-    doc.setFont(undefined, isBold ? 'bold' : 'normal');
-
-    texts.forEach(text => {
-      if (!text) return;
-
-      doc.setFontSize(fontSize);
-      while (doc.getTextWidth(text) > maxWidth && fontSize > 10) {
-        fontSize -= 0.5;
-        doc.setFontSize(fontSize);
-      }
-    });
-
-    return fontSize;
-  }
-
-  // Define label styles
-  const labelStyles = {
-    // Style A
-    // Style A
-'styleA': {
-  name: 'Style A - Full Name',
-  render: (labels, doc, x, y, width, height, config) => {
-    const margin = 0.1;
-    const availableWidth = width - (2 * margin);
-
-    // Get current label to render (first in array)
-    const label = labels[0];
-
-    // Apply role abbreviation if available
-    const role = formatRole(label.roles);
-    const abbreviatedRole = applyRoleAbbreviation(role);
-
-    // Calculate max font sizes for all elements across all labels
-    const allFirstNames = labels.map(label => (label.firstname || '').toUpperCase());
-    const allLastNames = labels.map(label => (label.lastname || '').toUpperCase());
-    const allRoles = labels.map(label => {
-      const role = formatRole(label.roles);
-      return applyRoleAbbreviation(role);
-    });
-
-    // Set maximum font sizes to prevent overlap
-    const firstNameFontSize = Math.min(calculateMaxFontSize(allFirstNames, doc, availableWidth * 0.9, 36, true), 30);
-    const lastNameFontSize = Math.min(calculateMaxFontSize(allLastNames, doc, availableWidth * 0.9, 24), 20);
-    const roleFontSize = Math.min(calculateMaxFontSize(allRoles, doc, availableWidth * 0.9, 18), 16);
-
-    // Proportional spacing structure
-    const totalHeight = height;
-    const topSection = totalHeight * 0.4;     // Top 40% for name
-    const middleSection = totalHeight * 0.15; // 15% for last name
-    const bottomSection = totalHeight * 0.15; // 15% for roles section
-    const bottomTextSection = totalHeight * 0.2; // 20% for bottom text
-    const padding = totalHeight * 0.05;      // 5% padding between sections
-
-    // Calculate available space in top section
-    const topAreaHeight = topSection + middleSection;
-
-    // Calculate equal spacing between elements
-    const equalSpacing = topAreaHeight / 4; // Divide by 4 to get 2 spaces + 2 text areas
-
-    // Position elements with equal spacing
-    const topTextY = y + padding + equalSpacing * 0.5;
-    const firstNameY = y + padding + equalSpacing * 2;
-    const lastNameY = y + padding + equalSpacing * 3.5;
-
-const roleY = lastNameY + (lastNameFontSize / 72) * 0.5;
-
-    // Keep the bottom text in its original position
-    const bottomY = y + height - (padding * 1.8);
-
-    // Top text
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
-    applyFirstItalics(config.topText, doc, x + width / 2, topTextY, 'center');
-
-    // First name
-    doc.setFontSize(firstNameFontSize);
-    doc.setFont(undefined, 'bold');
-    doc.text((label.firstname || '').toUpperCase(), x + width / 2, firstNameY, { align: 'center' });
-
-    // Last name
-    doc.setFontSize(lastNameFontSize);
-    doc.setFont(undefined, 'normal');
-    doc.text((label.lastname || '').toUpperCase(), x + width / 2, lastNameY, { align: 'center' });
-
-    // Role - BLACK BAR
-    doc.setFillColor(0, 0, 0);
-    doc.rect(x, roleY, width, bottomSection, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(roleFontSize);
-    doc.setFont(undefined, 'normal');
-
-    // Calculate center of black bar for vertical centering
-    const roleCenterY = roleY + (bottomSection / 2);
-
-    // Add font offset for proper baseline positioning
-    const fontOffset = roleFontSize / 72 * 0.35;
-    const roleTextY = roleCenterY + fontOffset;
-
-    applyFirstItalics(abbreviatedRole, doc, x + width / 2, roleTextY, 'center');
-    doc.setTextColor(0, 0, 0);
-
-    // Bottom text
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
-    applyFirstItalics(config.bottomLeftText, doc, x + 0.1, bottomY, 'left');
-    applyFirstItalics(config.bottomRightText, doc, x + width - 0.1, bottomY, 'right');
-  }
-},
-
-    // Style B
-    'styleB': {
-      name: 'Style B - First Name with Initial',
-      render: (labels, doc, x, y, width, height, config) => {
-        const margin = 0.1;
-        const availableWidth = width - (2 * margin);
-
-        // Get current label (first in array)
-        const label = labels[0];
-
-        // Apply role abbreviation if available
-        const role = formatRole(label.roles);
-        const abbreviatedRole = applyRoleAbbreviation(role);
-
-        // Calculate max font sizes across all labels
-        const allNames = labels.map(label =>
-          formatNameWithInitial(
-            (label.firstname || '').toUpperCase(),
-            (label.lastname || '').toUpperCase()
-          )
-        );
-        const allRoles = labels.map(label => {
-          const role = formatRole(label.roles);
-          return applyRoleAbbreviation(role);
-        });
-
-        const nameFontSize = calculateMaxFontSize(allNames, doc, availableWidth, 36, true);
-        const roleFontSize = calculateMaxFontSize(allRoles, doc, availableWidth, 24);
-
-        // Name
-        const displayName = formatNameWithInitial(
-          (label.firstname || '').toUpperCase(),
-          (label.lastname || '').toUpperCase()
-        );
-
-        // Calculate heights
-        const nameHeight = nameFontSize / 72;
-        const roleHeight = roleFontSize / 72;
-
-        // Use proportional spacing
-        const topPadding = height * 0.1;    // 10% padding at top
-        const bottomPadding = height * 0.1; // 10% padding at bottom
-        const contentHeight = height - topPadding - bottomPadding;
-        const nameSectionHeight = contentHeight * 0.55; // 55% for name
-        const roleSectionHeight = contentHeight * 0.35; // 35% for role
-        const spacing = contentHeight * 0.1;           // 10% spacing between
-
-        // Top text
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'normal');
-        applyFirstItalics(config.topText, doc, x + width / 2, y + topPadding * 0.5, 'center');
-
-        // Render name
-        doc.setFontSize(nameFontSize);
-        doc.setFont(undefined, 'bold');
-        doc.text(displayName, x + width / 2, y + topPadding + nameSectionHeight * 0.7, { align: 'center' });
-
-        // Render role
-        doc.setFontSize(roleFontSize);
-        doc.setFont(undefined, 'normal');
-        applyFirstItalics(abbreviatedRole, doc, x + width / 2,
-                         y + topPadding + nameSectionHeight + spacing + roleSectionHeight * 0.5,
-                         'center');
-
-        // Bottom text
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        applyFirstItalics(config.bottomLeftText, doc, x + 0.1, y + height - bottomPadding * 0.5, 'left');
-        applyFirstItalics(config.bottomRightText, doc, x + width - 0.1, y + height - bottomPadding * 0.5, 'right');
-      }
-    }
-  };
-
-  // Event listeners to show/hide custom text inputs
-  ['Left', 'Right'].forEach(side => {
-    const select = document.getElementById(`bottom${side}Type`);
-    const input = document.getElementById(`bottom${side}Text`);
-
-    if (select && input) {
-      input.style.display = 'none';
-      select.addEventListener('change', () => {
-        input.style.display = select.value === 'custom' ? 'block' : 'none';
-      });
-    }
+function varsFor(person) {
+  return badgeVariables({ ...person, role: roleText(person) }, {
+    event: $('topText').value,
+    bottomLeft: corner('Left', person),
+    bottomRight: corner('Right', person),
   });
+}
 
-  // Populate select elements
-  if (labelTypeSelect && labelStyleSelect) {
-    labelTypeSelect.innerHTML = Object.entries(labelTypes)
-      .map(([value, type]) => `<option value="${value}">${type.name}</option>`)
-      .join('');
+function currentPeople() {
+  return people.length ? people : SAMPLE_PEOPLE;
+}
 
-    labelStyleSelect.innerHTML = Object.entries(labelStyles)
-      .map(([value, style]) => `<option value="${value}">${style.name}</option>`)
-      .join('');
+function currentTemplate() {
+  const id = $('labelStyle').value;
+  return allTemplates().find((t) => t.id === id) ?? allTemplates()[0];
+}
+
+function currentLabel() {
+  return LABEL_TYPES[$('labelType').value] ?? LABEL_TYPES.avery5163;
+}
+
+// ---------- Preview ----------
+
+const editor = createEditor({
+  canvas: $('badgeCanvas'),
+  getTemplate: currentTemplate,
+  getLabel: currentLabel,
+  getVars: () => varsFor(currentPeople()[previewIndex % currentPeople().length]),
+  getAllVars: () => currentPeople().map(varsFor),
+  onTemplatesChanged: (selectId) => fillTemplateSelect(selectId),
+});
+
+function renderPreview() {
+  const list = currentPeople();
+  previewIndex = (previewIndex + list.length) % list.length;
+  const p = list[previewIndex];
+  $('previewWho').textContent = people.length
+    ? `${p.firstName} ${p.lastName} (${previewIndex + 1} of ${list.length})`
+    : `Sample volunteer ${previewIndex + 1} of ${list.length}`;
+  editor.render();
+}
+
+function fillTemplateSelect(selectId) {
+  const select = $('labelStyle');
+  const keep = selectId ?? select.value;
+  select.replaceChildren();
+  const groups = [['Built-in', allTemplates().filter((t) => t.builtIn)], ['Saved in this browser', allTemplates().filter((t) => !t.builtIn)]];
+  for (const [label, list] of groups) {
+    if (!list.length) continue;
+    const group = document.createElement('optgroup');
+    group.label = label;
+    for (const t of list) group.append(new Option(t.name, t.id));
+    select.append(group);
   }
+  if ([...select.options].some((o) => o.value === keep)) select.value = keep;
+  renderPreview();
+}
 
-  // Initially hide the generate button
-  if (generateButton) {
-    generateButton.style.display = 'none';
-  }
+// ---------- PDF ----------
 
-  if (form) {
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
+function pdfSurface(doc, offsetX, offsetY) {
+  const style = (bold, italic) => (bold && italic ? 'bolditalic' : bold ? 'bold' : italic ? 'italic' : 'normal');
+  return {
+    measure(text, size, bold, italic) {
+      doc.setFont('helvetica', style(bold, italic));
+      doc.setFontSize(size);
+      return doc.getTextWidth(text);
+    },
+    text(text, x, baseline, size, bold, italic, color) {
+      doc.setFont('helvetica', style(bold, italic));
+      doc.setFontSize(size);
+      doc.setTextColor(color);
+      doc.text(text, offsetX + x, offsetY + baseline);
+    },
+    rect(x, y, w, h, color) {
+      doc.setFillColor(color);
+      doc.rect(offsetX + x, offsetY + y, w, h, 'F');
+    },
+  };
+}
 
-      const csvFile = document.getElementById('fileInput').files[0];
-      const labelType = document.getElementById('labelType').value;
-      const labelStyle = document.getElementById('labelStyle').value;
-      const topText = document.getElementById('topText').value;
-      const bottomLeftType = document.getElementById('bottomLeftType').value;
-      const bottomLeftCustom = document.getElementById('bottomLeftText').value;
-      const bottomRightType = document.getElementById('bottomRightType').value;
-      const bottomRightCustom = document.getElementById('bottomRightText').value;
+function createPDF() {
+  const type = currentLabel();
+  const template = currentTemplate();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF(type.pageOrientation, 'in', [type.pageWidth, type.pageHeight]);
+  const varsList = people.map(varsFor);
+  const sizes = sharedSizes(template, varsList, pdfSurface(doc, 0, 0).measure, type.labelWidth);
 
-      if (csvFile) {
-        // Store the current abbreviations
-        const currentAbbreviations = {...roleAbbreviations};
+  varsList.forEach((vars, i) => {
+    const onPage = i % type.labelsPerPage;
+    if (i > 0 && onPage === 0) doc.addPage();
+    const row = Math.floor(onPage / type.labelsPerRow);
+    const col = onPage % type.labelsPerRow;
+    const x = type.startX + col * (type.labelWidth + type.columnGap);
+    const y = type.startY + row * type.labelHeight;
+    drawBadge(pdfSurface(doc, x, y), template, vars, { labelW: type.labelWidth, labelH: type.labelHeight, sizes });
+  });
+  doc.save('labels.pdf');
+}
 
-        // Show loading indicator
-        if (labelContainer) {
-          labelContainer.innerHTML = '<div class="loading">Processing file, please wait...</div>';
-        }
+// ---------- Report loading ----------
 
-        loadLabels(csvFile).then((labels) => {
-          createPDF(
-            labels,
-            labelType,
-            labelStyle,
-            topText,
-            bottomLeftType,
-            bottomLeftCustom,
-            bottomRightType,
-            bottomRightCustom
-          );
+// Fields read from the Name Badges or Assigned Volunteers report (see lib/vms/fields.js).
+const BADGE_NEEDS = {
+  preferredFirstName: { required: true },
+  lastName: { required: true },
+  rolesAssigned: { required: true },
+  personalPronouns: {},
+  languagesSpoken: {},
+};
 
-          // Restore the abbreviations after PDF generation
-          roleAbbreviations = currentAbbreviations;
-
-          // Show success message
-          if (labelContainer) {
-            const loadingMessage = labelContainer.querySelector('.loading');
-            if (loadingMessage) loadingMessage.remove();
-
-            // Add success message at the beginning
-            const successMessage = document.createElement('div');
-            successMessage.className = 'success';
-            successMessage.textContent = 'PDF generated successfully!';
-
-            // Create a temporary div to hold the success message
-            const tempDiv = document.createElement('div');
-            tempDiv.appendChild(successMessage);
-
-            // Insert the success message at the beginning
-            labelContainer.innerHTML = tempDiv.innerHTML + labelContainer.innerHTML;
-
-            // Re-create the abbreviation interface
-            displayRoleAbbreviationInterface(parsedLabels);
-          }
-        }).catch(showLoadError);
-      } else {
-        showError('Please select a CSV file.');
-      }
+/** One person per badge. Assigned Volunteers has a row per shift, so roles are merged by name. */
+async function loadPeople(file) {
+  const { records } = await VMS.loadReport(file, BADGE_NEEDS, { accepts: VMS.acceptsFor('badge') });
+  const byPerson = new Map();
+  for (const rec of records) {
+    const key = `${rec.preferredFirstName}|${rec.lastName}`.toLowerCase();
+    const roles = rec.rolesAssigned.split(',').map((r) => r.trim()).filter(Boolean);
+    const person = byPerson.get(key);
+    if (person) {
+      for (const r of roles) if (!person.roles.includes(r)) person.roles.push(r);
+      continue;
+    }
+    byPerson.set(key, {
+      firstName: rec.preferredFirstName,
+      lastName: rec.lastName,
+      roles,
+      pronouns: rec.personalPronouns,
+      languages: rec.languagesSpoken,
     });
   }
+  return [...byPerson.values()];
+}
 
-  // Function to handle uploaded files
-  function handleFiles(files) {
-    if (files.target) {
-      files = files.target.files;
-    }
+function handleFiles(files) {
+  if (files.target) files = files.target.files;
+  const file = files?.[0];
+  if (!file || !validateCSVFile(file)) return;
+  clearError();
+  loadPeople(file).then((loaded) => {
+    people = loaded;
+    previewIndex = 0;
+    roleAbbreviations = {};
+    setDropzoneLoaded($('dropzone'), { fileName: file.name, detail: `${people.length} badges` });
+    renderAbbreviations();
+    $('nameTagForm').classList.add('has-data');
+    renderPreview();
+  }).catch((error) => {
+    if (VMS.isCancelled(error)) return;
+    showError('Error reading file. Details: ' + error.message);
+  });
+}
 
-    if (files.length === 0) return;
+// ---------- Role abbreviations ----------
 
-    const file = files[0];
+const COMMON_ABBREVIATIONS = {
+  MANAGER: 'MGR.',
+  ADVISOR: 'ADVSR.',
+  ATTENDANT: '',
+  SUPERVISOR: 'SUP.',
+  ASSISTANT: 'ASST.',
+  " - DEAN'S LIST AWARD": '',
+  ' - FIRST IMPACT AWARD': '',
+};
 
-    if (!validateCSVFile(file)) {
-      if (labelContainer) {
-        labelContainer.innerHTML = '';
-      }
-      // Hide the generate button if file validation fails
-      if (generateButton) {
-        generateButton.style.display = 'none';
-      }
-      return;
-    }
+function el(tag, props = {}, ...children) {
+  const node = Object.assign(document.createElement(tag), props);
+  node.append(...children);
+  return node;
+}
 
-    // Update the file input
-    fileInput.files = files instanceof FileList ? files : new DataTransfer().files;
-    clearError();
-
-    // Process the file to get roles and display the abbreviation interface
-    loadLabels(file).then((labels) => {
-      parsedLabels = labels;
-
-      // Clear any existing abbreviations on new file upload
-      roleAbbreviations = {};
-
-      // Show file uploaded message
-      if (dropzone) {
-        setDropzoneLoaded(dropzone, { fileName: file.name, detail: `${labels.length} badges` });
-      }
-
-      // Display the role abbreviation interface
-      displayRoleAbbreviationInterface(parsedLabels);
-
-      // Show the generate button
-      if (generateButton) {
-        generateButton.style.display = 'block';
-      }
-    }).catch(showLoadError);
+function renderAbbreviations() {
+  const container = $('labelContainer');
+  const roles = [...new Set(people.map((p) => formatRole(p.roles)).filter(Boolean))];
+  if (!roles.length) {
+    container.replaceChildren();
+    return;
   }
+  const body = el('tbody');
+  const sort = el('select', { className: 'form-select', id: 'roleSortOrder' },
+    new Option('Length (longest first)', 'length'), new Option('Alphabetical', 'alphabetical'));
 
-  // Create and display the role abbreviation interface
-  function displayRoleAbbreviationInterface(labels) {
-    if (!labelContainer) return;
-
-    // Extract unique roles
-    const uniqueRoles = new Set();
-    labels.forEach(label => {
-      const formattedRole = formatRole(label.roles);
-      if (formattedRole) uniqueRoles.add(formattedRole);
-    });
-
-    // Convert to array for sorting
-    let rolesArray = Array.from(uniqueRoles);
-
-    // Check if there's a success message to preserve
-    let successMessage = '';
-    const existingSuccess = labelContainer.querySelector('.success');
-    if (existingSuccess) {
-      successMessage = existingSuccess.outerHTML;
-    }
-
-    // Create and append the interface
-    labelContainer.innerHTML = successMessage + `
-      <div class="role-abbreviation-container">
-        <h3>Role Abbreviations</h3>
-        <p>Long role names may appear in a small font on badges. Use this table to create abbreviations for roles.</p>
-
-        <div class="abbreviation-controls">
-          <button id="insertCommonAbbreviations" class="btn btn-secondary">Insert Common Abbreviations</button>
-          <div class="sort-control">
-            <label for="roleSortOrder">Sort by: </label>
-            <select id="roleSortOrder" class="form-select">
-              <option value="length">Length (longest first)</option>
-              <option value="alphabetical">Alphabetical</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="table-responsive">
-          <table class="table role-abbreviation-table">
-            <thead>
-              <tr>
-                <th>Original Role</th>
-                <th>Length</th>
-                <th>Abbreviation</th>
-              </tr>
-            </thead>
-            <tbody id="roleAbbreviationTableBody">
-              <!-- Roles will be inserted here -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-
-    // Sort and populate the table
-    updateRoleAbbreviationTable(rolesArray, 'length');
-
-    // Add event listeners
-    document.getElementById('insertCommonAbbreviations').addEventListener('click', applyCommonAbbreviations);
-    document.getElementById('roleSortOrder').addEventListener('change', function() {
-      updateRoleAbbreviationTable(rolesArray, this.value);
-    });
-  }
-
-  // Update the role abbreviation table with sorted roles
-  function updateRoleAbbreviationTable(roles, sortOrder) {
-    const tableBody = document.getElementById('roleAbbreviationTableBody');
-    if (!tableBody) return;
-
-    // Sort the roles based on selected order
-    let sortedRoles;
-
-    if (sortOrder === 'length') {
-      // Sort by length (longest first)
-      sortedRoles = [...roles].sort((a, b) => b.length - a.length);
-    } else {
-      // Sort alphabetically
-      sortedRoles = [...roles].sort();
-    }
-
-    // Clear the table
-    tableBody.innerHTML = '';
-
-    // Add rows for each role
-    sortedRoles.forEach((role, index) => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${role}</td>
-        <td>${role.length}</td>
-        <td>
-          <input type="text" class="form-control role-abbreviation-input"
-                 data-original-role="${role}"
-                 value="${roleAbbreviations[role] || ''}"
-                 placeholder="Enter abbreviation">
-        </td>
-      `;
-      tableBody.appendChild(row);
-    });
-
-    // Add event listeners to the abbreviation inputs
-    document.querySelectorAll('.role-abbreviation-input').forEach(input => {
-      input.addEventListener('input', function() {
-        const originalRole = this.getAttribute('data-original-role');
-        roleAbbreviations[originalRole] = this.value.toUpperCase();
+  const fill = () => {
+    const sorted = sort.value === 'length' ? [...roles].sort((a, b) => b.length - a.length) : [...roles].sort();
+    body.replaceChildren(...sorted.map((role) => {
+      const input = el('input', { type: 'text', className: 'form-control role-abbreviation-input', placeholder: 'Enter abbreviation', value: roleAbbreviations[role] ?? '' });
+      input.dataset.originalRole = role;
+      input.setAttribute('aria-label', `Abbreviation for ${role}`);
+      input.addEventListener('input', () => {
+        roleAbbreviations[role] = input.value.toUpperCase();
+        renderPreview();
       });
-    });
-  }
-
-  // Apply common abbreviations
-  function applyCommonAbbreviations() {
-    const replacements = {
-      'MANAGER': 'MGR.',
-      'ADVISOR': 'ADVSR.',
-      'ATTENDANT': '', // Remove entirely
-      'SUPERVISOR': 'SUP.',
-      'ASSISTANT': 'ASST.',
-      ' - DEAN\'S LIST AWARD': '', // Remove entirely
-      ' - FIRST IMPACT AWARD': '' // Remove entirely
-    };
-
-    // Get all inputs
-    const inputs = document.querySelectorAll('.role-abbreviation-input');
-
-    inputs.forEach(input => {
-      const originalRole = input.getAttribute('data-original-role');
-      let abbreviated = originalRole;
-
-      // Apply the replacements
-      Object.entries(replacements).forEach(([word, replacement]) => {
-        // Use case-insensitive regex to find the word
-        const regex = new RegExp(`\\b${word}\\b`, 'gi');
-        abbreviated = abbreviated.replace(regex, replacement);
-      });
-
-      // Only update if there was a change
-      if (abbreviated !== originalRole) {
-        input.value = abbreviated;
-        roleAbbreviations[originalRole] = abbreviated;
-      }
-    });
-  }
-
-  // Fields read from the Name Badges or Assigned Volunteers report (see lib/vms/fields.js).
-  const BADGE_NEEDS = {
-    preferredFirstName: { required: true },
-    lastName: { required: true },
-    rolesAssigned: { required: true },
-    minor: {},
-    personalPronouns: {},
-    languagesSpoken: {},
+      return el('tr', {}, el('td', { textContent: role }), el('td', { textContent: String(role.length) }), el('td', {}, input));
+    }));
   };
 
-  // One label per report row, with the property names the label styles use.
-  async function loadLabels(file) {
-    const { records } = await VMS.loadReport(file, BADGE_NEEDS, { accepts: VMS.acceptsFor('badge') });
-    // Assigned Volunteers has a row per shift, so one person can appear several times.
-    // Make one label per person, combining their roles in first-seen order.
-    const byPerson = new Map();
-    for (const rec of records) {
-      const key = `${rec.preferredFirstName}|${rec.lastName}`.toLowerCase();
-      const roles = rec.rolesAssigned.split(',').map((r) => r.trim()).filter(Boolean);
-      const label = byPerson.get(key);
-      if (label) {
-        for (const r of roles) if (!label.roleList.includes(r)) label.roleList.push(r);
-        continue;
+  const insert = el('button', { type: 'button', className: 'btn btn-secondary', id: 'insertCommonAbbreviations', textContent: 'Insert Common Abbreviations' });
+  insert.addEventListener('click', () => {
+    for (const role of roles) {
+      let short = role;
+      for (const [word, replacement] of Object.entries(COMMON_ABBREVIATIONS)) {
+        short = short.replace(new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'), replacement);
       }
-      byPerson.set(key, {
-        minor: rec.minor,
-        firstname: rec.preferredFirstName,
-        lastname: rec.lastName,
-        personalpronouns: rec.personalPronouns,
-        languagesspoken: rec.languagesSpoken,
-        roleList: roles,
-      });
+      if (short !== role) roleAbbreviations[role] = short.trim();
     }
-    return [...byPerson.values()].map(({ roleList, ...label }) => ({ ...label, roles: roleList.join(', ') }));
+    fill();
+    renderPreview();
+  });
+  sort.addEventListener('change', fill);
+
+  container.replaceChildren(el('div', { className: 'role-abbreviation-container' },
+    el('h3', { textContent: 'Role Abbreviations' }),
+    el('p', { textContent: 'Long role names print in a small font. Add shorter versions here; the preview updates as you type.' }),
+    el('div', { className: 'abbreviation-controls' }, insert,
+      el('div', { className: 'sort-control' }, el('label', { htmlFor: 'roleSortOrder', textContent: 'Sort by: ' }), sort)),
+    el('div', { className: 'table-responsive' }, el('table', { className: 'table role-abbreviation-table' },
+      el('thead', {}, el('tr', {}, el('th', { textContent: 'Original Role' }), el('th', { textContent: 'Length' }), el('th', { textContent: 'Abbreviation' }))),
+      body)),
+  ));
+  fill();
+}
+
+// ---------- Wiring ----------
+
+for (const [value, type] of Object.entries(LABEL_TYPES)) $('labelType').append(new Option(type.name, value));
+fillTemplateSelect('styleA');
+
+for (const side of ['Left', 'Right']) {
+  const select = $(`bottom${side}Type`);
+  const input = $(`bottom${side}Text`);
+  select.addEventListener('change', () => {
+    input.hidden = select.value !== 'custom';
+    renderPreview();
+  });
+  input.addEventListener('input', renderPreview);
+}
+for (const id of ['topText', 'labelType', 'labelStyle']) {
+  $(id).addEventListener(id === 'topText' ? 'input' : 'change', () => {
+    if (id === 'labelStyle') editor.close();
+    renderPreview();
+  });
+}
+$('prevPerson').addEventListener('click', () => { previewIndex--; renderPreview(); });
+$('nextPerson').addEventListener('click', () => { previewIndex++; renderPreview(); });
+$('customizeTemplate').addEventListener('click', () => editor.open());
+
+$('nameTagForm').addEventListener('submit', (event) => {
+  event.preventDefault();
+  if (!people.length) {
+    showError('Choose a Name Badges or Assigned Volunteers report first.');
+    return;
   }
-
-  function showLoadError(error) {
-    if (VMS.isCancelled(error)) return;
-    if (labelContainer) labelContainer.innerHTML = '';
-    showError('Error reading file. Details: ' + error.message);
-  }
-
-  function createPDF(labels, labelType, labelStyle, topText, bottomLeftType, bottomLeftCustom, bottomRightType, bottomRightCustom) {
-    const { jsPDF } = window.jspdf;
-    const typeConfig = labelTypes[labelType];
-    const styleConfig = labelStyles[labelStyle];
-
-    const doc = new jsPDF(
-      typeConfig.pageOrientation,
-      'in',
-      [typeConfig.pageWidth, typeConfig.pageHeight]
-    );
-
-    function getBottomText(type, customText, label) {
-      if (type === 'custom') {
-        return customText;
-      } else if (type === 'pronouns') {
-        return label.personalpronouns === 'Not Specified' ? '' : label.personalpronouns;
-      } else if (type === 'languages') {
-        return label.languagesspoken === 'Not Specified' ? '' : label.languagesspoken;
-      }
-      return '';
-    }
-
-    // Calculate how many complete rows we'll have
-    const totalRows = Math.ceil(labels.length / typeConfig.labelsPerRow);
-    let pageCount = 0;
-    let labelIndex = 0;
-
-    // Process each label
-    while (labelIndex < labels.length) {
-      // Start a new page if needed
-      if (labelIndex > 0 && labelIndex % typeConfig.labelsPerPage === 0) {
-        doc.addPage();
-        pageCount++;
-      }
-
-      // Calculate current row and column
-      const positionOnPage = labelIndex % typeConfig.labelsPerPage;
-      const row = Math.floor(positionOnPage / typeConfig.labelsPerRow);
-      const col = positionOnPage % typeConfig.labelsPerRow;
-
-      // Calculate and force exact grid positioning based on row and column
-      const currentX = typeConfig.startX + col * (typeConfig.labelWidth + typeConfig.columnGap);
-      const currentY = typeConfig.startY + row * typeConfig.labelHeight;
-
-      styleConfig.render(
-        [labels[labelIndex], ...labels], // Current label first, but include all labels for font calculations
-        doc,
-        currentX,
-        currentY,
-        typeConfig.labelWidth,
-        typeConfig.labelHeight,
-        {
-          topText,
-          bottomLeftText: getBottomText(bottomLeftType, bottomLeftCustom, labels[labelIndex]),
-          bottomRightText: getBottomText(bottomRightType, bottomRightCustom, labels[labelIndex])
-        }
-      );
-
-      labelIndex++;
-    }
-
-    // Remove the last page if it's empty
-    if (doc.getNumberOfPages() > 1 && labelIndex % typeConfig.labelsPerPage === 0) {
-      doc.deletePage(doc.getNumberOfPages());
-    }
-
-    doc.save('labels.pdf');
-  }
+  createPDF();
 });
+
+setupDragAndDrop($('dropzone'), $('fileInput'), handleFiles);

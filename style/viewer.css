@@ -32,10 +32,14 @@ table.viewer-table th[aria-sort="ascending"] button::after { content: '\25B2'; o
 table.viewer-table th[aria-sort="descending"] button::after { content: '\25BC'; opacity: 0.9; }
 table.viewer-table tbody tr:hover td { background: var(--table-hover-bg, #f5f5f5); }
 
+@page { size: landscape; margin: 0.4in; }
 @media print {
   #top-bar, .theme-toggle, .footer, .vms-drop, .viewer-intro, .viewer-steps, .viewer-controls, .viewer-note, #error { display: none !important; }
   .viewer-table-wrap { overflow: visible; max-height: none; border: 0; }
   table.viewer-table th { position: static; }
   table.viewer-table th button::after { content: none; }
-  table.viewer-table { font-size: 9pt; }
+  table.viewer-table { font-size: 8pt; width: 100%; min-width: 0; table-layout: auto; }
+  table.viewer-table th, table.viewer-table td { white-space: normal; overflow-wrap: break-word; hyphens: auto; padding: 3px 4px; }
+  table.viewer-table tr { break-inside: avoid; }
+  table.viewer-table thead { display: table-header-group; } /* repeat headers on each page */
 }
