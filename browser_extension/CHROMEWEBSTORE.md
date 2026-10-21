@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — VC Tools Integration
 
-> Last Updated: 2026-10-21
+> Last Updated: 2026-10-21 (privacy disclosure corrected)
 > Not packaged with the extension. Copy fields from here into the Chrome Web Store Developer Dashboard.
 
 ## Store Listing
@@ -65,14 +65,21 @@ No `host_permissions`, `tabs`, `scripting`, or remote code.
 ## Privacy & Data Use
 
 ### Data Collection
-**Does the extension collect user data?** No.
-The extension handles website content (VMS report contents, which include volunteer names and contact details) only to move it between the user's own tabs on their own computer. Nothing is collected, stored beyond the hand-off, or transmitted off the device by the extension.
+**What user data does the extension handle?** Check **Personally identifiable information** and **Website content** only.
 
-| Data Type | Collected? | Transmitted Off-Device? | Purpose | Shared with Third Parties? |
-|-----------|-----------|------------------------|---------|---------------------------|
-| Personally identifiable info | No (handled locally only) | No | Moves the user's report to VC Tools in their browser | No |
-| Website content | No (handled locally only) | No | Same | No |
-| All other categories | No | No | | No |
+The Chrome Web Store requires disclosing data the extension handles even when it never leaves the device ("Extensions are required to disclose how they handle user data, even when data is processed or stored locally on a user's device", [User Data FAQ](https://developer.chrome.com/docs/webstore/user_data/)). VMS reports contain volunteer names, emails, phone numbers, and addresses, and the extension moves that report between the user's own tabs and onto their clipboard.
+
+| Data Type | Check it? | Transmitted Off-Device? | Why |
+|-----------|-----------|------------------------|-----|
+| Personally identifiable information | ✅ Yes | No | VMS report contents (volunteer names, emails, phones, addresses) passed from the VMS tab to VC Tools or the clipboard at the user's request |
+| Website content | ✅ Yes | No | The VMS report export itself |
+| Health information | No | | Not handled. Reports can include self-reported dietary or accommodation notes, but the extension only passes the report through and never reads or uses those fields. |
+| Financial and payment information | No | | |
+| Authentication information | No | | |
+| Personal communications | No | | |
+| Location | No | | Addresses are in the report, covered under PII |
+| Web history | No | | Runs only on its three pages; records nothing about browsing |
+| User activity | No | | Responds to clicks on its own buttons; logs nothing |
 
 ### Data Use Certification
 - [x] Data is NOT sold to third parties
