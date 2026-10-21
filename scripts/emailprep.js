@@ -342,6 +342,7 @@ const NEEDS = {
     tc: {
         preferredFirstName: { required: true },
         lastName: { required: true },
+        email: {},
         role: { required: true },
         assignmentStatus: {},
         courseName: { required: true },
@@ -351,6 +352,7 @@ const NEEDS = {
     cr: {
         preferredFirstName: { required: true },
         lastName: { required: true },
+        email: {},
         consentReleaseStatus: { required: true },
     },
 };
@@ -361,21 +363,30 @@ const NEEDS = {
 // ============================================================
 function formatTime(raw) {
     if (!raw || !raw.trim()) return '';
-    const parts = raw.trim().split(':');
-    if (parts.length < 2) return raw.trim();
-    let hours = parseInt(parts[0], 10);
-    const minutes = parts[1].padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    if (hours === 0) hours = 12;
-    else if (hours > 12) hours -= 12;
-    return `${hours}:${minutes} ${ampm}`;
+    const total = clockMinutes(raw);
+    if (Number.isNaN(total)) return raw.trim();
+    const hours = Math.floor(total / 60);
+    const minutes = String(total % 60).padStart(2, '0');
+    return `${hours % 12 || 12}:${minutes} ${hours >= 12 ? 'PM' : 'AM'}`;
 }
 
-// Compare two "HH:MM:SS" time strings — returns -1, 0, or 1
+// Minutes after midnight for "8:00", "08:00:00", "8:00 AM", or "1:30 PM". NaN if unreadable.
+function clockMinutes(raw) {
+    const m = String(raw || '').trim().match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp][Mm])?/);
+    if (!m) return NaN;
+    let hours = Number(m[1]) % 24;
+    const period = m[3] && m[3].toUpperCase();
+    if (period === 'PM' && hours < 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    return hours * 60 + Number(m[2]);
+}
+
+// Sort comparator for times; blanks and unreadable times sort last.
 function compareTimeStrings(a, b) {
-    if (!a) return 1;
-    if (!b) return -1;
-    return a.localeCompare(b);
+    const x = clockMinutes(a), y = clockMinutes(b);
+    if (Number.isNaN(x)) return Number.isNaN(y) ? 0 : 1;
+    if (Number.isNaN(y)) return -1;
+    return x - y;
 }
 
 // ============================================================
@@ -413,9 +424,10 @@ function parseAssignedVolunteers({ records }) {
         const lastName = toProperName(rec.lastName);
         if (!firstName && !lastName) return;
         const fullName = `${firstName} ${lastName}`.trim();
+        const key = personKey(rec.email, fullName);
 
-        if (!people[fullName]) {
-            people[fullName] = {
+        if (!people[key]) {
+            people[key] = {
                 firstName,
                 lastName,
                 email: rec.email,
@@ -426,10 +438,10 @@ function parseAssignedVolunteers({ records }) {
         }
 
         // Update YPP with whatever is present (should be consistent per person)
-        if (rec.youthProtectionPolicy) people[fullName].yppStatus = rec.youthProtectionPolicy;
-        if (rec.caYppStatus) people[fullName].caYppStatus = rec.caYppStatus;
+        if (rec.youthProtectionPolicy) people[key].yppStatus = rec.youthProtectionPolicy;
+        if (rec.caYppStatus) people[key].caYppStatus = rec.caYppStatus;
 
-        people[fullName].shifts.push({
+        people[key].shifts.push({
             role: rec.rolesAssigned,
             day: rec.day,
             startTime: rec.startTime,
@@ -458,14 +470,16 @@ function parseTrainingCerts({ records }) {
         const startedDate = rec.startedDate;
         const completionDate = rec.completionDate;
 
-        if (!data[fullName]) {
-            data[fullName] = { courses: {}, assignedRoles: [] };
+        const key = personKey(rec.email, fullName);
+        if (!data[key]) {
+            data[key] = { courses: {}, assignedRoles: [] };
+            data[personKey('', fullName)] = data[personKey('', fullName)] || data[key];
         }
-        if (role && assignmentStatus.toLowerCase() === 'assigned' && !data[fullName].assignedRoles.includes(role)) {
-            data[fullName].assignedRoles.push(role);
+        if (role && assignmentStatus.toLowerCase() === 'assigned' && !data[key].assignedRoles.includes(role)) {
+            data[key].assignedRoles.push(role);
         }
         if (courseName) {
-            data[fullName].courses[courseName] = { startedDate, completionDate };
+            data[key].courses[courseName] = { startedDate, completionDate };
         }
     });
 
@@ -484,7 +498,9 @@ function parseConsentRelease({ records }) {
         const lastName = toProperName(rec.lastName);
         if (!firstName && !lastName) return;
         const fullName = `${firstName} ${lastName}`.trim();
-        data[fullName] = { consentStatus: rec.consentReleaseStatus };
+        const entry = { consentStatus: rec.consentReleaseStatus };
+        data[personKey(rec.email, fullName)] = entry;
+        data[personKey('', fullName)] = data[personKey('', fullName)] || entry;
     });
 
     return data;
@@ -621,6 +637,21 @@ function buildDayMap(avPeople) {
     return dayMap;
 }
 
+function splitRoles(cell) {
+    return String(cell || '').split(',').map(r => r.trim()).filter(Boolean);
+}
+
+// Key that links one person across the three reports: email when present, else name.
+function personKey(email, fullName) {
+    const e = String(email || '').trim().toLowerCase();
+    return e ? `email:${e}` : `name:${fullName.toLowerCase()}`;
+}
+
+// Look a person up by email first, then by name (older files or a missing Email column).
+function findPerson(map, email, fullName) {
+    return map[personKey(email, fullName)] || map[personKey('', fullName)] || null;
+}
+
 // ============================================================
 // MAIN GENERATE FUNCTION
 // ============================================================
@@ -645,7 +676,8 @@ function generate() {
     const dayMap = buildDayMap(avPeople);
 
     // Build output rows
-    Object.entries(avPeople).forEach(([fullName, person]) => {
+    Object.values(avPeople).forEach(person => {
+        const fullName = `${person.firstName} ${person.lastName}`.trim();
         // Group shifts by day
         const byDay = {};  // dayIndex -> { roles: Set, startTimes: [], endTimes: [] }
         person.shifts.forEach(shift => {
@@ -653,7 +685,8 @@ function generate() {
             const dayIdx = dayMap[dayLabel];
             if (dayIdx === undefined) return;
             if (!byDay[dayIdx]) byDay[dayIdx] = { roles: new Set(), startTimes: [], endTimes: [], dayLabel };
-            if (shift.role) byDay[dayIdx].roles.add(shift.role);
+            // A shift can list several roles in one cell: "Field Reset, Queuer".
+            splitRoles(shift.role).forEach(r => byDay[dayIdx].roles.add(r));
             if (shift.startTime) byDay[dayIdx].startTimes.push(shift.startTime);
             if (shift.endTime) byDay[dayIdx].endTimes.push(shift.endTime);
         });
@@ -670,7 +703,7 @@ function generate() {
                 const info = byDay[d];
                 const rolesStr = Array.from(info.roles).join(', ');
                 const earliestStart = info.startTimes.sort(compareTimeStrings)[0] || '';
-                const latestEnd = info.endTimes.sort((a, b) => compareTimeStrings(b, a))[0] || '';
+                const latestEnd = info.endTimes.sort(compareTimeStrings).at(-1) || '';
                 const scheduleStr = (earliestStart || latestEnd)
                     ? `${formatTime(earliestStart)} - ${formatTime(latestEnd)}`
                     : '';
@@ -687,11 +720,11 @@ function generate() {
         const caYppStatus = formatCAYPP(person.caYppStatus);
 
         // Consent
-        const crPerson = crPeople[fullName];
+        const crPerson = findPerson(crPeople, person.email, fullName);
         const consentStatus = crPerson ? formatConsent(crPerson.consentStatus) : 'Unknown status';
 
         // Training — evaluate per role, then deduplicate/simplify
-        const tcPerson = tcPeople[fullName] || null;
+        const tcPerson = findPerson(tcPeople, person.email, fullName);
         const trainingByRole = [];
         const seenTrainingRoles = new Set();
         allRoles.forEach(role => {

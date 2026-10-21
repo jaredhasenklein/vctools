@@ -59,5 +59,7 @@ Every file upload uses the shared drop zone in `scripts/commonscripts.js`:
 ## Tools and reports
 `lib/vms/tools.js` lists each tool page, its file inputs, and the reports each input accepts.
 - Pages get their `accepts` from it: `VMS.acceptsFor('badge')`, `VMS.acceptsFor('emailprep', 'tc')`.
-- The home page drop zone uses it to suggest tools. Add a new tool there, or it won't be suggested. `listed: false` keeps a tool off the home page.
+- The home page drop zone uses it to suggest tools. Add a new tool there, or it won't be suggested. `listed: false` keeps a tool out of suggestions.
+- `accepts: ['*']` takes any report (the Report Viewer). Such tools are suggested after the specific ones.
+- `beta: true` marks a less-tested tool. Also put `<span class="beta-tag">Beta</span>` in its home tile and page heading.
 - Examples shown on a page are HTML, not screenshots, so they follow the theme. Use invented names in examples.

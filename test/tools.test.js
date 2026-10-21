@@ -15,11 +15,18 @@ describe('tool registry', () => {
 });
 
 describe('toolsForReport', () => {
-  it('lists listed tools whose main input takes the report', () => {
-    expect(toolsForReport('Assigned Volunteers').map((m) => m.tool.page)).toEqual(['badge', 'parse']);
-    expect(toolsForReport('Training and Certifications').map((m) => m.tool.page)).toEqual(['certification']);
-    expect(toolsForReport('Judges')).toEqual([]);
-    expect(toolsForReport(undefined)).toEqual([]);
+  it('lists specific tools first, then the catch-all viewer', () => {
+    const pages = (name) => toolsForReport(name).map((m) => m.tool.page);
+    expect(pages('Assigned Volunteers')).toEqual(['badge', 'parse', 'emailprep', 'viewer']);
+    expect(pages('Training and Certifications')).toEqual(['certification', 'emailprep', 'viewer']);
+    expect(pages('Judges')).toEqual(['viewer']);
+    expect(pages(undefined)).toEqual(['viewer']);
+  });
+
+  it('hands Email Prep the right input for each report', () => {
+    const input = (name) => toolsForReport(name).find((m) => m.tool.page === 'emailprep').input.inputId;
+    expect(input('Assigned Volunteers')).toBe('avInput');
+    expect(input('Consent And Release Status')).toBe('crInput');
   });
 });
 
