@@ -1,6 +1,6 @@
 // Badge template editor: an interactive canvas preview plus a panel of block settings.
 // Used by scripts/badge.js. Drawing goes through drawBadge() so it matches the PDF.
-import { drawBadge, sharedSizes, normalizeBlock, unknownVariables, VARIABLES, BLOCK_DEFAULTS } from '../lib/badges/template.js';
+import { drawBadge, sharedSizes, normalizeBlock, unknownVariables, VARIABLES, BLOCK_PRESETS, blankTemplate } from '../lib/badges/template.js';
 import { saveTemplate, deleteTemplate, copyOf, toJSON, fromJSON, allTemplates } from '../lib/badges/store.js';
 
 const $ = (id) => document.getElementById(id);
@@ -67,6 +67,13 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
     const sizes = sharedSizes(t, getAllVars(), surface.measure, label.labelWidth);
     drawBadge(surface, t, getVars(), { labelW: label.labelWidth, labelH: label.labelHeight, sizes });
 
+    if (editing && !t.blocks.length) {
+      ctx.fillStyle = '#6c757d';
+      ctx.font = `16px ${FONT}`;
+      ctx.textAlign = 'center';
+      ctx.fillText('Blank badge: use "Add to badge" to start', cssWidth / 2, (label.labelHeight * ppi) / 2);
+      ctx.textAlign = 'start';
+    }
     if (editing) {
       t.blocks.forEach((b, i) => {
         const [x, y, w, h] = [b.x * cssWidth, b.y * label.labelHeight * ppi, b.w * cssWidth, b.h * label.labelHeight * ppi];
@@ -91,7 +98,9 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
     text: $('propText'), x: $('propX'), y: $('propY'), w: $('propW'), h: $('propH'),
     size: $('propSize'), minSize: $('propMin'), bold: $('propBold'), italic: $('propItalic'),
     upper: $('propUpper'), sameSize: $('propSame'), color: $('propColor'), fill: $('propFill'), hasFill: $('propHasFill'),
+    sizeRange: $('propSizeRange'),
   };
+  const TOGGLES = ['bold', 'italic', 'upper']; // Buttons with aria-pressed
 
   function block() {
     return editing?.blocks[selected];
@@ -100,11 +109,12 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
   function fillPanel() {
     const label = getLabel();
     $('templateName').value = editing.name;
+    $('emptyItems').hidden = editing.blocks.length > 0;
     $('blockList').replaceChildren(...editing.blocks.map((b, i) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = `badge-block${i === selected ? ' is-selected' : ''}`;
-      button.textContent = b.name || b.text || `Block ${i + 1}`;
+      button.textContent = b.name || b.text || `Item ${i + 1}`;
       button.setAttribute('aria-pressed', String(i === selected));
       button.addEventListener('click', () => select(i));
       const li = document.createElement('li');
@@ -113,23 +123,37 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
     }));
     const b = block();
     $('blockProps').hidden = !b;
-    $('removeBlock').disabled = !b;
     if (!b) return;
+    $('propTitle').textContent = b.name || 'Selected';
     fields.text.value = b.text;
     fields.x.value = round(b.x * label.labelWidth);
     fields.y.value = round(b.y * label.labelHeight);
     fields.w.value = round(b.w * label.labelWidth);
     fields.h.value = round(b.h * label.labelHeight);
     fields.size.value = b.size;
+    fields.sizeRange.value = b.size;
     fields.minSize.value = b.minSize;
-    for (const k of ['bold', 'italic', 'upper', 'sameSize']) fields[k].checked = b[k];
+    fields.sameSize.checked = b.sameSize;
+    for (const k of TOGGLES) {
+      fields[k].setAttribute('aria-pressed', String(b[k]));
+      fields[k].classList.toggle('active', b[k]);
+    }
     fields.color.value = b.color;
     fields.hasFill.checked = Boolean(b.fill);
     fields.fill.value = b.fill || '#000000';
     fields.fill.disabled = !b.fill;
-    for (const btn of document.querySelectorAll('[data-align]')) btn.classList.toggle('active', btn.dataset.align === b.align);
-    const unknown = unknownVariables(b.text);
-    $('propWarning').textContent = unknown.length ? `Unknown variable${unknown.length > 1 ? 's' : ''}: ${unknown.map((k) => `{${k}}`).join(', ')}. Use the buttons above.` : '';
+    for (const btn of document.querySelectorAll('[data-align]')) {
+      btn.classList.toggle('active', btn.dataset.align === b.align);
+      btn.setAttribute('aria-pressed', String(btn.dataset.align === b.align));
+    }
+    showWarning(b.text);
+  }
+
+  function showWarning(text) {
+    const unknown = unknownVariables(text);
+    $('propWarning').textContent = unknown.length
+      ? `${unknown.map((k) => `{${k}}`).join(', ')} isn't volunteer info this tool knows. Use "Insert volunteer info" to add a field.`
+      : '';
   }
 
   let saveTimer;
@@ -161,8 +185,7 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
     if (!block()) return;
     editing.blocks[selected].text = fields.text.value;
     changed({ panel: false });
-    const unknown = unknownVariables(fields.text.value);
-    $('propWarning').textContent = unknown.length ? `Unknown variable: ${unknown.map((k) => `{${k}}`).join(', ')}` : '';
+    showWarning(fields.text.value);
   });
   fields.text.addEventListener('change', fillPanel);
   const inches = { x: 'labelWidth', y: 'labelHeight', w: 'labelWidth', h: 'labelHeight' };
@@ -176,6 +199,12 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
     });
     fields[key].addEventListener('change', fillPanel);
   }
+  fields.sizeRange.addEventListener('input', () => {
+    fields.size.value = fields.sizeRange.value;
+    editing.blocks[selected].size = Number(fields.sizeRange.value);
+    changed({ panel: false });
+  });
+  fields.sizeRange.addEventListener('change', fillPanel);
   for (const key of ['size', 'minSize']) {
     fields[key].addEventListener('input', () => {
       const v = parseFloat(fields[key].value);
@@ -186,9 +215,10 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
     });
     fields[key].addEventListener('change', fillPanel);
   }
-  for (const key of ['bold', 'italic', 'upper', 'sameSize']) {
-    fields[key].addEventListener('change', () => update({ [key]: fields[key].checked }));
+  for (const key of TOGGLES) {
+    fields[key].addEventListener('click', () => update({ [key]: !block()[key] }));
   }
+  fields.sameSize.addEventListener('change', () => update({ sameSize: fields.sameSize.checked }));
   fields.color.addEventListener('input', () => update({ color: fields.color.value }));
   fields.hasFill.addEventListener('change', () => update({ fill: fields.hasFill.checked ? fields.fill.value : '' }));
   fields.fill.addEventListener('input', () => update({ fill: fields.fill.value }));
@@ -196,32 +226,41 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
     btn.addEventListener('click', () => update({ align: btn.dataset.align }));
   }
 
-  $('variableChips').replaceChildren(...VARIABLES.map((v) => {
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'badge-var';
-    chip.textContent = `{${v.key}}`;
-    chip.title = v.label;
-    chip.addEventListener('click', () => {
-      const input = fields.text;
-      const start = input.selectionStart ?? input.value.length;
-      const end = input.selectionEnd ?? input.value.length;
-      input.setRangeText(`{${v.key}}`, start, end, 'end');
-      input.dispatchEvent(new Event('input'));
-      input.focus();
+  // "Insert volunteer info" menu: friendly names that insert {variables} at the cursor.
+  const insert = $('insertField');
+  insert.replaceChildren(new Option('Insert volunteer info…', ''), ...VARIABLES.map((v) => new Option(v.label, v.key)));
+  insert.addEventListener('change', () => {
+    const key = insert.value;
+    insert.value = '';
+    if (!key || !block()) return;
+    const input = fields.text;
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    const before = input.value.slice(0, start);
+    const spacer = before && !/\s$/.test(before) ? ' ' : '';
+    input.setRangeText(`${spacer}{${key}}`, start, end, 'end');
+    input.dispatchEvent(new Event('input'));
+    input.focus();
+  });
+
+  // "Add to badge" buttons.
+  $('presetButtons').replaceChildren(...BLOCK_PRESETS.map((preset) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn btn-sm btn-outline-primary';
+    button.textContent = `+ ${preset.label}`;
+    button.addEventListener('click', () => {
+      editing.blocks.push(normalizeBlock(preset.block));
+      selected = editing.blocks.length - 1;
+      changed();
+      if (preset.key === 'custom') fields.text.select();
     });
-    return chip;
+    return button;
   }));
 
   $('templateName').addEventListener('input', () => {
     editing.name = $('templateName').value || 'Untitled template';
     changed({ panel: false });
-  });
-  $('addBlock').addEventListener('click', () => {
-    editing.blocks.push(normalizeBlock({ ...BLOCK_DEFAULTS, name: `Text ${editing.blocks.length + 1}`, text: 'New text', y: 0.4 }));
-    selected = editing.blocks.length - 1;
-    changed();
-    fields.text.select();
   });
   $('removeBlock').addEventListener('click', () => {
     if (!block()) return;
@@ -333,10 +372,10 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
   // ----- Open / close -----
 
   /** Edit the selected template. A built-in is copied first so the original stays intact. */
-  function open() {
-    let t = getTemplate();
-    if (t.builtIn) {
-      t = copyOf(t, `My ${t.name.replace(/\s*\(.*\)$/, '')}`);
+  function open({ blank = false } = {}) {
+    let t = blank ? blankTemplate(nextBlankName()) : getTemplate();
+    if (blank || t.builtIn) {
+      if (!blank) t = copyOf(t, `My ${t.name.replace(/\s*\(.*\)$/, '')}`);
       if (!saveTemplate(t)) showError('Your browser blocked saving. Use Export template to keep a copy.');
       onTemplatesChanged(t.id);
     }
@@ -344,9 +383,17 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
     selected = 0;
     $('templateEditor').hidden = false;
     $('customizeTemplate').hidden = true;
+    $('newBlankTemplate').hidden = true;
     render();
     fillPanel();
     canvas.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  function nextBlankName() {
+    const names = new Set(allTemplates().map((t) => t.name));
+    let n = 1;
+    while (names.has(n === 1 ? 'My badge' : `My badge ${n}`)) n++;
+    return n === 1 ? 'My badge' : `My badge ${n}`;
   }
 
   function close({ save = true } = {}) {
@@ -358,6 +405,7 @@ export function createEditor({ canvas, getTemplate, getLabel, getVars, getAllVar
     drag = null;
     $('templateEditor').hidden = true;
     $('customizeTemplate').hidden = false;
+    $('newBlankTemplate').hidden = false;
     if (allTemplates().some((t) => t.id === id)) onTemplatesChanged(id);
     else render();
   }

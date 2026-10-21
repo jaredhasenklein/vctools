@@ -299,6 +299,7 @@ for (const id of ['topText', 'labelType', 'labelStyle']) {
 $('prevPerson').addEventListener('click', () => { previewIndex--; renderPreview(); });
 $('nextPerson').addEventListener('click', () => { previewIndex++; renderPreview(); });
 $('customizeTemplate').addEventListener('click', () => editor.open());
+$('newBlankTemplate').addEventListener('click', () => editor.open({ blank: true }));
 
 $('nameTagForm').addEventListener('submit', (event) => {
   event.preventDefault();

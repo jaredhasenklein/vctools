@@ -11,5 +11,5 @@ Browser tools for *FIRST* Volunteer Coordinators, live at https://volunteer.syst
 - `*.html` at the root: one page per tool. `index.html` is the landing page.
 - `scripts/`: page scripts. `commonscripts.js` adds the shared top bar, footer, and theme to every page.
 - `style/`: page styles. `darkmode.css` holds the dark theme.
-- `chrome/`: the browser extension published on the Chrome Web Store.
+- `browser_extension/`: the browser extension, published on the Chrome Web Store. See its README for loading it by hand in Chrome or Firefox.
 - `tools/`, `test/`: dev-only checks and Vitest tests. Run `npm test` and `npm run check`.

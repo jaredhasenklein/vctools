@@ -1,0 +1,78 @@
+{
+  "manifest_version": 3,
+  "name": "VC Tools Integration",
+  "version": "1.3",
+  "description": "Adds buttons to open VMS reports in VC Tools or Google Sheets, and improves VMS styling",
+  "permissions": [
+    "storage",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "*://*.firstinspires.org/*",
+    "*://volunteer.systems/*",
+    "*://docs.google.com/spreadsheets/*"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "vctools-integration@volunteer.systems",
+      "strict_min_version": "128.0"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://my.firstinspires.org/VMS/*"
+      ],
+      "js": [
+        "vms-style-toggle.js"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "*://my.firstinspires.org/VMS/Reports/ReportViewer.aspx*"
+      ],
+      "js": [
+        "vms-content.js"
+      ],
+      "css": [
+        "styles.css"
+      ]
+    },
+    {
+      "matches": [
+        "*://my.firstinspires.org/VMS/Events/EventDetails.aspx*"
+      ],
+      "js": [
+        "reports-content.js"
+      ],
+      "css": [
+        "styles.css"
+      ]
+    },
+    {
+      "matches": [
+        "*://volunteer.systems/*"
+      ],
+      "js": [
+        "vctools-content.js"
+      ]
+    },
+    {
+      "matches": [
+        "*://docs.google.com/spreadsheets/*"
+      ],
+      "js": [
+        "google-sheets-content.js"
+      ],
+      "css": [
+        "google-sheets-style.css"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
