@@ -63,3 +63,8 @@ Every file upload uses the shared drop zone in `scripts/commonscripts.js`:
 - `accepts: ['*']` takes any report (the Report Viewer). Such tools are suggested after the specific ones.
 - `beta: true` marks a less-tested tool. Also put `<span class="beta-tag">Beta</span>` in its home tile and page heading.
 - Examples shown on a page are HTML, not screenshots, so they follow the theme. Use invented names in examples.
+
+## Badge templates
+- `lib/badges/template.js` lays out a badge from a template (text blocks with `{variables}`). `drawBadge()` draws through a surface: jsPDF for the PDF, canvas for the editor preview. Keep both on that one function so the preview matches the printout.
+- Built-in templates are in `BUILT_IN_TEMPLATES`. User templates live in localStorage and export as `.json`; `normalizeTemplate()` cleans anything loaded or imported.
+- To add a variable, add it to `VARIABLES` and fill it in `badgeVariables()`.

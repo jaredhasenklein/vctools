@@ -42,5 +42,4 @@ npm test
 VC Tools is made better with the help of:
 
 - [Bootstrap](https://getbootstrap.com/docs/)
-- [html2canvas](https://html2canvas.hertzen.com/documentation)
 - [jspdf](https://parall.ax/products/jspdf)

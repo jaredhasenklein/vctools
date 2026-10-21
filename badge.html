@@ -5,15 +5,14 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNHZ3NT97K"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Name Tag Generator</title>
+  <title>Name Badge Generator</title>
     <link rel="stylesheet" href="style/commonstyle.css">
   <link rel="stylesheet" href="style/badge.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <script type="module" src="lib/vms/index.js"></script>
-  <script src="scripts/badge.js" defer></script>
-<script src="scripts/commonscripts.js"></script>
+  <script src="scripts/commonscripts.js"></script>
+  <script type="module" src="scripts/badge.js"></script>
 </head>
 <body>
   <h1>Name Badge Generator</h1>
@@ -22,25 +21,24 @@
 <tr>
 <td><p><b><u>Instructions:</u></b>
 <ol><li>Log in to VMS and select your event.</li>
-<li>Click <b>All Reports</b>.</li>
-<li>Click <b>Badges</b>.</li>
-<li>Click <b>Export</b>.</li>
-<li>Click the button below to select your export.</li>
-<li>Select your export type from the list (either <b>Avery 5163</b> for a sheet of 10 labels or <b>Dymo 2x4</b> for use with thermal printers).</li>
-<li>Optionally, enter text into one or more of the custom text fields (event name works great in the top slot!).</li>
-<li>Optionally, enter abbreviations for longer roles or use the pre-defined options.</li>
-<li>The PDF will automatically download.</li></ol></p></td>
+<li>Click <b>All Reports</b>, then <b>Name Badges</b> (or <b>Assigned Volunteers</b>), then <b>Export</b>.</li>
+<li>Drop the file in the box below.</li>
+<li>Pick your label stock (<b>Avery 5163</b> sheets or <b>Dymo 2x4</b> thermal labels) and a template.</li>
+<li>Optionally, fill in the event name and bottom corners. The preview shows each volunteer's badge.</li>
+<li>Optionally, click <b>Customize</b> to change the layout: move and resize text, change sizes and colors, and add your own text.</li>
+<li>Optionally, shorten long role names in the abbreviations table.</li>
+<li>Click <b>Generate Labels</b> to download the PDF.</ol></p></td>
 <td class="tool-example-cell">
 <figure class="tool-example" aria-label="Example badges">
   <div class="badge-sample">
-    <div class="badge-sample__top">2027 Regional Kickoff</div>
+    <div class="badge-sample__top">2027 Agrestic Regional</div>
     <div class="badge-sample__first">AVERY</div>
     <div class="badge-sample__last">QUINTANA</div>
     <div class="badge-sample__role">HEAD REFEREE</div>
     <div class="badge-sample__bottom"><span>she/her</span><span>Event Staff</span></div>
   </div>
   <div class="badge-sample badge-sample--plain">
-    <div class="badge-sample__top">2027 Regional Kickoff</div>
+    <div class="badge-sample__top">2026 Festival of Champions</div>
     <div class="badge-sample__first">MORGAN T.</div>
     <div class="badge-sample__role badge-sample__role--plain">JUDGE ADVISOR</div>
     <div class="badge-sample__bottom"><span></span><span><i>FIRST</i> Alumni</span></div>
@@ -52,81 +50,124 @@
 <i>All data processing happens on your computer and is never sent to a server. No worries about PII here! Just remember that the file you download from here may contain PII, just like the export from VMS.</i>
 <br><br>
   </div>
-  <form id="nameTagForm">
+  <form id="nameTagForm" class="badge-form" novalidate>
     <input type="file" id="fileInput" accept=".csv" hidden>
     <div id="dropzone" class="vms-drop" data-title="Name Badges or Assigned Volunteers report"></div>
-    <div id="error"></div></td></tr>
-      </table>
+    <div id="error" role="alert"></div>
+
+    <div class="badge-layout">
+      <div class="badge-options">
+        <label class="badge-field">Label stock
+          <select id="labelType" class="form-select"></select>
+        </label>
+        <div class="badge-field">
+          <label for="labelStyle">Template</label>
+          <div class="badge-row">
+            <select id="labelStyle" class="form-select"></select>
+            <button type="button" id="customizeTemplate" class="btn btn-outline-primary">Customize</button>
+          </div>
+        </div>
+
+        <fieldset class="badge-text">
+          <legend>Badge text</legend>
+          <label class="badge-field">Event name <small>(the <code>{event}</code> block)</small>
+            <input type="text" id="topText" class="form-control" placeholder="2027 FIRST Agrestic Regional">
+          </label>
+          <div class="badge-corners">
+            <div class="badge-field">
+              <label for="bottomLeftType">Bottom left</label>
+              <select id="bottomLeftType" class="form-select">
+                <option value="">Nothing</option>
+                <option value="pronouns">Personal pronouns</option>
+                <option value="languages">Languages spoken</option>
+                <option value="custom">Custom text</option>
+              </select>
+              <input type="text" id="bottomLeftText" class="form-control" placeholder="Custom text" hidden>
+            </div>
+            <div class="badge-field">
+              <label for="bottomRightType">Bottom right</label>
+              <select id="bottomRightType" class="form-select">
+                <option value="">Nothing</option>
+                <option value="pronouns">Personal pronouns</option>
+                <option value="languages">Languages spoken</option>
+                <option value="custom">Custom text</option>
+              </select>
+              <input type="text" id="bottomRightText" class="form-control" placeholder="Custom text" hidden>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="badge-preview">
+        <canvas id="badgeCanvas" class="badge-canvas" tabindex="0" aria-label="Badge preview"></canvas>
+        <div class="badge-preview__nav">
+          <button type="button" id="prevPerson" class="btn btn-sm btn-outline-secondary" aria-label="Previous volunteer">&lsaquo;</button>
+          <span id="previewWho" aria-live="polite">Sample volunteer</span>
+          <button type="button" id="nextPerson" class="btn btn-sm btn-outline-secondary" aria-label="Next volunteer">&rsaquo;</button>
+        </div>
+      </div>
     </div>
 
-    <select id="labelType" name="labelType"></select>
-    <select id="labelStyle" name="labelStyle"></select>
+    <section id="templateEditor" class="badge-editor" hidden aria-labelledby="editorTitle">
+      <div class="badge-editor__head">
+        <h2 id="editorTitle">Customize template</h2>
+        <label class="badge-field badge-editor__name">Template name
+          <input type="text" id="templateName" class="form-control" maxlength="60">
+        </label>
+        <p class="badge-editor__hint">Click a block on the badge to select it, drag to move, and drag its corner to resize. Changes save in this browser as you go.</p>
+      </div>
 
-    <div>
+      <div class="badge-editor__body">
+        <div class="badge-editor__blocks">
+          <h3>Blocks</h3>
+          <ul id="blockList" class="badge-block-list"></ul>
+          <div class="badge-row">
+            <button type="button" id="addBlock" class="btn btn-sm btn-outline-primary">Add text</button>
+            <button type="button" id="removeBlock" class="btn btn-sm btn-outline-danger">Remove</button>
+          </div>
+        </div>
 
+        <div id="blockProps" class="badge-editor__props">
+          <label class="badge-field">Text
+            <input type="text" id="propText" class="form-control" autocomplete="off">
+          </label>
+          <div class="badge-vars" id="variableChips" aria-label="Insert a variable"></div>
+          <p id="propWarning" class="badge-warning" role="alert"></p>
+          <div class="badge-grid">
+            <label class="badge-field">Left (in)<input type="number" id="propX" step="any" min="0" class="form-control"></label>
+            <label class="badge-field">Top (in)<input type="number" id="propY" step="any" min="0" class="form-control"></label>
+            <label class="badge-field">Width (in)<input type="number" id="propW" step="any" min="0.05" class="form-control"></label>
+            <label class="badge-field">Height (in)<input type="number" id="propH" step="any" min="0.05" class="form-control"></label>
+            <label class="badge-field">Size (pt)<input type="number" id="propSize" step="0.5" min="4" max="96" class="form-control"></label>
+            <label class="badge-field">Smallest (pt)<input type="number" id="propMin" step="0.5" min="4" max="96" class="form-control"></label>
+          </div>
+          <div class="badge-row badge-toggles">
+            <label><input type="checkbox" id="propBold"> Bold</label>
+            <label><input type="checkbox" id="propItalic"> Italic</label>
+            <label><input type="checkbox" id="propUpper"> ALL CAPS</label>
+            <label title="Use one size that fits everyone's text, so badges match"><input type="checkbox" id="propSame"> Same size on every badge</label>
+          </div>
+          <div class="badge-row">
+            <div class="badge-seg" role="group" aria-label="Alignment">
+              <button type="button" data-align="left" class="btn btn-sm btn-outline-secondary">Left</button>
+              <button type="button" data-align="center" class="btn btn-sm btn-outline-secondary">Center</button>
+              <button type="button" data-align="right" class="btn btn-sm btn-outline-secondary">Right</button>
+            </div>
+            <label class="badge-color">Text <input type="color" id="propColor"></label>
+            <label class="badge-color"><input type="checkbox" id="propHasFill"> Background <input type="color" id="propFill"></label>
+          </div>
+        </div>
+      </div>
 
+      <div class="badge-row badge-editor__actions">
+        <button type="button" id="exportTemplate" class="btn btn-outline-secondary">Export template</button>
+        <label class="btn btn-outline-secondary mb-0">Import template<input type="file" id="importTemplate" accept=".json,application/json" hidden></label>
+        <button type="button" id="deleteTemplate" class="btn btn-outline-danger">Delete template</button>
+        <button type="button" id="closeEditor" class="btn btn-primary">Done</button>
+      </div>
+    </section>
 
-    <table style="border: 1px solid black;width: 30%;text-align: center;margin: 0px auto;">
-        <tbody>
-            <tr>
-                <td colspan="4">
-                    <p style="font-size:12px;text-align:center;"><input type="text" id="topText" placeholder="Event Name"></p>
-                </td>
-            </tr>
-            <tr>
-                <td width="10%">&nbsp;</td>
-                <td colspan="2" width="80%">
-                    <p style="font-size:18px;text-align:center;">FIRST NAME</p>
-                </td>
-                <td width="10%">&nbsp;</td>
-            </tr>
-            <tr>
-                <td width="10%">&nbsp;</td>
-                <td colspan="2" width="80%">
-                    <p style="font-size:12px;text-align:center;">LAST NAME</p>
-                </td>
-                <td width="10%">&nbsp;</td>
-            </tr>
-            <tr>
-                <td colspan="4" bgcolor="black">
-                    <p style="color:white;font-size:12px;text-align:center;">ROLE</p>
-                </td>
-            </tr>
-            <tr>
-              <div style="padding: 10px;">
-                  <div style="margin-bottom: 10px;">
-                <td colspan="2" width="50%">
-                            <label>
-                                <select id="bottomLeftType" class="form-select" style="font-size:12px;">
-                                    <option value="">--Select text/field--</option>
-                                    <option value="custom">Custom Text</option>
-                                    <option value="pronouns">Personal Pronouns</option>
-                                    <option value="languages">Languages Spoken</option>
-                                </select>
-                                <input type="text" id="bottomLeftText" class="form-control" placeholder="Custom Text" style="font-size:10px; margin-top: 5px;">
-                            </label>
-                            </td>
-                            <td colspan="2" width="50%">
-                            <label>
-                                <select id="bottomRightType" class="form-select" style="font-size:12px;">
-                                    <option value="">--Select text/field--</option>
-                                    <option value="custom">Custom Text</option>
-                                    <option value="pronouns">Personal Pronouns</option>
-                                    <option value="languages">Languages Spoken</option>
-                                </select>
-                                <input type="text" id="bottomRightText" class="form-control" placeholder="Custom Text" style="font-size:10px; margin-top: 5px;">
-                            </label>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-
-    </div>
-    <br>
-    <button type="submit">Generate Labels</button>
+    <button type="submit" class="badge-generate">Generate Labels</button>
   </form>
   <div id="labelContainer"></div>
 

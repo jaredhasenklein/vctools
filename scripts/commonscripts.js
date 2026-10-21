@@ -182,6 +182,7 @@ function addDarkModeCSS() {
   const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.href = 'style/darkmode.css';
+  link.media = 'screen'; // Printouts always use the light theme.
   document.head.appendChild(link);
 }
 

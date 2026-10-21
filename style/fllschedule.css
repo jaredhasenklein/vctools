@@ -58,3 +58,8 @@
 .fll-dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 #error { color: #cc0000; margin: 8px 0; }
 body.dark-mode #error, body.dark-mode .error { color: #ff8a80; }
+
+.form-check-row { display: flex; align-items: center; gap: 8px; }
+.form-check-row input { width: auto; margin: 0; }
+.form-check-row label { margin: 0; }
+.form-check-row .hint { font-weight: 400; opacity: 0.75; }

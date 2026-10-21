@@ -41,8 +41,8 @@ describe('buildSchedule', () => {
         expect(games.map((a) => a.type)).toEqual(['Robot Round 1', 'Robot Round 2', 'Robot Round 3']);
         for (let i = 1; i < games.length; i++) expect(games[i].start).toBeGreaterThanOrEqual(games[i - 1].end);
         for (const a of acts) {
-          // Nothing touches lunch.
-          expect(a.end <= base.lunchStart || a.start >= base.lunchEnd).toBe(true);
+          // Robot games never touch lunch (judging may; see the toggle tests).
+          if (a.type !== 'Judging') expect(a.end <= base.lunchStart || a.start >= base.lunchEnd).toBe(true);
           // Minimum gap between a team's activities.
           for (const b of acts) if (a !== b) expect(a.end + base.minGap <= b.start || b.end + base.minGap <= a.start, `team ${team}`).toBe(true);
         }
@@ -54,6 +54,15 @@ describe('buildSchedule', () => {
       }
     });
   }
+
+  it('judges through lunch by default, and pauses when asked', () => {
+    // 4 rooms x 40-minute slots from 10:40 puts sessions across noon.
+    const opts = { ...base, teams: teams(24), start: parseClock('10:40'), random: seeded(2) };
+    const inLunch = (s) => [...s.teamActivities.values()].flat()
+      .some((a) => a.type === 'Judging' && a.start < base.lunchEnd && a.end > base.lunchStart);
+    expect(inLunch(buildSchedule(opts))).toBe(true);
+    expect(inLunch(buildSchedule({ ...opts, judgingDuringLunch: false }))).toBe(false);
+  });
 
   it('handles a large event that the old shared retry limit could not', () => {
     const s = buildSchedule({ ...base, teams: teams(60), gameTables: 6, judgingRooms: 6, robotRounds: 4, lunchEnd: parseClock('12:30'), random: seeded(7) });

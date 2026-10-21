@@ -625,3 +625,55 @@ body.dark-mode .badge-sample .badge-sample__role:not(.badge-sample__role--plain)
   letter-spacing: 0.03em;
 }
 body.dark-mode .beta-tag { background: #5c4a00; color: #ffe08a; }
+
+/* Printouts always use the light theme. style/darkmode.css is loaded for screen only
+   (see addDarkModeCSS); this resets the dark variables and the body colors for print. */
+@media print {
+  body.dark-mode {
+    /* Light mode (default) variables */
+    --background-color: #ffffff;
+    --text-color: #000000;
+    --secondary-bg-color: #f8f9fa;
+    --border-color: #ddd;
+    --table-header-bg: #f2f2f2;
+    --table-hover-bg: #f5f5f5;
+    --table-border: #ddd;
+    --primary-button-bg: #0066cc;
+    --primary-button-text: white;
+    --primary-button-hover-bg: #0052a3;
+    --secondary-button-bg: #6c757d;
+    --secondary-button-text: white;
+    --dropdown-bg: white;
+    --dropdown-text: #333;
+    --input-bg: white;
+    --input-text: #333;
+    --input-border: #ced4da;
+    --error-text: #dc3545;
+    --success-bg: #d4edda;
+    --success-text: #155724;
+    --warning-bg: #fff3cd;
+    --warning-text: #856404;
+    --dropzone-bg: white;
+    --dropzone-border: #ccc;
+    --dropzone-text: #333;
+    --dropzone-hover-bg: #f0f0f0;
+    --email-button-bg: #0dcaf0;
+    --email-button-text: #000000;
+    --extension-button-bg: #4285f4;
+    --extension-button-text: white;
+    --footer-bg: #f8f9fa;
+    --modal-bg: white;
+    --instructions-bg: #f8f9fa;
+    --instructions-text: #000000;
+    --tile-bg: #f8f9fa;
+    --tile-text: #000000;
+    --disabled-bg: #e9ecef;
+    --disabled-text: #6c757d;
+    --placeholder-text: #6c757d;
+    --link-color: #007bff;
+    --link-hover-color: #0056b3;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  body.dark-mode .beta-tag { background: #fff3cd; color: #664d03; }
+}
