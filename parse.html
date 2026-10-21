@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNHZ3NT97K"></script>
   <title>VMS Parser</title>
@@ -21,16 +23,44 @@
 <li>Click <b>Export</b>.</li>
 <li>Click the button below to select your export.</li>
 <li>If you are happy with the preview, click <b>Download CSV</b>.</li></ol></p></td>
-<td style="width:15%;"><img src="assets/vmsparse.png" width="100%"></img></td></tr>
+<td class="tool-example-cell">
+<figure class="tool-example" aria-label="Example of what this tool does">
+  <div class="parse-sample">
+    <div>
+      <div class="parse-sample__label">VMS export: one row per shift</div>
+      <table class="sample-table">
+        <thead><tr><th>Name</th><th>Role</th><th>Day</th></tr></thead>
+        <tbody>
+          <tr><td>Avery Q.</td><td>Referee</td><td>Fri</td></tr>
+          <tr><td>Avery Q.</td><td>Referee</td><td>Sat</td></tr>
+          <tr><td>Morgan T.</td><td>Judge</td><td>Fri</td></tr>
+          <tr><td>Morgan T.</td><td>Judge Advisor</td><td>Sat</td></tr>
+          <tr><td>Riley P.</td><td>Queuer</td><td>Sat</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="parse-sample__arrow" aria-hidden="true">&rarr;</div>
+    <div>
+      <div class="parse-sample__label">This tool: one row per volunteer</div>
+      <table class="sample-table">
+        <thead><tr><th>Name</th><th>Fri</th><th>Sat</th></tr></thead>
+        <tbody>
+          <tr><td>Avery Q.</td><td>Referee</td><td>Referee</td></tr>
+          <tr><td>Morgan T.</td><td>Judge</td><td>Judge Advisor</td></tr>
+          <tr><td>Riley P.</td><td></td><td>Queuer</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</figure>
+</td></tr>
     </table>
 <i>All data processing happens on your computer and is never sent to a server. No worries about PII here! Just remember that the file you download from here contains PII, just like the export from VMS.</i>
 <br><br>
   </div>
 
-  <input type="file" id="csvFile" accept=".csv" style="display:none;">
-  <div style="width: 50%;" id="dropzone">
-    Click or Drag and Drop CSV File
-  </div>
+  <input type="file" id="csvFile" accept=".csv" hidden>
+  <div id="dropzone" class="vms-drop" data-title="Assigned Volunteers report"></div>
   <div id="error"></div>
   <div id="buttonContainer"></div>
   <div class="table-responsive">

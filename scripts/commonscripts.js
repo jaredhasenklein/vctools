@@ -3,37 +3,93 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-LNHZ3NT97K');
 
-// Drag and drop event handlers
+// ============================================================
+// FILE DROP ZONE
+// Every upload box on the site is built here so they all look and behave the same.
+// Markup:  <input type="file" id="x" accept=".csv" hidden>
+//          <div class="vms-drop" data-title="Name Badges report" data-optional></div>
+// Pages call setupDragAndDrop(zone, input, handler), then setDropzoneLoaded(zone, {...})
+// once the file has been read.
+// ============================================================
+const DROP_ICONS = {
+  upload: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  done: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12.5l2.5 2.5L16 9.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+
+function renderDropzone(dropzone, state = {}) {
+  const title = dropzone.dataset.title || 'VMS report';
+  const optional = 'optional' in dropzone.dataset;
+  const loaded = Boolean(state.fileName);
+  dropzone.classList.add('vms-drop');
+  dropzone.classList.toggle('is-loaded', loaded);
+  dropzone.innerHTML = '';
+
+  const icon = document.createElement('div');
+  icon.className = 'vms-drop__icon';
+  icon.innerHTML = loaded ? DROP_ICONS.done : DROP_ICONS.upload;
+
+  const body = document.createElement('div');
+  body.className = 'vms-drop__body';
+  const heading = document.createElement('div');
+  heading.className = 'vms-drop__title';
+  heading.textContent = loaded ? state.fileName : title;
+  const hint = document.createElement('div');
+  hint.className = 'vms-drop__hint';
+  hint.textContent = loaded
+    ? [state.detail, 'Drop or click to replace'].filter(Boolean).join(' · ')
+    : 'Drag your VMS export here, or click to choose a CSV file';
+  body.append(heading, hint);
+  dropzone.append(icon, body);
+
+  if (optional && !loaded) {
+    const tag = document.createElement('span');
+    tag.className = 'vms-drop__tag';
+    tag.textContent = 'Optional';
+    dropzone.append(tag);
+  }
+  dropzone.setAttribute('aria-label', loaded ? `${title}: ${state.fileName} loaded. Choose a different file.` : `${title}: choose a CSV file`);
+}
+
+/** Show a drop zone's loaded state: file name plus a short detail line, e.g. "Assigned Volunteers · 42 volunteers". */
+function setDropzoneLoaded(dropzone, { fileName, detail } = {}) {
+  if (dropzone) renderDropzone(dropzone, { fileName: fileName || 'File loaded', detail });
+}
+
+/** Put a drop zone back to its empty state. */
+function resetDropzone(dropzone) {
+  if (dropzone) renderDropzone(dropzone);
+}
+
+/** "Name Badges · CA-Van Nuys Kickoff - FRC" style summary of a report from lib/vms. */
+function describeReport(report, countText) {
+  return [report?.meta?.report, report?.meta?.event, countText].filter(Boolean).join(' · ');
+}
+
 function setupDragAndDrop(dropzone, fileInput, handleFiles) {
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropzone.addEventListener(eventName, preventDefaults, false);
-    });
+  renderDropzone(dropzone);
+  dropzone.setAttribute('role', 'button');
+  dropzone.tabIndex = 0;
+  fileInput.hidden = true;
 
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropzone.addEventListener(eventName, highlight, false);
-    });
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropzone.addEventListener(eventName, preventDefaults, false);
+  });
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropzone.addEventListener(eventName, () => dropzone.classList.add('is-dragover'), false);
+  });
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropzone.addEventListener(eventName, () => dropzone.classList.remove('is-dragover'), false);
+  });
 
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropzone.addEventListener(eventName, unhighlight, false);
-    });
-
-    dropzone.addEventListener('click', () => fileInput.click(), false);
-    dropzone.addEventListener('drop', handleDrop, false);
-    fileInput.addEventListener('change', handleFiles, false);
-
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        handleFiles(files);
+  dropzone.addEventListener('click', () => fileInput.click(), false);
+  dropzone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      fileInput.click();
     }
-
-    function highlight() {
-        dropzone.classList.add('dragover');
-    }
-
-    function unhighlight() {
-        dropzone.classList.remove('dragover');
-    }
+  });
+  dropzone.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files), false);
+  fileInput.addEventListener('change', handleFiles, false);
 }
 
 function preventDefaults(e) {

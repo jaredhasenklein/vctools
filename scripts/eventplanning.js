@@ -72,8 +72,11 @@ function loadFile(event) {
     return;
   }
 
-  VMS.loadReport(file, EVENT_PLANNING_NEEDS, { accepts: ['Attendance & Event Planning'] })
-    .then(({ records }) => processRecords(records))
+  VMS.loadReport(file, EVENT_PLANNING_NEEDS, { accepts: VMS.acceptsFor('eventplanning') })
+    .then(({ report, records }) => {
+      processRecords(records);
+      setDropzoneLoaded(document.getElementById('dropzone'), { fileName: file.name, detail: describeReport(report, `${records.length} shifts`) });
+    })
     .catch((error) => {
       if (VMS.isCancelled(error)) return;
       showError('Error processing CSV: ' + error.message);

@@ -46,3 +46,18 @@ const { report, records } = await loadReport(file, {
 Reports differ in what a row is: one per person (Name Badges), per shift (Assigned Volunteers, Attendance & Event Planning), or per course (Training and Certifications).
 - Every tool passes `accepts` with the reports it was built for. A different report is refused with a message naming the right one, before any mapping dialog.
 - A tool that produces one output per person (badges, emails, rosters) must group rows by person itself when it accepts a per-shift or per-course report.
+
+## Upload boxes
+Every file upload uses the shared drop zone in `scripts/commonscripts.js`:
+```html
+<input type="file" id="csvFile" accept=".csv" hidden>
+<div id="dropzone" class="vms-drop" data-title="Assigned Volunteers report"></div>   <!-- add data-optional for optional files -->
+```
+- Wire it with `setupDragAndDrop(zone, input, handler)`. After a file loads, call `setDropzoneLoaded(zone, { fileName, detail: describeReport(report, '42 volunteers') })`.
+- Don't style drop zones per page or write into them with `innerHTML`.
+
+## Tools and reports
+`lib/vms/tools.js` lists each tool page, its file inputs, and the reports each input accepts.
+- Pages get their `accepts` from it: `VMS.acceptsFor('badge')`, `VMS.acceptsFor('emailprep', 'tc')`.
+- The home page drop zone uses it to suggest tools. Add a new tool there, or it won't be suggested. `listed: false` keeps a tool off the home page.
+- Examples shown on a page are HTML, not screenshots, so they follow the theme. Use invented names in examples.

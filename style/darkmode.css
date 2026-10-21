@@ -132,16 +132,6 @@ table td {
   background-color: var(--background-color);
 }
 
-/* Fix for dropzone text */
-.dropzone {
-  background-color: var(--dropzone-bg);
-  border-color: var(--dropzone-border);
-  color: var(--dropzone-text);
-}
-
-.dropzone.dragover {
-  background-color: var(--dropzone-hover-bg);
-}
 
 /* Fix for homepage tiles */
 .tile {

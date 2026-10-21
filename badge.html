@@ -30,16 +30,31 @@
 <li>Optionally, enter text into one or more of the custom text fields (event name works great in the top slot!).</li>
 <li>Optionally, enter abbreviations for longer roles or use the pre-defined options.</li>
 <li>The PDF will automatically download.</li></ol></p></td>
-<td style="width:15%;"><img src="assets/badges.png" width="100%"></img></td></tr>
+<td class="tool-example-cell">
+<figure class="tool-example" aria-label="Example badges">
+  <div class="badge-sample">
+    <div class="badge-sample__top">2027 Regional Kickoff</div>
+    <div class="badge-sample__first">AVERY</div>
+    <div class="badge-sample__last">QUINTANA</div>
+    <div class="badge-sample__role">HEAD REFEREE</div>
+    <div class="badge-sample__bottom"><span>she/her</span><span>Event Staff</span></div>
+  </div>
+  <div class="badge-sample badge-sample--plain">
+    <div class="badge-sample__top">2027 Regional Kickoff</div>
+    <div class="badge-sample__first">MORGAN T.</div>
+    <div class="badge-sample__role badge-sample__role--plain">JUDGE ADVISOR</div>
+    <div class="badge-sample__bottom"><span></span><span><i>FIRST</i> Alumni</span></div>
+  </div>
+  <figcaption>Two of the label styles. Top and bottom text are yours to set.</figcaption>
+</figure>
+</td></tr>
     </table>
 <i>All data processing happens on your computer and is never sent to a server. No worries about PII here! Just remember that the file you download from here may contain PII, just like the export from VMS.</i>
 <br><br>
   </div>
   <form id="nameTagForm">
- <input type="file" id="fileInput" accept=".csv" style="display:none;">
-    <div style="width: 50%;" id="dropzone">
-        Click or Drag and Drop CSV File
-    </div>
+    <input type="file" id="fileInput" accept=".csv" hidden>
+    <div id="dropzone" class="vms-drop" data-title="Name Badges or Assigned Volunteers report"></div>
     <div id="error"></div></td></tr>
       </table>
     </div>

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Event Planning Reporter</title>
   <link rel="stylesheet" href="style/commonstyle.css">
   <link rel="stylesheet" href="style/eventplanning.css">
@@ -21,10 +23,8 @@
   <li>Click or drag your file to the box on the right to select your export.</li>
   <li>Configure meal times if needed (defaults: breakfast 7:30am, lunch 12:00pm, dinner 6:00pm).</li>
   <li>View the generated stats reports.</li></ol></p></td>
-  <td><input type="file" id="csvFile" accept=".csv" style="display:none;">
-    <div style="width: 100%;" id="dropzone">
-      Click or Drag and Drop CSV File
-    </div>
+  <td><input type="file" id="csvFile" accept=".csv" hidden>
+    <div id="dropzone" class="vms-drop" data-title="Attendance &amp; Event Planning report"></div>
     <!-- Meal Times Configuration -->
     <div id="mealTimesConfig" style="display: none;" class="mt-4">
       <div class="config-box">

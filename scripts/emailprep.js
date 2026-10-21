@@ -300,7 +300,7 @@ function loadFile(files, type) {
         showError('Please upload a CSV file.');
         return;
     }
-    VMS.loadReport(file, NEEDS[type], { accepts: ACCEPTS[type] })
+    VMS.loadReport(file, NEEDS[type], { accepts: VMS.acceptsFor('emailprep', type) })
         .then((loaded) => {
             clearError();
             const dropzoneId = type === 'av' ? 'avDropzone' : type === 'tc' ? 'tcDropzone' : 'crDropzone';
@@ -311,8 +311,7 @@ function loadFile(files, type) {
             if (type === 'av') avData = loaded;
             else if (type === 'tc') tcData = loaded;
             else crData = loaded;
-            dropzone.textContent = `✓ ${file.name}`;
-            dropzone.classList.add('loaded');
+            setDropzoneLoaded(dropzone, { fileName: file.name, detail: describeReport(loaded.report, `${loaded.records.length} rows`) });
             statusBadge.textContent = 'Loaded';
             statusBadge.className = 'status-badge status-loaded';
 
@@ -326,13 +325,6 @@ function loadFile(files, type) {
             showError('Error reading file: ' + err.message);
         });
 }
-
-// Which VMS report each drop zone takes.
-const ACCEPTS = {
-    av: ['Assigned Volunteers'],
-    tc: ['Training and Certifications'],
-    cr: ['Consent And Release Status'],
-};
 
 // Fields read from each report (see lib/vms/fields.js).
 const NEEDS = {

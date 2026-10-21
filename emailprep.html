@@ -12,26 +12,6 @@
   <script src="scripts/emailprep.js"></script>
   <link rel="stylesheet" href="style/commonstyle.css">
   <style>
-    .dropzone {
-      border: 2px dashed var(--dropzone-border, #ccc);
-      border-radius: 8px;
-      padding: 18px 14px;
-      text-align: center;
-      cursor: pointer;
-      background: var(--dropzone-bg, #fff);
-      color: var(--dropzone-text, #333);
-      transition: background 0.2s, border-color 0.2s;
-      font-size: 14px;
-    }
-    .dropzone.dragover, .dropzone:hover {
-      background: var(--dropzone-hover-bg, #f0f0f0);
-      border-color: var(--primary-button-bg, #0066cc);
-    }
-    .dropzone.loaded {
-      background: var(--success-bg, #d4edda);
-      color: var(--success-text, #155724);
-      border-color: var(--success-bg, #d4edda);
-    }
     .upload-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -167,18 +147,18 @@
   <div class="upload-grid">
     <div class="upload-section">
       <label>1. Assigned Volunteers Export <span id="avStatus" class="status-badge status-pending">Not loaded</span></label>
-      <input type="file" id="avInput" accept=".csv" style="display:none;">
-      <div id="avDropzone" class="dropzone">Click or drag &amp; drop<br><small>Assigned Volunteers CSV</small></div>
+      <input type="file" id="avInput" accept=".csv" hidden>
+      <div id="avDropzone" class="vms-drop" data-title="Assigned Volunteers report"></div>
     </div>
     <div class="upload-section">
       <label>2. Training &amp; Certifications Export <span id="tcStatus" class="status-badge status-pending">Not loaded</span></label>
-      <input type="file" id="tcInput" accept=".csv" style="display:none;">
-      <div id="tcDropzone" class="dropzone">Click or drag &amp; drop<br><small>Training &amp; Certifications CSV</small></div>
+      <input type="file" id="tcInput" accept=".csv" hidden>
+      <div id="tcDropzone" class="vms-drop" data-title="Training and Certifications report"></div>
     </div>
     <div class="upload-section">
       <label>3. Consent &amp; Release Status Export <span id="crStatus" class="status-badge status-pending">Not loaded</span></label>
-      <input type="file" id="crInput" accept=".csv" style="display:none;">
-      <div id="crDropzone" class="dropzone">Click or drag &amp; drop<br><small>Consent &amp; Release CSV</small></div>
+      <input type="file" id="crInput" accept=".csv" hidden>
+      <div id="crDropzone" class="vms-drop" data-title="Consent And Release Status report"></div>
     </div>
   </div>
 

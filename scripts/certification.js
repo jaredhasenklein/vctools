@@ -262,8 +262,8 @@ function handleFiles(files) {
         return;
     }
 
-    VMS.loadReport(file, TC_NEEDS, { accepts: ['Training and Certifications'] })
-        .then(({ report, records }) => processCSV(report, records))
+    VMS.loadReport(file, TC_NEEDS, { accepts: VMS.acceptsFor('certification') })
+        .then(({ report, records }) => processCSV(report, records, file.name))
         .catch((error) => {
             if (VMS.isCancelled(error)) return;
             showError('Error reading file. Please make sure this is a Training and Certifications report from VMS. Details: ' + error.message);
@@ -316,7 +316,7 @@ function getDisplayNameForProgram(programCode) {
     return displayNames[programCode] || programCode;
 }
 
-function processCSV(report, records) {
+function processCSV(report, records, loadedFileName) {
     clearError();
 
     // Detect program from the report's Event line
@@ -349,10 +349,7 @@ function processCSV(report, records) {
 
     const dropzone = document.getElementById('dropzone');
     if (dropzone) {
-        dropzone.textContent = `Loaded ${Object.keys(personData).length} volunteers.`;
-        dropzone.style.backgroundColor = 'var(--success-bg)';
-        dropzone.style.color = 'var(--success-text)';
-        dropzone.style.borderColor = 'var(--success-bg)';
+        setDropzoneLoaded(dropzone, { fileName: loadedFileName, detail: describeReport(report, `${Object.keys(personData).length} volunteers`) });
     }
 }
 
@@ -506,9 +503,9 @@ function handleAssignedVolunteersFiles(files) {
         return;
     }
 
-    VMS.loadReport(file, AV_NEEDS, { accepts: ['Assigned Volunteers'] })
+    VMS.loadReport(file, AV_NEEDS, { accepts: VMS.acceptsFor('certification', 'assigned') })
         .then(({ records }) => {
-            processAssignedVolunteersCSV(records);
+            processAssignedVolunteersCSV(records, file.name);
 
             // Re-render results if main data was already processed
             if (Object.keys(personData).length > 0) {
@@ -522,7 +519,7 @@ function handleAssignedVolunteersFiles(files) {
         });
 }
 
-function processAssignedVolunteersCSV(records) {
+function processAssignedVolunteersCSV(records, loadedFileName) {
     assignedVolunteersFilters = {};
 
     records.forEach(rec => {
@@ -542,10 +539,7 @@ function processAssignedVolunteersCSV(records) {
 
     const dropzone = document.getElementById('assignedVolunteersDropzone');
     if (dropzone) {
-        dropzone.textContent = `Loaded ${Object.keys(assignedVolunteersFilters).length} assigned volunteers.`;
-        dropzone.style.backgroundColor = 'var(--success-bg)';
-        dropzone.style.color = 'var(--success-text)';
-        dropzone.style.borderColor = 'var(--success-bg)';
+        setDropzoneLoaded(dropzone, { fileName: loadedFileName, detail: `${Object.keys(assignedVolunteersFilters).length} assigned volunteers` });
     }
 }
 

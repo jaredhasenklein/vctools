@@ -61,9 +61,10 @@ function loadFile(event) {
 
   VMS.readReportFile(file)
     .then(async (report) => {
-      VMS.checkAccepted(report, ['Assigned Volunteers']);
+      VMS.checkAccepted(report, VMS.acceptsFor('parse'));
       const fields = await VMS.resolveWithUser(report, PARSE_NEEDS);
       allVolunteerData = pivotByVolunteer(report, fields);
+      setDropzoneLoaded(document.getElementById('dropzone'), { fileName: file.name, detail: describeReport(report, `${allVolunteerData.length} volunteers`) });
 
       // Create filter dropdown
       createFilterControls();
