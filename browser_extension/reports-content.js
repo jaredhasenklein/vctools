@@ -8,11 +8,12 @@ function addStarsToReports() {
   }
   
   // Mapping of report names to their tool URLs
+  // Reports with a dedicated tool. (Every report can open in the VC Tools Report Viewer.)
   const reportsWithTools = {
-    'Attendance & Event Planning': 'eventplanning.html',
-    'Training and Certifications': 'certification.html',
-    'Assigned Volunteers': 'parse.html',
-    'Name Badges': 'badge.html'
+    'Attendance & Event Planning': 'eventplanning',
+    'Training and Certifications': 'certification',
+    'Assigned Volunteers': 'parse',
+    'Name Badges': 'badge'
   };
   
   // Find all link elements in the reports tab

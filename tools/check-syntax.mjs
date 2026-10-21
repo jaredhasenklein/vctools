@@ -3,7 +3,7 @@ import { readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 
-const dirs = ['scripts', 'chrome', 'lib/vms', 'lib/fll', 'lib/badges'];
+const dirs = ['scripts', 'browser_extension', 'lib/vms', 'lib/fll', 'lib/badges'];
 let failed = 0;
 for (const dir of dirs) {
   for (const f of readdirSync(dir).filter((n) => n.endsWith('.js'))) {

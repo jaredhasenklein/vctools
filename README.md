@@ -27,6 +27,10 @@ Contributions are welcome! Here are a few things to keep in mind:
 - **Privacy:** Personal Identifiable Information (PII) should only be processed client-side (like with JavaScript). This project will not send PII to any servers.
 - **AI and External Tools:** Using AI and other tools is welcome. Just make sure to cite any tools used that aren't already mentioned.
 
+## Browser extension
+
+The VC Tools Integration extension adds **Open in VC Tools** and **Open in Google Sheets** buttons to VMS reports. Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/vc-tools-integration/bgndacoknekjiadmlogmnechjnabggjf), or see [`browser_extension/README.md`](browser_extension/README.md) to load it by hand in Chrome or Firefox.
+
 ## Development
 
 The site is static files served by GitHub Pages; open any `.html` file through a local server (for example `python3 -m http.server`). Checks and tests need Node 22:

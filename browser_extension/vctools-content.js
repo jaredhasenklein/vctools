@@ -1,86 +1,27 @@
-console.log('[VCTools] content script injected, readyState:', document.readyState);
+// Runs on volunteer.systems. If the VMS page handed over a report for this page,
+// put it in the page's file input; the page reacts to the change event like a normal upload.
 
-function runVCToolsCheck() {
-  const path = window.location.pathname;
-  const toolPage = path.substring(path.lastIndexOf('/') + 1);
+function pageKey() {
+  const last = window.location.pathname.split('/').pop() || 'index';
+  return last.replace(/\.html$/, '') || 'index';
+}
 
-  console.log('[VCTools] runVCToolsCheck called, toolPage:', toolPage);
-
-  chrome.storage.local.get(['csvData', 'csvFileName', 'targetTool'], function(data) {
-    console.log('[VCTools] storage.get result:', { hasCsvData: !!data.csvData, targetTool: data.targetTool, toolPage });
-    if (chrome.runtime.lastError) {
-      console.error('[VCTools] storage.get failed:', chrome.runtime.lastError.message);
-      return;
-    }
-    if (!data.csvData || data.targetTool !== toolPage) {
-      console.log('[VCTools] no matching data in storage, bailing out');
-      return;
-    }
-
-    const csvText = data.csvData;
-    const fileName = data.csvFileName;
-    console.log('[VCTools] found CSV data, length:', csvText.length, 'fileName:', fileName);
+function receiveReport() {
+  chrome.storage.local.get(['csvData', 'csvFileName', 'targetTool'], (data) => {
+    if (chrome.runtime.lastError || !data.csvData) return;
+    const target = String(data.targetTool || '').replace(/\.html$/, '') || 'index';
+    if (target !== pageKey()) return;
     chrome.storage.local.remove(['csvData', 'csvFileName', 'targetTool']);
 
-    const blob = new Blob([csvText], { type: 'text/csv' });
-    const file = new File([blob], fileName, { type: 'text/csv' });
-
-    let fileInput = document.querySelector('input[type="file"]');
-    console.log('[VCTools] fileInput (querySelector):', fileInput);
-    if (!fileInput) {
-      fileInput = document.getElementById('fileInput') ||
-                 document.getElementById('csvFile');
-      console.log('[VCTools] fileInput (by id):', fileInput);
-    }
-
-    if (!fileInput) {
-      console.error('[VCTools] could not find file input element');
-      return;
-    }
-
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(file);
-    fileInput.files = dataTransfer.files;
-
-    const event = new Event('change', { bubbles: true });
-    fileInput.dispatchEvent(event);
-    console.log('[VCTools] dispatched change event, files:', fileInput.files.length);
-
-    if (typeof window.handleFiles === 'function') {
-      console.log('[VCTools] calling window.handleFiles');
-      window.handleFiles(fileInput.files);
-    } else if (typeof window.loadFile === 'function') {
-      console.log('[VCTools] calling window.loadFile');
-      window.loadFile({ target: { files: fileInput.files } });
-    } else {
-      console.log('[VCTools] no known handler found, trying possibleHandlers');
-      const possibleHandlers = [
-        { name: 'handleFiles', obj: window },
-        { name: 'loadFile', obj: window },
-        { name: 'onchange', obj: fileInput }
-      ];
-
-      for (const handler of possibleHandlers) {
-        if (typeof handler.obj[handler.name] === 'function') {
-          try {
-            handler.obj[handler.name](fileInput.files);
-            break;
-          } catch (e) {
-            console.error(`Error calling ${handler.name}:`, e);
-          }
-        }
-      }
-    }
-
-    const dropzone = document.getElementById('dropzone');
-    if (dropzone) {
-      dropzone.innerHTML = `<div class="file-success">✓ File "${fileName}" imported automatically from VMS</div>`;
-    }
+    const input = document.querySelector('input[type="file"][accept*=".csv"]') || document.querySelector('input[type="file"]');
+    if (!input) return;
+    const transfer = new DataTransfer();
+    transfer.items.add(new File([data.csvData], data.csvFileName || 'report.csv', { type: 'text/csv' }));
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
   });
 }
 
-if (document.readyState === 'complete') {
-  runVCToolsCheck();
-} else {
-  window.addEventListener('load', runVCToolsCheck);
-}
+// The script can be injected after the page has already loaded (e.g. from cache).
+if (document.readyState === 'complete') receiveReport();
+else window.addEventListener('load', receiveReport);
