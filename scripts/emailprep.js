@@ -572,7 +572,8 @@ function generate() {
 
     renderPreview(outputRows);
     document.getElementById('downloadBtn').style.display = 'inline-block';
-    document.getElementById('resultsInfo').textContent = `✓ ${outputRows.length} volunteers processed (Program detected: ${program})`;
+    const beta = BETA_PROGRAMS.has(program) ? ' (beta: role list still being filled in, double-check training)' : '';
+    document.getElementById('resultsInfo').textContent = `✓ ${outputRows.length} volunteers processed (Program detected: ${program}${beta})`;
 }
 
 // ============================================================

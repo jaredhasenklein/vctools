@@ -73,6 +73,7 @@ Every file upload uses the shared drop zone in `scripts/commonscripts.js`:
 
 ## Role training table
 - `scripts/roleconfig.js` (`PROGRAM_CONFIGS`) lists the required training for each role, per program. Certification and Email Prep both load it; update it once per season.
+- `BETA_PROGRAMS` in the same file marks programs whose role lists are incomplete (FTC and FLL today). Both tools label results for those programs Beta. Remove a program from it once its list is complete.
 
 ## Badge templates
 - `lib/badges/template.js` lays out a badge from a template (text blocks with `{variables}`). `drawBadge()` draws through a surface: jsPDF for the PDF, canvas for the editor preview. Keep both on that one function so the preview matches the printout.

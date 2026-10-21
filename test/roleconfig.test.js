@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 
 // `const` at the top of a classic script doesn't become a window property, so read it out.
-const PROGRAM_CONFIGS = new Function(`${readFileSync('scripts/roleconfig.js', 'utf8')}; return PROGRAM_CONFIGS;`)();
+const { PROGRAM_CONFIGS, BETA_PROGRAMS } = new Function(`${readFileSync('scripts/roleconfig.js', 'utf8')}; return { PROGRAM_CONFIGS, BETA_PROGRAMS };`)();
 
 describe('role → training table', () => {
   it('covers FRC, FTC, and FLL', () => {
@@ -17,6 +17,10 @@ describe('role → training table', () => {
         for (const c of [...cfg.requiredRoles, ...cfg.requiredCourses]) expect(c.trim(), `${program} ${name}`).toBe(c);
       }
     }
+  });
+
+  it('marks FTC and FLL as beta, FRC as fully supported', () => {
+    expect([...BETA_PROGRAMS].sort()).toEqual(['FLL', 'FTC']);
   });
 
   it('is the only copy', () => {
