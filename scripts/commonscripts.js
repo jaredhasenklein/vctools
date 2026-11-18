@@ -90,6 +90,57 @@ function setupDragAndDrop(dropzone, fileInput, handleFiles) {
   });
   dropzone.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files), false);
   fileInput.addEventListener('change', handleFiles, false);
+  addSampleButton(dropzone, fileInput);
+}
+
+// ============================================================
+// SAMPLE DATA
+// Under each drop zone, "Try it with sample data" loads an invented report from samples/
+// (written by tools/make-samples.mjs) into the page's file input, the same way a chosen file
+// arrives. Which report it loads comes from lib/vms/tools.js; the home page uses Assigned
+// Volunteers. Add data-no-sample to a drop zone to leave the button off.
+// ============================================================
+const SITE_ROOT = new URL('..', (document.currentScript && document.currentScript.src) || location.href);
+const SAMPLE_FILES = {
+  'Assigned Volunteers': 'assigned-volunteers.csv',
+  'Attendance & Event Planning': 'attendance-and-event-planning.csv',
+  'Name Badges': 'name-badges.csv',
+  'Consent And Release Status': 'consent-and-release-status.csv',
+  'Training and Certifications': 'training-and-certifications.csv',
+};
+
+async function sampleFileFor(fileInput) {
+  const page = (location.pathname.split('/').pop() || 'index').replace(/\.html$/, '') || 'index';
+  if (page === 'index') return SAMPLE_FILES['Assigned Volunteers'];
+  const { TOOLS } = await import(new URL('lib/vms/tools.js', SITE_ROOT).href);
+  const input = TOOLS.find((t) => t.page === page)?.inputs.find((i) => i.inputId === fileInput.id);
+  const report = (input?.accepts || []).find((r) => SAMPLE_FILES[r]) || (input?.accepts?.[0] === '*' ? 'Assigned Volunteers' : null);
+  return report ? SAMPLE_FILES[report] : null;
+}
+
+async function addSampleButton(dropzone, fileInput) {
+  if ('noSample' in dropzone.dataset) return;
+  let file;
+  try { file = await sampleFileFor(fileInput); } catch { return; }
+  if (!file) return;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'sample-data-btn';
+  button.textContent = 'No report handy? Try it with sample data';
+  button.addEventListener('click', async () => {
+    try {
+      const res = await fetch(new URL(`samples/${file}`, SITE_ROOT));
+      if (!res.ok) throw new Error('The sample report could not be loaded.');
+      const csv = new File([await res.text()], `sample-${file}`, { type: 'text/csv' });
+      const transfer = new DataTransfer();
+      transfer.items.add(csv);
+      fileInput.files = transfer.files;
+      fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (err) {
+      showError(err.message);
+    }
+  });
+  dropzone.insertAdjacentElement('afterend', button);
 }
 
 function preventDefaults(e) {

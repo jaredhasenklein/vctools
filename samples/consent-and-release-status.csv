@@ -1,0 +1,43 @@
+Report: Consent And Release Status
+Date: 2/20/2027
+
+Event: CA District Sample Event - FRC
+Location: Springfield, CA
+Event Dates: March 12 - 14, 2027
+Season: 2027 - BIOCOREâ„¢ presented by Haas
+
+Volunteer Coordinator(s)
+Sam Example
+
+WARNING: This file contains personal data (L1 - PII).
+This is invented sample data for trying out VC Tools. None of these people are real.
+
+
+
+
+
+Minor,Preferred First Name,Last Name,Consent & Release Status,Date Accepted,Email,Phone,Assignment Status
+No,Avery,Nakamura,Accepted,1/15/2027,avery.nakamura@example.com,555-0100,Assigned
+No,Marcus,Bell,Accepted,1/15/2027,marcus.bell@example.com,555-0101,Assigned
+No,Priya,Raman,Accepted,1/15/2027,priya.raman@example.com,555-0102,Assigned
+No,Diego,Flores,Accepted,1/15/2027,diego.flores@example.com,555-0103,Assigned
+No,Hannah,Okafor,Incomplete,,hannah.okafor@example.com,555-0104,Assigned
+No,Tomás,Ruiz,Accepted,1/15/2027,toms.ruiz@example.com,555-0105,Assigned
+No,Grace,Liu,Accepted,1/15/2027,grace.liu@example.com,555-0106,Assigned
+No,Owen,Pryce,Accepted,1/15/2027,owen.pryce@example.com,555-0107,Assigned
+No,Nadia,Haddad,Incomplete,,nadia.haddad@example.com,555-0108,Assigned
+No,Ben,Carver,Accepted,1/15/2027,ben.carver@example.com,555-0109,Assigned
+No,Sofia,Marino,Accepted,1/15/2027,sofia.marino@example.com,555-0110,Assigned
+No,Kai,Morgan,Accepted,1/15/2027,kai.morgan@example.com,555-0111,Assigned
+No,Ruth,Adeyemi,Accepted,1/15/2027,ruth.adeyemi@example.com,555-0112,Assigned
+Yes,Leo,Grant,Accepted,1/15/2027,leo.grant@example.com,555-0113,Assigned
+Yes,Maya,Singh,Incomplete,,maya.singh@example.com,555-0114,Assigned
+No,Eli,Brooks,Accepted,1/15/2027,eli.brooks@example.com,555-0115,Assigned
+Yes,Zoe,Park,Accepted,1/15/2027,zoe.park@example.com,555-0116,Assigned
+No,Isaac,Thompson,Accepted,1/15/2027,isaac.thompson@example.com,555-0117,Assigned
+No,Lena,Weber,Accepted,1/15/2027,lena.weber@example.com,555-0118,Assigned
+No,Andre,Dubois,Accepted,1/15/2027,andre.dubois@example.com,555-0119,Assigned
+Yes,Chloe,Kim,Incomplete,,chloe.kim@example.com,555-0120,Assigned
+No,Victor,Osei,Accepted,1/15/2027,victor.osei@example.com,555-0121,Assigned
+No,Ivy,Chen,Accepted,1/15/2027,ivy.chen@example.com,555-0122,Assigned
+No,Sam,Example,Accepted,1/15/2027,sam.example@example.com,555-0123,Assigned

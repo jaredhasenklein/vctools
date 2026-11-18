@@ -1,0 +1,49 @@
+Report: Training and Certifications
+Date: 2/20/2027
+
+Event: CA District Sample Event - FRC
+Location: Springfield, CA
+Event Dates: March 12 - 14, 2027
+Season: 2027 - BIOCOREâ„¢ presented by Haas
+
+Volunteer Coordinator(s)
+Sam Example
+
+WARNING: This file contains personal data (L1 - PII).
+This is invented sample data for trying out VC Tools. None of these people are real.
+
+
+
+
+
+Minor,Preferred First Name,Last Name,Email,Phone,Role,Assignment Status,Course Name,Enrollment Date,Started Date,Completion Date,Required?
+No,Avery,Nakamura,avery.nakamura@example.com,555-0100,Judge Advisor,Assigned,FIRST Robotics Competition Leadership Award Judge,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Avery,Nakamura,avery.nakamura@example.com,555-0100,Judge Advisor,Assigned,Data Privacy for Event Volunteers,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Avery,Nakamura,avery.nakamura@example.com,555-0100,Judge Advisor,Assigned,FIRST Robotics Competition FIRST Impact Award Judge,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Avery,Nakamura,avery.nakamura@example.com,555-0100,Judge Advisor,Assigned,FIRST Robotics Competition Judge,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Avery,Nakamura,avery.nakamura@example.com,555-0100,Judge Advisor,Assigned,FIRST Robotics Competition Judge Advisor,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Marcus,Bell,marcus.bell@example.com,555-0101,Judge,Assigned,FIRST Robotics Competition Judge,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Priya,Raman,priya.raman@example.com,555-0102,Judge - FIRST Impact Award,Assigned,FIRST Robotics Competition Judge,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Priya,Raman,priya.raman@example.com,555-0102,Judge - FIRST Impact Award,Assigned,FIRST Robotics Competition FIRST Impact Award Judge,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Diego,Flores,diego.flores@example.com,555-0103,Judge,Assigned,FIRST Robotics Competition Judge,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Hannah,Okafor,hannah.okafor@example.com,555-0104,Judge - FIRST Leadership Award,Assigned,FIRST Robotics Competition Judge,1/10/2027,,,Yes
+No,Hannah,Okafor,hannah.okafor@example.com,555-0104,Judge - FIRST Leadership Award,Assigned,FIRST Robotics Competition Leadership Award Judge,1/10/2027,,,Yes
+No,Hannah,Okafor,hannah.okafor@example.com,555-0104,Judge - FIRST Leadership Award,Assigned,Data Privacy for Event Volunteers,1/10/2027,,,Yes
+No,Tomás,Ruiz,toms.ruiz@example.com,555-0105,Head Referee,Assigned,Data Privacy for Event Volunteers,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Tomás,Ruiz,toms.ruiz@example.com,555-0105,Head Referee,Assigned,The Gracious Volunteer,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Tomás,Ruiz,toms.ruiz@example.com,555-0105,Head Referee,Assigned,FIRST Robotics Competition Head Referee,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Grace,Liu,grace.liu@example.com,555-0106,Referee,Assigned,FIRST Robotics Competition Referee,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Owen,Pryce,owen.pryce@example.com,555-0107,Referee,Assigned,FIRST Robotics Competition Referee,1/10/2027,,,Yes
+No,Nadia,Haddad,nadia.haddad@example.com,555-0108,Referee,Assigned,FIRST Robotics Competition Referee,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Ben,Carver,ben.carver@example.com,555-0109,Lead Robot Inspector,Assigned,Data Privacy for Event Volunteers,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Ben,Carver,ben.carver@example.com,555-0109,Lead Robot Inspector,Assigned,The Gracious Volunteer,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Ben,Carver,ben.carver@example.com,555-0109,Lead Robot Inspector,Assigned,FIRST Robotics Competition Robot Inspector,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Sofia,Marino,sofia.marino@example.com,555-0110,Robot Inspector,Assigned,FIRST Robotics Competition Robot Inspector,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Kai,Morgan,kai.morgan@example.com,555-0111,Robot Inspector,Assigned,FIRST Robotics Competition Robot Inspector,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Ruth,Adeyemi,ruth.adeyemi@example.com,555-0112,Field Supervisor,Assigned,The Gracious Volunteer,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Ruth,Adeyemi,ruth.adeyemi@example.com,555-0112,Field Supervisor,Assigned,FIRST Robotics Competition Field Supervisor,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Eli,Brooks,eli.brooks@example.com,555-0115,Lead Queuer,Assigned,FIRST Robotics Competition Lead Queuer,1/10/2027,,,Yes
+No,Isaac,Thompson,isaac.thompson@example.com,555-0117,Safety Manager,Assigned,FIRST Robotics Competition Safety Manager,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Lena,Weber,lena.weber@example.com,555-0118,Pit Administration Supervisor,Assigned,Data Privacy for Event Volunteers,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Lena,Weber,lena.weber@example.com,555-0118,Pit Administration Supervisor,Assigned,The Gracious Volunteer,1/10/2027,1/12/2027,1/20/2027,Yes
+No,Lena,Weber,lena.weber@example.com,555-0118,Pit Administration Supervisor,Assigned,FIRST Robotics Competition Pit Administration Supervisor,1/10/2027,1/12/2027,1/20/2027,Yes

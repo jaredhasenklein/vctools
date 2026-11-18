@@ -654,3 +654,10 @@ a.tool-card:focus-visible { outline: 3px solid #0066cc; outline-offset: 2px; }
 .tool-card p { font-size: 0.875rem; margin: 0; opacity: 0.8; }
 
 #error:empty { margin: 0; }
+
+/* "Try it with sample data", under each drop zone (scripts/commonscripts.js). */
+.sample-data-btn {
+  display: block; margin: 8px 0 0; padding: 0; border: 0; background: none;
+  color: var(--drop-accent, #0066cc); font: inherit; font-size: 0.9rem; text-decoration: underline; cursor: pointer;
+}
+.sample-data-btn:focus-visible { outline: 3px solid var(--drop-accent, #0066cc); outline-offset: 2px; border-radius: 2px; }
