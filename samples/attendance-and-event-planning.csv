@@ -1,0 +1,71 @@
+Report: Attendance & Event Planning
+Date: 2/20/2027
+
+Event: CA District Sample Event - FRC
+Location: Springfield, CA
+Event Dates: March 12 - 14, 2027
+Season: 2027 - BIOCOREâ„¢ presented by Haas
+
+Volunteer Coordinator(s)
+Sam Example
+
+WARNING: This file contains personal data (L1 - PII).
+This is invented sample data for trying out VC Tools. None of these people are real.
+
+
+
+
+
+Minor,Preferred First Name,Last Name,Email,Roles Assigned,Day,Start Time,End Time,Dietary Restrictions/Allergies,Shirt Size,Years of Service,Consent & Release Status
+No,Avery,Nakamura,avery.nakamura@example.com,Judge Advisor,Thu,12:00 PM,6:00 PM,None,M,12,Accepted
+No,Avery,Nakamura,avery.nakamura@example.com,Judge Advisor,Fri,7:30 AM,6:30 PM,None,M,12,Accepted
+No,Avery,Nakamura,avery.nakamura@example.com,Judge Advisor,Sat,7:30 AM,6:00 PM,None,M,12,Accepted
+No,Marcus,Bell,marcus.bell@example.com,Judge,Fri,7:30 AM,6:30 PM,Vegetarian,L,6,Accepted
+No,Marcus,Bell,marcus.bell@example.com,Judge,Sat,7:30 AM,6:00 PM,Vegetarian,L,6,Accepted
+No,Priya,Raman,priya.raman@example.com,Judge - FIRST Impact Award,Fri,7:30 AM,6:30 PM,Vegetarian,S,8,Accepted
+No,Priya,Raman,priya.raman@example.com,Judge - FIRST Impact Award,Sat,7:30 AM,6:00 PM,Vegetarian,S,8,Accepted
+No,Diego,Flores,diego.flores@example.com,Judge,Fri,7:30 AM,6:30 PM,None,L,3,Accepted
+No,Diego,Flores,diego.flores@example.com,Judge,Sat,7:30 AM,6:00 PM,None,L,3,Accepted
+No,Hannah,Okafor,hannah.okafor@example.com,Judge - FIRST Leadership Award,Fri,7:30 AM,6:30 PM,Gluten free,M,4,Incomplete
+No,Hannah,Okafor,hannah.okafor@example.com,Judge - FIRST Leadership Award,Sat,7:30 AM,6:00 PM,Gluten free,M,4,Incomplete
+No,Tomás,Ruiz,toms.ruiz@example.com,Head Referee,Thu,12:00 PM,6:00 PM,None,XL,10,Accepted
+No,Tomás,Ruiz,toms.ruiz@example.com,Head Referee,Fri,7:30 AM,6:30 PM,None,XL,10,Accepted
+No,Tomás,Ruiz,toms.ruiz@example.com,Head Referee,Sat,7:30 AM,6:00 PM,None,XL,10,Accepted
+No,Grace,Liu,grace.liu@example.com,Referee,Fri,7:30 AM,6:30 PM,None,S,5,Accepted
+No,Grace,Liu,grace.liu@example.com,Referee,Sat,7:30 AM,6:00 PM,None,S,5,Accepted
+No,Owen,Pryce,owen.pryce@example.com,Referee,Fri,7:30 AM,6:30 PM,Nut allergy,L,2,Accepted
+No,Owen,Pryce,owen.pryce@example.com,Referee,Sat,7:30 AM,6:00 PM,Nut allergy,L,2,Accepted
+No,Nadia,Haddad,nadia.haddad@example.com,Referee,Sat,7:30 AM,6:00 PM,Halal,M,1,Incomplete
+No,Ben,Carver,ben.carver@example.com,Lead Robot Inspector,Thu,12:00 PM,6:00 PM,None,XXL,9,Accepted
+No,Ben,Carver,ben.carver@example.com,Lead Robot Inspector,Fri,7:30 AM,6:30 PM,None,XXL,9,Accepted
+No,Sofia,Marino,sofia.marino@example.com,Robot Inspector,Thu,12:00 PM,6:00 PM,None,M,3,Accepted
+No,Sofia,Marino,sofia.marino@example.com,Robot Inspector,Fri,7:30 AM,6:30 PM,None,M,3,Accepted
+No,Kai,Morgan,kai.morgan@example.com,Robot Inspector,Thu,12:00 PM,6:00 PM,Vegan,M,2,Accepted
+No,Kai,Morgan,kai.morgan@example.com,Robot Inspector,Fri,7:30 AM,6:30 PM,Vegan,M,2,Accepted
+No,Ruth,Adeyemi,ruth.adeyemi@example.com,Field Supervisor,Thu,12:00 PM,6:00 PM,None,L,7,Accepted
+No,Ruth,Adeyemi,ruth.adeyemi@example.com,Field Supervisor,Fri,7:30 AM,6:30 PM,None,L,7,Accepted
+No,Ruth,Adeyemi,ruth.adeyemi@example.com,Field Supervisor,Sat,7:30 AM,6:00 PM,None,L,7,Accepted
+Yes,Leo,Grant,leo.grant@example.com,Field Reset,Fri,7:30 AM,6:30 PM,None,M,1,Accepted
+Yes,Leo,Grant,leo.grant@example.com,Field Reset,Sat,7:30 AM,6:00 PM,None,M,1,Accepted
+Yes,Maya,Singh,maya.singh@example.com,Field Reset,Fri,7:30 AM,6:30 PM,Vegetarian,S,2,Incomplete
+Yes,Maya,Singh,maya.singh@example.com,Field Reset,Sat,7:30 AM,6:00 PM,Vegetarian,S,2,Incomplete
+No,Eli,Brooks,eli.brooks@example.com,Lead Queuer,Fri,7:30 AM,6:30 PM,None,L,4,Accepted
+No,Eli,Brooks,eli.brooks@example.com,Lead Queuer,Sat,7:30 AM,6:00 PM,None,L,4,Accepted
+Yes,Zoe,Park,zoe.park@example.com,Queuer,Fri,7:30 AM,6:30 PM,None,S,1,Accepted
+Yes,Zoe,Park,zoe.park@example.com,Queuer,Sat,7:30 AM,6:00 PM,None,S,1,Accepted
+No,Isaac,Thompson,isaac.thompson@example.com,Safety Manager,Thu,12:00 PM,6:00 PM,None,XL,11,Accepted
+No,Isaac,Thompson,isaac.thompson@example.com,Safety Manager,Fri,7:30 AM,6:30 PM,None,XL,11,Accepted
+No,Isaac,Thompson,isaac.thompson@example.com,Safety Manager,Sat,7:30 AM,6:00 PM,None,XL,11,Accepted
+No,Lena,Weber,lena.weber@example.com,Pit Administration Supervisor,Thu,12:00 PM,6:00 PM,None,M,6,Accepted
+No,Lena,Weber,lena.weber@example.com,Pit Administration Supervisor,Fri,7:30 AM,6:30 PM,None,M,6,Accepted
+No,Lena,Weber,lena.weber@example.com,Pit Administration Supervisor,Sat,7:30 AM,6:00 PM,None,M,6,Accepted
+No,Andre,Dubois,andre.dubois@example.com,Pit Administration,Fri,7:30 AM,6:30 PM,Shellfish allergy,L,2,Accepted
+No,Andre,Dubois,andre.dubois@example.com,Pit Administration,Sat,7:30 AM,6:00 PM,Shellfish allergy,L,2,Accepted
+Yes,Chloe,Kim,chloe.kim@example.com,Pit Administration,Sat,7:30 AM,6:00 PM,None,S,1,Incomplete
+No,Victor,Osei,victor.osei@example.com,Scorekeeper,Fri,7:30 AM,6:30 PM,None,L,5,Accepted
+No,Victor,Osei,victor.osei@example.com,Scorekeeper,Sat,7:30 AM,6:00 PM,None,L,5,Accepted
+No,Ivy,Chen,ivy.chen@example.com,Game Announcer,Fri,7:30 AM,6:30 PM,None,M,3,Accepted
+No,Ivy,Chen,ivy.chen@example.com,Game Announcer,Sat,7:30 AM,6:00 PM,None,M,3,Accepted
+No,Sam,Example,sam.example@example.com,Volunteer Coordinator,Thu,12:00 PM,6:00 PM,None,L,8,Accepted
+No,Sam,Example,sam.example@example.com,Volunteer Coordinator,Fri,7:30 AM,6:30 PM,None,L,8,Accepted
+No,Sam,Example,sam.example@example.com,Volunteer Coordinator,Sat,7:30 AM,6:00 PM,None,L,8,Accepted
